@@ -1,12 +1,25 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url(https://fonts.googleapis.com/css?family=Lato:200,300,400,700);
 
+:root {
+    --gradient: linear-gradient(180deg,hsla(0,0%,100%,0.15),hsla(0,0%,100%,0));
+    --principal: 39 84 75;
+    --secundario: 173 182 196;
+    --success: 91 186 111;
+    --warning: 247 154 100;
+}
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    font-family: Lato, system-ui;
+}
+.error {
+    border: 1px solid #B0413E;
+    color: #B0413E;
+    border-radius: 4px;
+    background: #f6d0cf;
+    padding: 5px;
+    font-weight: 400;
+    margin: 15px 0;
+    font-size: 0.85em;
+}
+.w-100 {
+    width: 100%;
 }

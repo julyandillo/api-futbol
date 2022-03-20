@@ -1,0 +1,28 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+body,
+h1,
+h2,
+h3,
+h4,
+p {
+    margin: 0;
+}
+input,
+select,
+textarea,
+button {
+    font: inherit;
+}
+body {
+    line-height: 1.5;
+    min-height: 100vh;
+}
+img,
+picture {
+    max-width: 100%;
+    display: block;
+}
