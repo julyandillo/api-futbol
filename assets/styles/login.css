@@ -72,6 +72,6 @@ input:focus {
 }
 .footer {
     width: 100%;
-    margin-top: auto;
-    margin-bottom: -5px;
+    position: fixed;
+    bottom: 0;
 }
