@@ -31,52 +31,6 @@ body {
     margin-bottom: 1rem;
     color: rgb( var(--color-oscuro) );
 }
-input{
-    display: block;
-    width: 100%;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    margin-inline: auto;
-    padding: 6px;
-    outline: none;
-    border-radius: 4px;
-    border: 1px solid lightgray;
-}
-input:focus {
-    color: rgb( var(--color-oscuro) );
-    outline: 1px solid rgb( var(--color-oscuro) );
-    background-color: rgb( var(--color-secundario) / .5 );
-}
-.boton {
-    display: inline-block;
-    font-weight: 400;
-    line-height: 1.5;
-    color: rgb( var(--color-oscuro) );
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    background-color: transparent;
-    border: 1px solid transparent;
-    padding: .375rem .75rem;
-    margin-top: var(--mt, 1rem);
-    border-radius: .25rem;
-    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-.boton-primary {
-    --mt: 1.5rem;
-     color: rgb( var(--color-oscuro) );
-     background-color: rgb( var(--color-claro) );
-     background-image: var(--gradient);
-     border-color: rgb(var(--color-oscuro));
-     box-shadow: inset 0 1px 0 hsla(0,0%,100%,.15),0 1px 1px rgba(0,0,0,.075);
- }
-.boton-primary:hover {
-    color: rgb( var(--color-claro) );
-    background-color: rgb( var(--color-oscuro) / .85);
-    background-image: var(--gradient);
-    border-color: rgb( var(--color-oscuro) );
-}
 .footer {
     width: 100%;
     position: fixed;
