@@ -6,12 +6,19 @@ body {
 }
 .contenido {
     background: white;
-    width: 450px;
-    padding: 2rem;
-    margin-top: 15rem;
+    padding: 1rem;
+    margin-top: 0;
+    width: 80%;
     min-height: 500px;
     border-radius: 5px;
     box-shadow: 0 .5rem 1rem rgb(0 0 0 /.15);
+}
+@media (min-width: 600px) {
+    .contenido {
+        padding: 2rem;
+        margin-top: 15rem;
+        width: 450px;
+    }
 }
 .login-form {
     padding: 40px 20px;
