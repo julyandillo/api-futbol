@@ -35,6 +35,12 @@ class LoginController extends AbstractController
             return $this->redirectToRoute($destino);
         }
 
-        return $this->render('');
+        return $this->render('notfound.html.twig');
+    }
+
+    #[Route('/404', name: 'app_not_found')]
+    public function testNotFound(): Response
+    {
+        return $this->render('notfound.html.twig');
     }
 }

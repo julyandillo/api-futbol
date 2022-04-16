@@ -1,0 +1,16 @@
+body {
+    text-align: center;
+    color: rgb(var( --color-oscuro));
+    background-color: rgb( var(--color-gris) );
+}
+.contenedor-imagen {
+    width: 100%;
+    margin-top: 5rem;
+}
+img {
+    margin: 0 auto;
+    width: 25rem;
+}
+h1 {
+    margin-bottom: 5rem;
+}

@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Página no encontrada{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('notfound') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('notfound') }}
+{% endblock %}
+
+{% block body %}
+    <div class="contenedor-imagen"><img src="{{ asset('img/parada.svg') }}" alt="parada"></div>
+    <h1 class="fs-900">Uuuyyy!</h1>
+    <h2 class="fs-700">Página no encontrada</h2>
+    <p>Parece que ha ocurrido un error, vuelve a intentarlo...</p>
+{% endblock %}
