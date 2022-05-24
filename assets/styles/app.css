@@ -20,6 +20,7 @@
 body {
     font-family: Lato, system-ui;
     font-size: var(--fs-400);
+    background: #f4f4f4;
 }
 .error {
     border: 1px solid #B0413E;

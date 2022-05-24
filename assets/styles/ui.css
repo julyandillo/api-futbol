@@ -1,0 +1,26 @@
+#menu{
+    background: rgb( var(--color-oscuro) );
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    height: 5rem;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+.opcion-menu {
+    color: rgb( var(--color-claro) );
+    font-weight: bold;
+    font-size: var(--fs-600);
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid rgb( var(--color-claro) );
+    text-align: center;
+    min-width: 4rem;
+}
+.opcion-menu:hover {
+    background: rgb( var(--color-claro) );
+    color: rgb( var(--color-oscuro) );
+    cursor: pointer;
+}
