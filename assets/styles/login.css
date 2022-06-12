@@ -35,3 +35,7 @@ body {
     position: fixed;
     bottom: 0;
 }
+.remember-me {
+    display: flex;
+    margin-top: 1rem;
+}

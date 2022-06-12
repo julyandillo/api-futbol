@@ -26,6 +26,11 @@
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
                 <button class="boton boton-primary w-100" type="submit">Iniciar sesión</button>
+
+                <div class="remember-me">
+                    <input class="checkbox" type="checkbox" name="_remember_me" id="remember_me">
+                    <label for="remember-me">Mantener sesión iniciada</label>
+                </div>
             </form>
             {% if error %}
                 <div class="error">
