@@ -15,7 +15,7 @@
 {% block body %}
     <div class="contenido">
         <div class="login-form">
-            <h2>Inicia sesión para continuar</h2>
+            <h2>Inicia sesión</h2>
             <form action="{{ path('app_login') }}" method="post">
                 <label for="usuario">Usuario</label>
                 <input type="text" id="usuario" name="_username"/>
@@ -28,8 +28,10 @@
                 <button class="boton boton-primary w-100" type="submit">Iniciar sesión</button>
 
                 <div class="remember-me">
-                    <input class="checkbox" type="checkbox" name="_remember_me" id="remember_me">
-                    <label for="remember-me">Mantener sesión iniciada</label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="_remember_me" id="remember_me">
+                        Recuérdame
+                    </label>
                 </div>
             </form>
             {% if error %}

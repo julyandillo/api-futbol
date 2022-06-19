@@ -2,20 +2,20 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
+    justify-content: center;
 }
 .contenido {
     background: white;
     padding: 1rem;
-    margin-top: 0;
     width: 80%;
+    margin-top: 4rem;
     min-height: 500px;
     border-radius: 5px;
     box-shadow: 0 .5rem 1rem rgb(0 0 0 /.15);
 }
-@media (min-width: 600px) {
+@media (min-width: 40em) {
     .contenido {
         padding: 2rem;
-        margin-top: 15rem;
         width: 450px;
     }
 }
@@ -34,8 +34,10 @@ body {
     width: 100%;
     position: fixed;
     bottom: 0;
+    z-index: -1;
 }
 .remember-me {
     display: flex;
     margin-top: 1rem;
+    padding-left: 0.5rem;
 }
