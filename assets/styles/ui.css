@@ -1,26 +1,75 @@
 #menu{
     background: rgb( var(--color-oscuro) );
     display: flex;
-    gap: 1rem;
     justify-content: center;
-    align-items: center;
-    height: 5rem;
+    height: 4rem;
     position: fixed;
     width: 100%;
     bottom: 0;
+    -webkit-box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
+    -moz-box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
+    box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
 }
 .opcion-menu {
     color: rgb( var(--color-claro) );
     font-weight: bold;
     font-size: var(--fs-600);
-    padding: 1rem;
-    border-radius: 5px;
-    border: 1px solid rgb( var(--color-claro) );
     text-align: center;
-    min-width: 4rem;
+    min-width: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
-.opcion-menu:hover {
+.opcion-menu:hover,
+.opcion-menu-activa {
     background: rgb( var(--color-claro) );
     color: rgb( var(--color-oscuro) );
     cursor: pointer;
+}
+.opcion-menu:not(:last-child){
+    border-right: 2px solid rgb(33, 64, 58);
+}
+.icono-menu {
+    margin-right: .25rem;
+    min-width: 2rem;
+}
+.contenido {
+    max-width: 100%;
+    padding: 2rem;
+    margin-bottom: 5rem;
+}
+@media (max-width: 40em) {
+    .desktop {
+        display: none;
+        visibility: hidden;
+    }
+}
+@media (min-width: 40em) {
+    #menu {
+        height: 100vh;
+        flex-direction: column;
+        width: 15rem;
+        bottom: unset;
+        justify-content: unset;
+        -webkit-box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
+        -moz-box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
+        box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
+    }
+    .opcion-menu {
+        font-size: var(--fs-400);
+        padding: .5rem 1rem;
+        min-width: unset;
+        justify-content: unset;
+        height: unset;
+    }
+    .opcion-menu:not(:last-child){
+        border-right: unset;
+        border-bottom: 2px solid rgb(33, 64, 58);
+    }
+    .contenido {
+        margin-left: 15rem;
+        margin-bottom: unset;
+    }
 }

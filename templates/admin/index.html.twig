@@ -13,8 +13,57 @@
 {% endblock %}
 
 {% block body %}
-<nav id="menu">
-    <a class="opcion-menu"><i class="fa-solid fa-users"></i></a>
-    <a class="opcion-menu"><i class="fa-solid fa-futbol"></i></a>
-</nav>
+    <div id="menu">
+        <a class="opcion-menu">
+            <span class="icono-menu"><i class="fa-solid fa-users"></i></span>
+            <span class="desktop">Usuarios</span>
+        </a>
+        <a class="opcion-menu">
+            <span class="icono-menu"><i class="fa-solid fa-futbol"></i></span>
+            <span class="desktop">Competiciones</span>
+        </a>
+        <a href="{{ path('app_logout') }}" class="opcion-menu">
+            <span class="icono-menu"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+            <span class="desktop">Salir</span>
+        </a>
+    </div>
+    <div class="contenido">
+        {% block contenido %}
+        <h1>Contenido</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam asperiores aut dignissimos, distinctio
+            dolor doloribus eaque, ex, fugiat fugit modi molestiae molestias nam nesciunt non reiciendis sit tempore
+            ullam voluptatibus.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium amet, animi aut dolor doloremque est
+            eum, magnam natus pariatur tempora tenetur ullam vitae? Animi fugit incidunt necessitatibus quae rerum
+            sapiente!</p>
+        <p>Ab amet architecto beatae dignissimos dolore ducimus eius, esse est harum illum impedit iure laborum maxime
+            obcaecati odit perspiciatis porro, quam repudiandae totam voluptate! Commodi labore laboriosam libero sed
+            sunt!</p>
+        <p>Autem eaque facilis harum possimus quae. At dolor ipsa optio sit tempore vero. Consequuntur cum debitis,
+            deleniti, doloribus est et fugit harum hic ipsa nisi nobis nulla quasi tenetur vero.</p>
+        <p>Accusantium neque omnis quae quia sed unde. Asperiores beatae cupiditate deserunt itaque, iusto nesciunt
+            numquam obcaecati officia repellat saepe sunt temporibus unde, vitae. Fugit optio perspiciatis praesentium,
+            quae quia sunt.</p>
+        <p>Debitis et numquam pariatur quos totam! Adipisci, alias delectus, deleniti, doloremque doloribus enim est
+            eveniet illo in ipsum iure labore laborum laudantium maiores nobis nulla repellat repellendus sit ut
+            voluptatem.</p>
+        <p>Ab aliquid architecto commodi corporis, cumque dignissimos ea eveniet ex illo ipsa iure magnam maiores nam
+            necessitatibus nemo omnis optio quas quos reprehenderit sapiente sunt, suscipit tenetur. Expedita, pariatur
+            placeat.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eligendi, enim est id illum ipsa ipsam ipsum
+            laborum magnam, maxime modi natus neque sapiente. Accusantium dolore, in magnam mollitia sapiente
+            voluptatibus.</p>
+        <p>Aperiam assumenda beatae blanditiis, dolores, ea eaque eligendi esse, explicabo facere labore laborum nemo
+            neque perferendis placeat praesentium provident quas rerum. Aperiam deleniti expedita, laboriosam odio
+            quidem rerum saepe tempora?</p>
+        <p>A ad assumenda at atque aut earum fuga fugiat hic illo impedit incidunt libero neque omnis optio, qui, quo
+            ratione repellat veniam. Cupiditate doloribus laudantium maxime pariatur quod rem reprehenderit!</p>
+        <p>Accusamus alias aut cum delectus dolorem labore molestiae mollitia obcaecati officia totam! Accusamus
+            accusantium, aliquam aperiam commodi cum cumque cupiditate doloremque ex numquam, provident recusandae
+            tempore ut voluptas voluptatem voluptatibus.</p>
+        <p>Atque deleniti facere in reprehenderit velit voluptatibus. Ad architecto cupiditate fugiat, maxime molestias
+            numquam praesentium quibusdam quod ratione sunt! Animi assumenda consectetur facilis inventore nam
+            necessitatibus sed soluta, veniam voluptates?</p>
+        {% endblock %}
+    </div>
 {% endblock %}
