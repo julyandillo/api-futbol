@@ -1,17 +1,19 @@
-#menu{
-    background: rgb( var(--color-oscuro) );
+#menu {
+    background: rgb(var(--color-oscuro));
     display: flex;
     justify-content: center;
     height: 4rem;
     position: fixed;
     width: 100%;
     bottom: 0;
-    -webkit-box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
-    -moz-box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
-    box-shadow: 0 -2px 5px 0 rgba(120,120,120,1);
+    -webkit-box-shadow: 0 -2px 5px 0 rgba(120, 120, 120, 1);
+    -moz-box-shadow: 0 -2px 5px 0 rgba(120, 120, 120, 1);
+    box-shadow: 0 -2px 5px 0 rgba(120, 120, 120, 1);
+    z-index: 999;
 }
+
 .opcion-menu {
-    color: rgb( var(--color-claro) );
+    color: rgb(var(--color-claro));
     font-weight: bold;
     font-size: var(--fs-600);
     text-align: center;
@@ -22,30 +24,94 @@
     height: 100%;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
+
 .opcion-menu:hover,
 .opcion-menu-activa {
-    background: rgb( var(--color-claro) );
-    color: rgb( var(--color-oscuro) );
+    background: rgb(var(--color-claro));
+    color: rgb(var(--color-oscuro));
     cursor: pointer;
 }
-.opcion-menu:not(:last-child){
+
+.opcion-menu:not(:last-child) {
     border-right: 2px solid rgb(33, 64, 58);
 }
+
 .icono-menu {
     margin-right: .25rem;
     min-width: 2rem;
 }
+
 .contenido {
     max-width: 100%;
-    padding: 2rem;
+    padding: .5rem;
     margin-bottom: 5rem;
 }
+
+.competiciones,
+.competiciones-acciones{
+    margin: 1rem;
+}
+
+.competiciones {
+    display: flex;
+    gap: 2rem;
+    flex-direction: column;
+}
+
+.competiciones-acciones {
+    margin-bottom: 3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.competicion {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-radius: .3rem;
+    border: 1px solid var(--color-oscuro);
+    box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0, rgba(60, 64, 67, 0.15) 0 2px 6px 2px;
+    background-color: rgb(var(--color-secundario));
+    position: relative;
+    color: rgb(var(--color-oscuro));
+}
+
+.competicion-accion {
+    font-size: 1.225rem;
+    margin-right: .75rem;
+    color: rgb(var(--color-oscuro));
+}
+
+.competicion-accion:hover {
+    cursor: pointer;
+    color: rgb(var(--color-morado));
+}
+
+.competicion-fechas {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.competicion-nombre {
+    font-size: var(--fs-600);
+    font-weight: 600;
+    color: var(--color-oscuro);
+}
+
 @media (max-width: 40em) {
     .desktop {
         display: none;
         visibility: hidden;
     }
+
+    .competiciones-acciones > span:first-child {
+        width: 100%;
+    }
 }
+
 @media (min-width: 40em) {
     #menu {
         height: 100vh;
@@ -53,10 +119,11 @@
         width: 15rem;
         bottom: unset;
         justify-content: unset;
-        -webkit-box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
-        -moz-box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
-        box-shadow: 2px 0 5px 0 rgba(120,120,120,1);
+        -webkit-box-shadow: 2px 0 5px 0 rgba(120, 120, 120, 1);
+        -moz-box-shadow: 2px 0 5px 0 rgba(120, 120, 120, 1);
+        box-shadow: 2px 0 5px 0 rgba(120, 120, 120, 1);
     }
+
     .opcion-menu {
         font-size: var(--fs-400);
         padding: .5rem 1rem;
@@ -64,12 +131,28 @@
         justify-content: unset;
         height: unset;
     }
-    .opcion-menu:not(:last-child){
+
+    .opcion-menu:not(:last-child) {
         border-right: unset;
         border-bottom: 2px solid rgb(33, 64, 58);
     }
+
     .contenido {
         margin-left: 15rem;
         margin-bottom: unset;
+        padding: 2rem;
+    }
+
+    .competicion {
+        width: 45%;
+    }
+
+    .competiciones {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .competiciones-acciones > span:first-child {
+        margin-right: 4rem;
     }
 }

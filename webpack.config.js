@@ -24,6 +24,7 @@ Encore
     .addEntry('login', './assets/login.js')
     .addEntry('notfound', './assets/notfound.js')
     .addEntry('ui', './assets/ui.js')
+    .addEntry('competiciones', './assets/competiciones.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')

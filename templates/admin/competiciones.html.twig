@@ -1,0 +1,25 @@
+{% extends 'admin/index.html.twig' %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('competiciones') }}
+{% endblock %}
+
+{% block contenido %}
+    <div class="competiciones-acciones">
+        <span>
+            <a href="{{ path('competicion_nueva') }}" class="boton boton-primary">Nueva competición</a>
+        </span>
+        {% if competiciones|length > 0 %}
+        <span>Categorías:</span>
+        {% endif %}
+    </div>
+
+    <div class="competiciones">
+        {% for competicion in competiciones %}
+            {{ include('admin/competicion.html.twig', {competicion: competicion}) }}
+        {% else %}
+            <h1>No hay competiciones disponibles</h1>
+        {% endfor %}
+    </div>
+{% endblock %}

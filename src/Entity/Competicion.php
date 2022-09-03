@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Config\CategoriaCompeticion;
+use App\Config\TipoCompeticion;
 use App\Repository\CompeticionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,14 +19,17 @@ class Competicion
     #[ORM\Column(length: 255)]
     private ?string $nombre = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $tipo = null;
+    #[ORM\Column(length: 255, enumType: TipoCompeticion::class)]
+    private TipoCompeticion $tipo;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $fecha_inicio = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $fecha_fin = null;
+
+    #[ORM\Column(length: 255, enumType: CategoriaCompeticion::class)]
+    private CategoriaCompeticion $categoria;
 
     public function getId(): ?int
     {
@@ -43,12 +48,12 @@ class Competicion
         return $this;
     }
 
-    public function getTipo(): ?string
+    public function getTipo(): TipoCompeticion
     {
         return $this->tipo;
     }
 
-    public function setTipo(string $tipo): self
+    public function setTipo(TipoCompeticion $tipo): self
     {
         $this->tipo = $tipo;
 
@@ -75,6 +80,18 @@ class Competicion
     public function setFechaFin(\DateTimeInterface $fecha_fin): self
     {
         $this->fecha_fin = $fecha_fin;
+
+        return $this;
+    }
+
+    public function getCategoria(): CategoriaCompeticion
+    {
+        return $this->categoria;
+    }
+
+    public function setCategoria(CategoriaCompeticion $categoria): self
+    {
+        $this->categoria = $categoria;
 
         return $this;
     }

@@ -1,0 +1,27 @@
+<div class="competicion" data-categoria="{{ competicion.categoria.value }}">
+    <div class="competicion-nombre">{{ competicion.nombre }}</div>
+
+    <div class="competicion-acciones">
+        <a class="competicion-accion"
+           data-competicion="{{ competicion.id }}"
+        >
+            <i class="fa-solid fa-eye"></i>
+        </a>
+        <a class="competicion-accion"
+           data-competicion="{{ competicion.id }}"
+           href="{{ path('competicion_editar', {'idCompeticion': competicion.id}) }}"
+        >
+            <i class="fa-solid fa-pen-to-square"></i>
+        </a>
+        <span class="competicion-accion"
+              data-competicion="{{ competicion.id }}"
+        >
+            <i class="fa-solid fa-trash-can"></i>
+        </span>
+    </div>
+
+    <div class="competicion-fechas">
+        <div>inicio: {{ competicion.fechaInicio|date('d-m-Y') }}</div>
+        <div>fin: {{ competicion.fechaFin|date('d-m-Y') }}</div>
+    </div>
+</div>
