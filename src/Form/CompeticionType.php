@@ -24,23 +24,14 @@ class CompeticionType extends AbstractType
             ->add('tipo', EnumType::class, [
                 'class' => TipoCompeticion::class,
                 'choice_label' => function ($choice, $key, $value) {
-                    return match ($choice) {
-                        TipoCompeticion::TorneoConLiguilla => 'Torneo con liguilla',
-                        TipoCompeticion::TorneoSoloConEliminatorias => 'Eliminatorias',
-                        default => $choice->name,
-                    };
+                    return $choice->nameForSelect();
                 },
                 'row_attr' => ['class' => 'form-enlinea'],
             ])
             ->add('categoria', EnumType::class, [
                 'class' => CategoriaCompeticion::class,
                 'choice_label' => function ($choice, $key, $value) {
-                    return match ($choice) {
-                        CategoriaCompeticion::EuropeLeague => 'UEFA Europe League',
-                        CategoriaCompeticion::ChampionsLeague => 'UEFA Champions League',
-                        CategoriaCompeticion::CopaDelRey => 'Copa del Rey',
-                        default => $choice->name,
-                    };
+                    return $choice->nameForSelect();
                 },
                 'row_attr' => ['class' => 'form-enlinea'],
             ])
