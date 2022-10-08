@@ -109,21 +109,30 @@ body {
     padding: .375rem .75rem;
     border-radius: .25rem;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    background-image: var(--gradient);
+    box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, .15), 0 1px 1px rgba(0, 0, 0, .075);
 }
 
 .boton-primary {
     color: rgb(var(--color-oscuro));
     background-color: rgb(var(--color-claro));
-    background-image: var(--gradient);
     border-color: rgb(var(--color-oscuro));
-    box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, .15), 0 1px 1px rgba(0, 0, 0, .075);
 }
 
 .boton-primary:hover {
     color: rgb(var(--color-claro));
     background-color: rgb(var(--color-oscuro) / .85);
-    background-image: var(--gradient);
     border-color: rgb(var(--color-oscuro));
+}
+
+.boton-warning {
+    color: white;
+    background-color: rgb(var(--color-warning));
+    border-color: rgb(var(--color-warning) / .85);
+}
+
+.boton-warning:hover {
+    background-color: rgb(var(--color-warning) / .85);
 }
 
 .checkbox-label {
@@ -231,7 +240,7 @@ input[type="checkbox"]:checked::before {
 
 .badge-cantidad {
     background-color: white;
-    color: rgb( var(--color-oscuro));
+    color: rgb(var(--color-oscuro));
     padding: 0.25rem;
     font-size: var(--fs-200);
     margin-left: .25rem;
@@ -243,6 +252,41 @@ input[type="checkbox"]:checked::before {
     line-height: 1;
     text-align: center;
     vertical-align: text-top;
+}
+
+dialog {
+    width: 50ch;
+    padding: 0;
+    border-radius: 0.5rem;
+    border: 1px solid grey;
+    transition: opacity .15s linear;
+}
+
+.modal-content {
+    width: 100%;
+}
+
+.modal-header {
+    padding: 1rem;
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+.modal-msg {
+    text-align: center;
+}
+
+.modal-footer {
+    padding: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: right;
+    align-items: center;
+    margin-top: 1rem;
+    background-color: #f0f0f0;
+    border-top: 1px solid grey;
 }
 
 @media (min-width: 40em) {

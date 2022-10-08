@@ -1,3 +1,5 @@
+import {muestraModalParaEliminarConMensaje} from "./app";
+
 const categorias = {};
 
 const competiciones = document.querySelectorAll('.competicion');
@@ -40,10 +42,10 @@ const creaBadgeCategoriaCompeticion = (categoria, cantidad) => {
     badge.onclick = () => {
         document.querySelectorAll('.badge-activo').forEach(el => el.classList.remove('badge-activo'))
         if (categoria === 'Todas') {
-            muestraTodasLasCompeticiones()
+            muestraTodasLasCompeticiones();
         } else {
             badge.classList.add('badge-activo');
-            muestraCompeticionesConCategoria(categoria);
+            muestraCompeticionesPorCategoria(categoria);
         }
     }
 
@@ -54,7 +56,7 @@ const nombreParaCategoria = (categoria) => {
     return categoria.replaceAll('_', ' ');
 }
 
-const muestraCompeticionesConCategoria = (categoria) => {
+const muestraCompeticionesPorCategoria = (categoria) => {
     competiciones.forEach((competicion) => {
         competicion.style.display = (competicion.dataset.categoria !== categoria) ? 'none' : 'flex';
     });
@@ -65,3 +67,28 @@ const muestraTodasLasCompeticiones = () => {
         el.style.display = 'flex';
     })
 }
+
+document.querySelectorAll('[data-accion]').forEach(el => {
+    el.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-accion]');
+        const accionParaEjecutar = target.dataset.accion;
+        const acciones = {
+            eliminar: () => muestraConfirmacionParaEliminarCompeticion(target.dataset.competicion),
+        }
+
+        if (!acciones.hasOwnProperty(accionParaEjecutar)) {
+            return;
+        }
+
+        acciones[accionParaEjecutar]();
+    });
+});
+
+const muestraConfirmacionParaEliminarCompeticion = async (idCompeticion) => {
+    muestraModalParaEliminarConMensaje('¿seguro que quieres eliminar la competición?', () => {eliminaCompeticion(idCompeticion)});
+}
+
+const eliminaCompeticion = (idCompeticion) => {
+    window.location.href = `/competicion/eliminar/${idCompeticion}`;
+}
+
