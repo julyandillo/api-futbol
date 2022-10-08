@@ -66,6 +66,13 @@
     align-items: center;
 }
 
+.competiciones-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
 .competicion {
     display: flex;
     flex-direction: column;

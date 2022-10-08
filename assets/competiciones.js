@@ -1,11 +1,17 @@
 import {muestraModalParaEliminarConMensaje} from "./app";
-
-const categorias = {};
-
-const competiciones = document.querySelectorAll('.competicion');
-const competicionesAcciones = document.querySelector('.competiciones-acciones');
+import {realizaPeticionPOST} from "./utils";
 
 document.addEventListener('DOMContentLoaded', () => {
+    cargaTagsTiposDeCompeticion();
+});
+
+const cargaTagsTiposDeCompeticion = () => {
+    const categorias = {};
+    const competiciones = document.querySelectorAll('.competicion');
+    const competicionesTags = document.querySelector('.competiciones-tags');
+
+    competicionesTags.innerHTML = '';
+
     competiciones.forEach((el) => {
         let categoria = el.dataset.categoria;
         if (categoria in categorias) {
@@ -16,17 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (competiciones.length > 0) {
-        competicionesAcciones.appendChild(
+        competicionesTags.appendChild(
             creaBadgeCategoriaCompeticion('Todas', competiciones.length)
         );
     }
 
     for (let [categoria, cantidad] of Object.entries(categorias)) {
-        competicionesAcciones.appendChild(
+        competicionesTags.appendChild(
             creaBadgeCategoriaCompeticion(categoria, cantidad)
         );
     }
-});
+}
 
 const creaBadgeCategoriaCompeticion = (categoria, cantidad) => {
     const badge = document.createElement('span');
@@ -88,7 +94,12 @@ const muestraConfirmacionParaEliminarCompeticion = async (idCompeticion) => {
     muestraModalParaEliminarConMensaje('¿seguro que quieres eliminar la competición?', () => {eliminaCompeticion(idCompeticion)});
 }
 
-const eliminaCompeticion = (idCompeticion) => {
-    window.location.href = `/competicion/eliminar/${idCompeticion}`;
+const eliminaCompeticion = async (competicion) => {
+    const response = await realizaPeticionPOST('/competicion-eliminar', {competicion});
+
+    if (response.code === 200) {
+        document.querySelector(`[data-competicion="${competicion}"]`).closest('.competicion').remove();
+        cargaTagsTiposDeCompeticion();
+    }
 }
 

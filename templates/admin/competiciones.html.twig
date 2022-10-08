@@ -11,7 +11,8 @@
             <a href="{{ path('competicion_nueva') }}" class="boton boton-primary">Nueva competición</a>
         </span>
         {% if competiciones|length > 0 %}
-        <span>Categorías:</span>
+            <span>Categorías:</span>
+            <div class="competiciones-tags"></div>
         {% endif %}
     </div>
 
