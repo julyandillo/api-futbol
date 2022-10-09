@@ -1,14 +1,14 @@
 import {muestraModalParaEliminarConMensaje} from "./app";
-import {realizaPeticionPOST} from "./utils";
+import {realizaPeticionDELETE} from "./utils";
 
+const competicionesTags = document.querySelector('.competiciones-tags');
 document.addEventListener('DOMContentLoaded', () => {
     cargaTagsTiposDeCompeticion();
 });
 
 const cargaTagsTiposDeCompeticion = () => {
-    const categorias = {};
     const competiciones = document.querySelectorAll('.competicion');
-    const competicionesTags = document.querySelector('.competiciones-tags');
+    const categorias = {};
 
     competicionesTags.innerHTML = '';
 
@@ -58,18 +58,16 @@ const creaBadgeCategoriaCompeticion = (categoria, cantidad) => {
     return badge;
 }
 
-const nombreParaCategoria = (categoria) => {
-    return categoria.replaceAll('_', ' ');
-}
+const nombreParaCategoria = (categoria) => categoria.replaceAll('_', ' ');
 
 const muestraCompeticionesPorCategoria = (categoria) => {
-    competiciones.forEach((competicion) => {
+    document.querySelectorAll('.competicion').forEach((competicion) => {
         competicion.style.display = (competicion.dataset.categoria !== categoria) ? 'none' : 'flex';
     });
 }
 
 const muestraTodasLasCompeticiones = () => {
-    competiciones.forEach(el => {
+    document.querySelectorAll('.competicion').forEach(el => {
         el.style.display = 'flex';
     })
 }
@@ -91,11 +89,13 @@ document.querySelectorAll('[data-accion]').forEach(el => {
 });
 
 const muestraConfirmacionParaEliminarCompeticion = async (idCompeticion) => {
-    muestraModalParaEliminarConMensaje('¿seguro que quieres eliminar la competición?', () => {eliminaCompeticion(idCompeticion)});
+    muestraModalParaEliminarConMensaje('¿seguro que quieres eliminar la competición?', () => {
+        eliminaCompeticion(idCompeticion)
+    });
 }
 
 const eliminaCompeticion = async (competicion) => {
-    const response = await realizaPeticionPOST('/competicion-eliminar', {competicion});
+    const response = await realizaPeticionDELETE('/competicion', {competicion});
 
     if (response.code === 200) {
         document.querySelector(`[data-competicion="${competicion}"]`).closest('.competicion').remove();
