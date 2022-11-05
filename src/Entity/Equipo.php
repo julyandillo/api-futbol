@@ -29,13 +29,13 @@ class Equipo
     #[ORM\Column]
     private ?int $fundacion = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $presidente = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ciudad = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $web = null;
 
     #[ORM\ManyToMany(targetEntity: Competicion::class, inversedBy: 'equipos')]
