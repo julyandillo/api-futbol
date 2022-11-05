@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Config\CategoriaCompeticion;
 use App\Config\TipoCompeticion;
 use App\Repository\CompeticionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -30,6 +32,14 @@ class Competicion
 
     #[ORM\Column(length: 255, enumType: CategoriaCompeticion::class)]
     private CategoriaCompeticion $categoria;
+
+    #[ORM\ManyToMany(targetEntity: Equipo::class, mappedBy: 'competiciones')]
+    private Collection $equipos;
+
+    public function __construct()
+    {
+        $this->equipos = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -92,6 +102,25 @@ class Competicion
     public function setCategoria(CategoriaCompeticion $categoria): self
     {
         $this->categoria = $categoria;
+
+        return $this;
+    }
+
+    public function getEquipos(): Collection
+    {
+        return $this->equipos;
+    }
+
+    public function setEquipos(Collection $equipos): Competicion
+    {
+        $this->equipos = $equipos;
+        return $this;
+    }
+
+
+    public function agregarEquipo(Equipo $equipo): self
+    {
+        $this->equipos->add($equipo);
 
         return $this;
     }
