@@ -5,11 +5,15 @@ namespace App\Controller;
 use App\Entity\Competicion;
 use App\Form\CompeticionType;
 use App\Repository\CompeticionRepository;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class CompeticionController extends AbstractController
 {
@@ -76,5 +80,15 @@ class CompeticionController extends AbstractController
             'code' => 500,
             'msg' => 'La competeción que se intenta eliminar no existe',
         ]);
+    }
+
+    #[Route('/api/competiciones', name: 'api_competiciones', methods: ['GET'])]
+    public function listaCompeticiones(): JsonResponse
+    {
+        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+
+        return $this->json(array_map(function (Competicion $competicion) use ($normalizer) {
+            return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
+        }, $this->competicionRepository->findAll()));
     }
 }
