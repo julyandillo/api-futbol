@@ -39,6 +39,15 @@ class EquipoRepository extends ServiceEntityRepository
         }
     }
 
+    public function existeEquipoConNombre(string $nombre): bool
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.nombre = :nombre')
+            ->setParameter('nombre', $nombre)
+            ->getQuery()
+            ->getOneOrNullResult() !== null;
+    }
+
 //    /**
 //     * @return Equipo[] Returns an array of Equipo objects
 //     */

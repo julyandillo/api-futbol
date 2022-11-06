@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\EquipoRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: EquipoRepository::class)]
 class Equipo
@@ -12,9 +14,11 @@ class Equipo
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('lista')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('lista')]
     private ?string $nombre = null;
 
     #[ORM\Column(length: 255)]
@@ -24,6 +28,7 @@ class Equipo
     private ?string $nombreAbreviado = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('lista')]
     private ?string $pais = null;
 
     #[ORM\Column]
@@ -40,6 +45,7 @@ class Equipo
 
     #[ORM\ManyToMany(targetEntity: Competicion::class, inversedBy: 'equipos')]
     #[ORM\JoinTable(name: 'equipos_competiciones')]
+    #[Ignore]
     private Collection $competiciones;
 
     public function getId(): ?int
