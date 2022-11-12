@@ -3,11 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: ['usuario'], message: 'Ya existe un usuario con ese nombre')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,6 +30,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $email = null;
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $hash = null;
+
+    #[ORM\OneToMany(mappedBy: 'usuario', targetEntity: Aplicacion::class)]
+    private Collection $aplicaciones;
+
+    public function __construct()
+    {
+        $this->aplicaciones = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -108,4 +124,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getHash(): ?string
+    {
+        return $this->hash;
+    }
+
+    public function setHash(?string $hash): self
+    {
+        $this->hash = $hash;
+        return $this;
+    }
+
+    public function getAplicaciones(): Collection
+    {
+        return $this->aplicaciones;
+    }
+
+    public function setAplicaciones(Collection $aplicaciones): self
+    {
+        $this->aplicaciones = $aplicaciones;
+        return $this;
+    }
+
 }
