@@ -1,0 +1,18 @@
+h2 {
+    color: rgb(var(--color-oscuro));
+}
+.div__nueva-aplicacion {
+    margin-top: 2rem;
+}
+.form-nueva-aplicacion {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.form-nueva-aplicacion>div:first-of-type{
+    flex-grow: 0.1;
+}
+.input__nombre-aplicacion {
+    flex-grow: 0.35;
+    margin: 0;
+}

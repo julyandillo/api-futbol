@@ -298,3 +298,7 @@ dialog {
         width: 10rem;
     }
 }
+
+.oculto {
+    display: none;
+}

@@ -14,14 +14,16 @@
 
 {% block body %}
     <div id="menu">
-        <a class="opcion-menu">
-            <span class="icono-menu"><i class="fa-solid fa-users"></i></span>
-            <span class="desktop">Usuarios</span>
-        </a>
-        <a href="{{ path('competiciones') }}" class="opcion-menu">
-            <span class="icono-menu"><i class="fa-solid fa-futbol"></i></span>
-            <span class="desktop">Competiciones</span>
-        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_admin_usuarios') }}" class="opcion-menu">
+                <span class="icono-menu"><i class="fa-solid fa-users"></i></span>
+                <span class="desktop">Usuarios</span>
+            </a>
+            <a href="{{ path('competiciones') }}" class="opcion-menu">
+                <span class="icono-menu"><i class="fa-solid fa-futbol"></i></span>
+                <span class="desktop">Competiciones</span>
+            </a>
+        {% endif %}
         <a href="{{ path('app_logout') }}" class="opcion-menu">
             <span class="icono-menu"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
             <span class="desktop">Salir</span>

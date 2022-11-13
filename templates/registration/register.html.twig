@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('registro') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('registro') }}
+{% endblock %}
+
+{% block title %}Nuevo usuario{% endblock %}
+
+{% block body %}
+    <div class="contenido">
+        <h2>Crea una nueva cuenta</h2>
+    {{ form_start(registrationForm, {'attr': {'class': 'form'}}) }}
+        <div class="form-enlinea">
+            {{ form_label(registrationForm.usuario) }}
+            {{ form_widget(registrationForm.usuario) }}
+        </div>
+
+        <div class="form-enlinea">
+            {{ form_label(registrationForm.plainPassword) }}
+            {{ form_widget(registrationForm.plainPassword) }}
+        </div>
+        {% if not registrationForm.plainPassword.vars.valid %}
+            <div class="error">
+                {{ registrationForm.plainPassword.vars.errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-enlinea">
+            {{ form_label(registrationForm.email) }}
+            {{ form_widget(registrationForm.email) }}
+        </div>
+
+        <button type="submit" class="boton boton-primary mt-2">Crear cuenta</button>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}

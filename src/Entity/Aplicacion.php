@@ -51,4 +51,15 @@ class Aplicacion
 
         return $this;
     }
+
+    public function getUsuario(): User
+    {
+        return $this->usuario;
+    }
+
+    public function setUsuario(User $usuario): self
+    {
+        $this->usuario = $usuario;
+        return $this;
+    }
 }

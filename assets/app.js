@@ -30,3 +30,15 @@ export const muestraModalParaEliminarConMensaje = (mensaje, callable) => {
     
     modalEliminar.showModal();
 }
+
+document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', event => {
+        const element = document.getElementById(event.target.closest('[data-toggle]').dataset.toggle);
+        if (!element) return;
+        element.classList.toggle('oculto');
+    });
+});
+
+export const ocultaElemento = el => el.classList.add('oculto');
+
+export const muestraElemento = el => el.classList.remove('oculto');
