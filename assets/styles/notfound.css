@@ -1,6 +1,6 @@
 body {
     text-align: center;
-    color: rgb(var( --color-oscuro));
+    color: rgb(var( --color-verde-oscuro));
     background-color: rgb( var(--color-gris) );
 }
 .contenedor-imagen {

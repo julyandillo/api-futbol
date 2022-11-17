@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Aplicacion;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +28,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/nueva-aplicacion', name: 'user_nueva_aplicacion', methods: ['POST'])]
-    public function guardaAplicacion(Request $request, UserInterface $user, UserPasswordHasherInterface $userPasswordHasher): Response
+    public function guardaAplicacion(Request $request, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         if (!$request->request->has('nombre')) {
             return $this->json([
@@ -36,8 +37,10 @@ class UserController extends AbstractController
             ]);
         }
 
+        $user = $this->getUser();
         $nombreAplicacion = $request->request->get('nombre');
-        if ($this->entityManager->getRepository(Aplicacion::class)->findBy([
+
+        if ($this->entityManager->getRepository(Aplicacion::class)->findOneBy([
             'nombre' => $nombreAplicacion,
             'usuario' => $user->getId(),
         ])) {
@@ -74,5 +77,43 @@ class UserController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['code' => 200]);
+    }
+
+    #[Route('/token-aplicacion', name: 'user_token_aplicacion', methods: ['POST'])]
+    public function generaTokenParaAplicacion(Request $request, JWTTokenManagerInterface $JWTManager): Response
+    {
+        if (!$request->request->has('id_aplicacion')) {
+            return $this->json([
+                'code' => 400,
+                'msg' => 'No se puede generar el token, falta el parámetro "id_aplicacion"',
+            ]);
+        }
+
+        $aplicacion = $this->entityManager
+            ->getRepository(Aplicacion::class)
+            ->find($request->request->get('id_aplicacion'));
+
+        if (!$aplicacion) {
+            return $this->json([
+                'code' => 401,
+                'msg' => 'No se puede generar el token, no existe la aplicación',
+            ]);
+        }
+
+        $usuarioAplicacion = $this->entityManager
+            ->getRepository(User::class)
+            ->findOneBy(['hash' => $aplicacion->getHash()]);
+
+        if (!$usuarioAplicacion) {
+            return $this->json([
+                'code' => 401,
+                'msg' => 'No se puede generar el token, no existe ningún usuario asociado a la aplicación',
+            ]);
+        }
+
+        return $this->json([
+            'code' => 200,
+            'token' => $JWTManager->create($usuarioAplicacion),
+        ]);
     }
 }

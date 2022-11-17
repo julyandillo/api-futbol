@@ -30,6 +30,14 @@
 
     <div class="aplicaciones mt-3">
         {% for aplicacion in aplicaciones %}
+            <div class="aplicacion sombra">
+                <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
+                <div><span class="boton boton-primary btn__aplicacion-token" data-aplicacion="{{ aplicacion.id }}">Generar token</span></div>
+                <div class="aplicacion-token">
+                    <div><span class="boton boton-azul btn__aplicacion-copiar-token"><i class="fa-regular fa-copy"></i></span></div>
+                    <input class="input__aplicacion-token" type="text" readonly>
+                </div>
+            </div>
         {% else %}
             <h3>No hay ninguna aplicación configurada</h3>
         {% endfor %}

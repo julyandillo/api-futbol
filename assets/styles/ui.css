@@ -1,5 +1,5 @@
 #menu {
-    background: rgb(var(--color-oscuro));
+    background: rgb(var(--color-verde-oscuro));
     display: flex;
     justify-content: center;
     height: 4rem;
@@ -28,7 +28,7 @@
 .opcion-menu:hover,
 .opcion-menu-activa {
     background: rgb(var(--color-claro));
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
     cursor: pointer;
 }
 
@@ -78,17 +78,17 @@
     flex-direction: column;
     padding: 1rem;
     border-radius: .3rem;
-    border: 1px solid var(--color-oscuro);
+    border: 1px solid var(--color-verde-oscuro);
     box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0, rgba(60, 64, 67, 0.15) 0 2px 6px 2px;
     background-color: rgb(var(--color-secundario));
     position: relative;
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
 }
 
 .competicion-accion {
     font-size: 1.225rem;
     margin-right: .75rem;
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
 }
 
 .competicion-accion:hover {
@@ -105,7 +105,7 @@
 .competicion-nombre {
     font-size: var(--fs-600);
     font-weight: 600;
-    color: var(--color-oscuro);
+    color: var(--color-verde-oscuro);
 }
 
 @media (max-width: 40em) {

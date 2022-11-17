@@ -1,5 +1,5 @@
 h2 {
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
 }
 .div__nueva-aplicacion {
     margin-top: 2rem;
@@ -15,4 +15,27 @@ h2 {
 .input__nombre-aplicacion {
     flex-grow: 0.35;
     margin: 0;
+}
+.aplicacion {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: whitesmoke;
+    border-radius: .25rem;
+    border: 1px solid rgb(var(--color-oscuro));
+    padding: 1rem;
+}
+.aplicacion-nombre {
+    flex-grow: 0.35;
+    padding-left: 1rem;
+}
+.input__aplicacion-token {
+    width: 100%;
+}
+.aplicacion-token {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
 }

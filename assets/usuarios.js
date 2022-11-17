@@ -16,3 +16,24 @@ document.getElementById('btn__guardar-aplicacion').addEventListener('click', asy
 
     ocultaElemento(divNuevaAplicacion.querySelector('.error'));
 });
+
+document.querySelectorAll('.btn__aplicacion-token').forEach(el => {
+    el.addEventListener('click', () => {
+        generaTokenParaAplicacion(el.dataset.aplicacion)
+            .then(token => {
+                console.log({token})
+                el.closest('.aplicacion').querySelector('.input__aplicacion-token').value = token;
+            });
+    });
+});
+
+const generaTokenParaAplicacion = async (aplicacion) => {
+    const response = await realizaPeticionPOST('/token-aplicacion', {id_aplicacion: aplicacion});
+
+    if (response.code !== 200) {
+        console.log(response.msg);
+        return;
+    }
+
+    return response.token;
+}
