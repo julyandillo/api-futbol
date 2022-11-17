@@ -2,13 +2,16 @@
 
 :root {
     --gradient: linear-gradient(180deg, hsla(0, 0%, 100%, 0.15), hsla(0, 0%, 100%, 0));
-    --color-oscuro: 39 84 75;
+    --color-verde-oscuro: 39 84 75;
     --color-claro: 188 242 152;
     --color-secundario: 243 234 218;
     --color-gris: 242 244 243;
     --color-morado: 129 28 129;
     --color-success: 91 186 111;
     --color-warning: 255 161 122;
+    --color-oscuro: 69, 72, 81;
+    --color-azul: 121, 173, 220;
+    --color-azul-oscuro: 61, 84, 103;
 
     --fs-900: 5rem;
     --fs-800: 3.5rem;
@@ -88,7 +91,7 @@ body {
 }
 
 .bg-oscuro {
-    background-color: rgb(var(--color-oscuro));
+    background-color: rgb(var(--color-verde-oscuro));
 }
 
 .bg-secundario {
@@ -99,7 +102,7 @@ body {
     display: inline-block;
     font-weight: 400;
     line-height: 1.5;
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
@@ -114,15 +117,15 @@ body {
 }
 
 .boton-primary {
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
     background-color: rgb(var(--color-claro));
-    border-color: rgb(var(--color-oscuro));
+    border-color: rgb(var(--color-verde-oscuro));
 }
 
 .boton-primary:hover {
     color: rgb(var(--color-claro));
-    background-color: rgb(var(--color-oscuro) / .85);
-    border-color: rgb(var(--color-oscuro));
+    background-color: rgb(var(--color-verde-oscuro) / .85);
+    border-color: rgb(var(--color-verde-oscuro));
 }
 
 .boton-warning {
@@ -133,6 +136,30 @@ body {
 
 .boton-warning:hover {
     background-color: rgb(var(--color-warning) / .85);
+}
+
+.boton-secundary {
+    color: rgb(var(--color-claro));
+    background-color: rgb(var(--color-verde-oscuro));
+    border-color: rgb(var(--color-claro));
+}
+
+.boton-secundary:hover {
+    background-color: rgb(var(--color-claro));
+    color: rgb(var(--color-verde-oscuro));
+    border-color: rgb(var(--color-verde-oscuro));
+}
+
+.boton-azul {
+    color: rgb(var(--color-azul-oscuro));
+    border-color: rgb(var(--color-azul-oscuro));
+    background-color: rgb(var(--color-azul));
+}
+
+.boton-azul:hover {
+    color: rgb(var(--color-azul));
+    border-color: rgb(var(--color-azul));
+    background-color: rgb(var(--color-azul-oscuro));
 }
 
 .checkbox-label {
@@ -156,8 +183,8 @@ input {
 }
 
 input:focus {
-    color: rgb(var(--color-oscuro));
-    outline: 1px solid rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
+    outline: 1px solid rgb(var(--color-verde-oscuro));
     background-color: rgb(var(--color-secundario) / .5);
 }
 
@@ -170,7 +197,7 @@ input[type="checkbox"] {
     font: inherit;
     width: 1rem;
     height: 1rem;
-    border: 0.1em solid rgb(var(--color-oscuro));
+    border: 0.1em solid rgb(var(--color-verde-oscuro));
     border-radius: 0.25em;
     transform: translateY(-0.075em);
     cursor: pointer;
@@ -184,7 +211,7 @@ input[type="checkbox"]::before {
     height: 0.65rem;
     transform: scale(0);
     transition: 120ms transform ease-in-out;
-    box-shadow: inset 1em 1em rgb(var(--color-oscuro));
+    box-shadow: inset 1em 1em rgb(var(--color-verde-oscuro));
     border-radius: 0.25rem;
 }
 
@@ -221,7 +248,7 @@ input[type="checkbox"]:checked::before {
     border-radius: 0.25rem;
     display: inline-block;
     line-height: 1.5;
-    border: 1px solid rgb(var(--color-oscuro));
+    border: 1px solid rgb(var(--color-verde-oscuro));
     background-color: rgb(var(--color-gris));
     padding: .15rem;
     padding-inline: .5rem;
@@ -229,18 +256,18 @@ input[type="checkbox"]:checked::before {
 }
 
 .badge:hover {
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
     background-color: rgb(var(--color-secundario));
 }
 
 .badge-activo {
     color: rgb(var(--color-claro));
-    background-color: rgb(var(--color-oscuro));
+    background-color: rgb(var(--color-verde-oscuro));
 }
 
 .badge-cantidad {
     background-color: white;
-    color: rgb(var(--color-oscuro));
+    color: rgb(var(--color-verde-oscuro));
     padding: 0.25rem;
     font-size: var(--fs-200);
     margin-left: .25rem;
