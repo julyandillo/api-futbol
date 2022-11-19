@@ -1,0 +1,17 @@
+<div class="aplicacion sombra">
+    <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
+    <div>
+        <span class="boton boton-primary btn__aplicacion-token" data-aplicacion="{{ aplicacion.id }}">Generar token</span>
+    </div>
+    <div class="aplicacion-token oculto">
+        <div class="aplicacion-token-cabecera">
+            <div>token</div>
+            <div class="aplicacion-copiar-token"><i class="fa-regular fa-copy"></i><span class="texto">copiar</span>
+            </div>
+        </div>
+        <div class="aplicacion-token-contenido">
+            <div class="div__token"></div>
+        </div>
+        <div class="error oculto"></div>
+    </div>
+</div>

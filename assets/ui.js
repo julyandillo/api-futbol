@@ -7,4 +7,10 @@ document.querySelectorAll('.opcion-menu').forEach(el => {
 
         el.classList.add('opcion-menu-activa');
     })
-})
+});
+
+export const htmlToElement = (html) => {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
+}

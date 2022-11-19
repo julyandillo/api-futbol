@@ -1,6 +1,7 @@
 import './styles/usuarios.css'
 import {realizaPeticionPOST} from "./utils";
 import {muestraElemento, ocultaElemento} from "./app";
+import {htmlToElement} from "./ui";
 
 const inputNombreAplicacion = document.getElementById('input__nombre-aplicacion');
 const divNuevaAplicacion = document.getElementById('div__nueva-aplicacion');
@@ -13,8 +14,10 @@ document.getElementById('btn__guardar-aplicacion').addEventListener('click', asy
         muestraElemento(divNuevaAplicacion.querySelector('.error'));
         return;
     }
-
     ocultaElemento(divNuevaAplicacion.querySelector('.error'));
+
+    document.querySelector('.aplicaciones').appendChild(htmlToElement(response.html_aplicacion));
+    inputNombreAplicacion.value = '';
 });
 
 document.querySelectorAll('.btn__aplicacion-token').forEach(el => {

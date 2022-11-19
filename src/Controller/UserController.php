@@ -76,7 +76,10 @@ class UserController extends AbstractController
         $this->entityManager->persist($aplicacion);
         $this->entityManager->flush();
 
-        return $this->json(['code' => 200]);
+        return $this->json([
+            'code' => 200,
+            'html_aplicacion' => $this->renderView('user/aplicacion.html.twig', ['aplicacion' => $aplicacion]),
+        ]);
     }
 
     #[Route('/token-aplicacion', name: 'user_token_aplicacion', methods: ['POST'])]
