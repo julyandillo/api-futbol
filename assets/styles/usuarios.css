@@ -1,21 +1,37 @@
 h2 {
     color: rgb(var(--color-verde-oscuro));
 }
+
 .div__nueva-aplicacion {
     margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    opacity: 100;
+    visibility: visible;
+    transition: visibility 500s, opacity 500ms;
 }
+
 .form-nueva-aplicacion {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
-.form-nueva-aplicacion>div:first-of-type{
-    flex-grow: 0.1;
+
+.form-nueva-aplicacion > div:first-of-type {
+    margin-right: 2rem;
 }
-.input__nombre-aplicacion {
+
+.div__nombre-aplicacion {
     flex-grow: 0.35;
+}
+
+#input__nombre-aplicacion {
     margin: 0;
 }
+
+.aplicaciones .aplicacion:not(:first-child) {
+    margin-top: 1rem;
+}
+
 .aplicacion {
     display: flex;
     align-items: center;
@@ -23,19 +39,75 @@ h2 {
     background-color: whitesmoke;
     border-radius: .25rem;
     border: 1px solid rgb(var(--color-oscuro));
-    padding: 1rem;
+    padding: 1.5rem;
 }
+
 .aplicacion-nombre {
-    flex-grow: 0.35;
-    padding-left: 1rem;
+    color: rgb(var(--color-oscuro));
+    font-weight: bold;
+    flex-grow: 1;
 }
-.input__aplicacion-token {
-    width: 100%;
-}
+
 .aplicacion-token {
     width: 100%;
-    padding: 1rem;
     display: flex;
-    align-items: baseline;
-    gap: 1rem;
+    flex-direction: column;
+    margin-top: 1rem;
+}
+
+.aplicacion-token-cabecera {
+    background-color: rgb(var(--color-oscuro));
+    color: white;
+    display: flex;
+    align-items: center;
+    min-height: 1rem;
+    font-size: var(--fs-300);
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.aplicacion-token-cabecera > div:first-of-type {
+    padding-left: .5rem;
+    flex-grow: 1;
+}
+
+.aplicacion-token-contenido {
+    padding: .5rem;
+    border: 1px solid rgb(var(--color-oscuro));
+}
+
+.aplicacion-copiar-token {
+    padding: .25rem;
+    padding-inline: .5rem;
+    color: white;
+    background-color: rgb(var(--color-azul));
+    border-top-right-radius: .25rem;
+    transition: background-color 200ms ease-in-out;
+    min-width: 70px;
+    min-height: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.aplicacion-copiar-token:hover {
+    cursor: pointer;
+    background-color: hsl(var(--color-azul-hover-hsl));
+}
+
+.aplicacion-copiar-token-success {
+    color: rgb(var(--color-oscuro)) !important;
+    background-color: rgba(var(--color-claro) / 0.75) !important;
+    transition: background-color 1s ease-in-out, color 1s ease-in-out;
+}
+
+.aplicacion-copiar-token .texto {
+    margin-left: .35rem;
+}
+
+.div__token {
+    min-height: 100px;
+    line-break: anywhere;
+    font-style: italic;
+    font-size: var(--fs-300);
 }

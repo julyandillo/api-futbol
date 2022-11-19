@@ -19,21 +19,38 @@ document.getElementById('btn__guardar-aplicacion').addEventListener('click', asy
 
 document.querySelectorAll('.btn__aplicacion-token').forEach(el => {
     el.addEventListener('click', () => {
+        const elAplicacion = el.closest('.aplicacion');
         generaTokenParaAplicacion(el.dataset.aplicacion)
             .then(token => {
-                console.log({token})
-                el.closest('.aplicacion').querySelector('.input__aplicacion-token').value = token;
+                muestraElemento(elAplicacion.querySelector('.aplicacion-token'));
+                elAplicacion.querySelector('.div__token').textContent = token;
             });
     });
 });
 
-const generaTokenParaAplicacion = async (aplicacion) => {
-    const response = await realizaPeticionPOST('/token-aplicacion', {id_aplicacion: aplicacion});
+const generaTokenParaAplicacion = async (id_aplicacion) => {
+    const response = await realizaPeticionPOST('/token-aplicacion', {id_aplicacion});
 
+    let divError = document.querySelector('.aplicacion-token .error');
     if (response.code !== 200) {
-        console.log(response.msg);
+        divError.textContent = response.msg;
+        muestraElemento(divError);
         return;
     }
+    ocultaElemento(divError)
 
     return response.token;
 }
+
+document.querySelectorAll('.aplicacion-copiar-token').forEach(el => {
+    el.addEventListener('click', () => {
+        navigator.clipboard.writeText(el.closest('.aplicacion-token').querySelector('.div__token').textContent);
+        el.classList.add('aplicacion-copiar-token-success');
+        const content = el.innerHTML;
+        el.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        setTimeout(() => {
+            el.classList.remove('aplicacion-copiar-token-success');
+            el.innerHTML = content;
+        }, 2500);
+    });
+})

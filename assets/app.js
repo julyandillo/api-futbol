@@ -8,12 +8,7 @@
 require('@fortawesome/fontawesome-free/css/all.min.css');
 
 import './styles/reset.css';
-
-// any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
-
-// start the Stimulus application
-import './bootstrap';
 
 export const modalEliminar = document.getElementById('modal-eliminar');
 

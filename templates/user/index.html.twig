@@ -19,23 +19,33 @@
 
     <div id="div__nueva-aplicacion" class="div__nueva-aplicacion oculto">
         <div class="form-nueva-aplicacion">
-            <div>Nombre</div>
-            <div class="input__nombre-aplicacion"><input type="text" id="input__nombre-aplicacion" name="nombre-aplicacion"></div>
-            <div><span id="btn__guardar-aplicacion" class="boton boton-primary"><i class="fa-solid fa-floppy-disk"></i></span></div>
+            <div>Nombre:</div>
+            <div class="div__nombre-aplicacion">
+                <input type="text" id="input__nombre-aplicacion" name="nombre-aplicacion">
+            </div>
+            <div><span id="btn__guardar-aplicacion" class="boton boton-primary"><i class="fa-solid fa-floppy-disk"></i> Guardar</span>
+            </div>
         </div>
-        <div class="error oculto">
-
-        </div>
+        <div class="error oculto"></div>
     </div>
 
     <div class="aplicaciones mt-3">
         {% for aplicacion in aplicaciones %}
             <div class="aplicacion sombra">
                 <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
-                <div><span class="boton boton-primary btn__aplicacion-token" data-aplicacion="{{ aplicacion.id }}">Generar token</span></div>
-                <div class="aplicacion-token">
-                    <div><span class="boton boton-azul btn__aplicacion-copiar-token"><i class="fa-regular fa-copy"></i></span></div>
-                    <input class="input__aplicacion-token" type="text" readonly>
+                <div>
+                    <span class="boton boton-primary btn__aplicacion-token" data-aplicacion="{{ aplicacion.id }}">Generar token</span>
+                </div>
+                <div class="aplicacion-token oculto">
+                    <div class="aplicacion-token-cabecera">
+                        <div>token</div>
+                        <div class="aplicacion-copiar-token"><i class="fa-regular fa-copy"></i><span class="texto">copiar</span>
+                        </div>
+                    </div>
+                    <div class="aplicacion-token-contenido">
+                        <div class="div__token"></div>
+                    </div>
+                    <div class="error oculto"></div>
                 </div>
             </div>
         {% else %}
