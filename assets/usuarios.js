@@ -1,5 +1,5 @@
 import './styles/usuarios.css'
-import {realizaPeticionPOST} from "./utils";
+import {realizaPeticionDELETE, realizaPeticionPOST} from "./utils";
 import {muestraElemento, ocultaElemento} from "./app";
 import {htmlToElement} from "./ui";
 
@@ -56,4 +56,21 @@ document.querySelectorAll('.aplicacion-copiar-token').forEach(el => {
             el.innerHTML = content;
         }, 2500);
     });
-})
+});
+
+document.querySelectorAll('.btn__aplicacion-eliminar').forEach(el => {
+    el.addEventListener('click', () => {
+        const idAplicacion = el.closest('.aplicacion').dataset.aplicacion;
+
+        eliminaAplicacion(idAplicacion)
+            .then(response => {
+                if (response.code === 200) {
+                    document.querySelector(`.aplicacion[data-aplicacion='${idAplicacion}']`).remove();
+                }
+            });
+    });
+});
+
+const eliminaAplicacion = async (id_aplicacion) => {
+    return await realizaPeticionDELETE('/elimina-aplicacion', {id_aplicacion});
+}

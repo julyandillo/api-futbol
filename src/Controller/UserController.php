@@ -88,7 +88,7 @@ class UserController extends AbstractController
         if (!$request->request->has('id_aplicacion')) {
             return $this->json([
                 'code' => 400,
-                'msg' => 'No se puede generar el token, falta el parámetro "id_aplicacion"',
+                'msg' => 'No se puede realizar la peticion, falta el parámetro "id_aplicacion"',
             ]);
         }
 
@@ -118,5 +118,41 @@ class UserController extends AbstractController
             'code' => 200,
             'token' => $JWTManager->create($usuarioAplicacion),
         ]);
+    }
+
+    #[Route('/elimina-aplicacion', name: 'user_elimina_aplicacion', methods: ['DELETE'])]
+    public function eliminaAplicacion(Request $request): Response
+    {
+        if (!$request->request->has('id_aplicacion')) {
+            return $this->json([
+                'code' => 400,
+                'msg' => 'No se realizar la petición, falta el parámetro "id_aplicacion"',
+            ]);
+        }
+
+        $aplicacion = $this->entityManager
+            ->getRepository(Aplicacion::class)
+            ->find($request->request->get('id_aplicacion'));
+
+        if (!$aplicacion) {
+            return $this->json([
+                'code' => 501,
+                'msg' => 'No existe la aplicación',
+            ]);
+        }
+
+        $this->entityManager->getRepository(Aplicacion::class)->remove($aplicacion);
+
+        $usuarioAplicacion = $this->entityManager
+            ->getRepository(User::class)
+            ->findOneBy(['hash' => $aplicacion->getHash()]);
+
+        if ($usuarioAplicacion) {
+            $this->entityManager->getRepository(User::class)->remove($usuarioAplicacion);
+        }
+
+        $this->entityManager->flush();
+
+        return $this->json(['code' => 200]);
     }
 }
