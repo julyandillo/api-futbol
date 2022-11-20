@@ -8,7 +8,7 @@
     --color-gris: 242 244 243;
     --color-morado: 129 28 129;
     --color-success: 91 186 111;
-    --color-warning: 255 161 122;
+    --color-warning: 237 113 62;
     --color-oscuro: 69 72 81;
     --color-azul: 121 173 220;
     --color-azul-hsl: 208, 58%, 46%;
@@ -147,7 +147,7 @@ body {
 }
 
 .boton-warning:hover {
-    background-color: rgb(var(--color-warning) / .85);
+    background-color: rgb(var(--color-warning) / .9);
 }
 
 .boton-secundary {
