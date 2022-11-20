@@ -1,6 +1,9 @@
 <div class="aplicacion sombra" data-aplicacion="{{ aplicacion.id }}">
-    <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
-    <div>
+    <div class="aplicacion-info">
+        <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
+        <div class="aplicacion-fecha">[{{ aplicacion.fechaCreacion|date("d/m/Y H:i:s") }}]</div>
+    </div>
+    <div class="aplicacion-acciones">
         <span class="boton boton-primary btn__aplicacion-token" data-accion="app-token">Genera token</span>
         <span class="boton boton-warning btn__aplicacion-eliminar" data-accion="app-eliminar"><i class="fa-solid fa-trash-can"></i></span>
     </div>

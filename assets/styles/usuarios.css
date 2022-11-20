@@ -32,20 +32,29 @@ h2 {
     margin-top: 1rem;
 }
 
+.aplicacion-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
 .aplicacion {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    background-color: whitesmoke;
+    background-color: hsla(0, 0%, 0%, 0.05);
     border-radius: .25rem;
     border: 1px solid rgb(var(--color-oscuro));
     padding: 1.5rem;
 }
 
+.aplicacion-fecha {
+    font-size: var(--fs-200);
+    font-style: italic;
+    color: rgb(var(--color-azul-oscuro));
+}
 .aplicacion-nombre {
     color: rgb(var(--color-oscuro));
     font-weight: bold;
-    flex-grow: 1;
 }
 
 .aplicacion-token {
@@ -110,4 +119,8 @@ h2 {
     line-break: anywhere;
     font-style: italic;
     font-size: var(--fs-300);
+}
+
+.aplicacion-acciones .boton:not(:first-child) {
+    margin-left: .75rem;
 }
