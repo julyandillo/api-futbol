@@ -6,6 +6,45 @@ import {htmlToElement} from "./ui";
 const inputNombreAplicacion = document.getElementById('input__nombre-aplicacion');
 const divNuevaAplicacion = document.getElementById('div__nueva-aplicacion');
 
+
+document.body.addEventListener('click', (event) => {
+    const accion = event.target.closest('[data-accion]')?.dataset.accion;
+
+    if (accion) {
+        acciones[accion](event);
+    }
+});
+
+const acciones = {
+    "app-token": (event) => {
+        const elAplicacion = event.target.closest('.aplicacion');
+        generaTokenParaAplicacion(elAplicacion.dataset.aplicacion)
+            .then(token => {
+                muestraElemento(elAplicacion.querySelector('.aplicacion-token'));
+                elAplicacion.querySelector('.div__token').textContent = token;
+            });
+    },
+    "app-token-copiar": async (event) => {
+        await navigator.clipboard.writeText(event.target.closest('.aplicacion-token').querySelector('.div__token').textContent);
+
+        const btnCopiar = event.target.closest('.aplicacion-copiar-token');
+        btnCopiar.classList.add('aplicacion-copiar-token-success');
+        const content = btnCopiar.innerHTML;
+        btnCopiar.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        setTimeout(() => {
+            btnCopiar.classList.remove('aplicacion-copiar-token-success');
+            btnCopiar.innerHTML = content;
+        }, 2000);
+    },
+    "app-eliminar": (event) => {
+        const idAplicacion = event.target.closest('.aplicacion').dataset.aplicacion;
+        const nombre = event.target.closest('.aplicacion').querySelector('.aplicacion-nombre').textContent;
+        muestraModalParaEliminarConMensaje(`¿Seguro que quieres eliminar la aplicación <strong>${nombre}</strong>?`, async () => {
+            await eliminaAplicacion(idAplicacion);
+        });
+    },
+}
+
 document.getElementById('btn__guardar-aplicacion').addEventListener('click', async () => {
     const response = await realizaPeticionPOST('/nueva-aplicacion', {nombre: inputNombreAplicacion.value});
 
@@ -16,20 +55,14 @@ document.getElementById('btn__guardar-aplicacion').addEventListener('click', asy
     }
     ocultaElemento(divNuevaAplicacion.querySelector('.error'));
 
+    if (document.querySelector('.sin-aplicaciones')) {
+        document.querySelector('.sin-aplicaciones').remove();
+    }
+
     document.querySelector('.aplicaciones').appendChild(htmlToElement(response.html_aplicacion));
     inputNombreAplicacion.value = '';
 });
 
-document.querySelectorAll('.btn__aplicacion-token').forEach(el => {
-    el.addEventListener('click', () => {
-        const elAplicacion = el.closest('.aplicacion');
-        generaTokenParaAplicacion(el.dataset.aplicacion)
-            .then(token => {
-                muestraElemento(elAplicacion.querySelector('.aplicacion-token'));
-                elAplicacion.querySelector('.div__token').textContent = token;
-            });
-    });
-});
 
 const generaTokenParaAplicacion = async (id_aplicacion) => {
     const response = await realizaPeticionPOST('/token-aplicacion', {id_aplicacion});
@@ -45,34 +78,15 @@ const generaTokenParaAplicacion = async (id_aplicacion) => {
     return response.token;
 }
 
-document.querySelectorAll('.aplicacion-copiar-token').forEach(el => {
-    el.addEventListener('click', async () => {
-        await navigator.clipboard.writeText(el.closest('.aplicacion-token').querySelector('.div__token').textContent);
-
-        el.classList.add('aplicacion-copiar-token-success');
-        const content = el.innerHTML;
-        el.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
-        setTimeout(() => {
-            el.classList.remove('aplicacion-copiar-token-success');
-            el.innerHTML = content;
-        }, 2000);
-    });
-});
-
-document.querySelectorAll('.btn__aplicacion-eliminar').forEach(el => {
-    el.addEventListener('click', () => {
-        const idAplicacion = el.closest('.aplicacion').dataset.aplicacion;
-        const nombre = el.closest('.aplicacion').querySelector('.aplicacion-nombre').textContent;
-        muestraModalParaEliminarConMensaje(`¿Seguro que quieres eliminar la aplicación <strong>${nombre}</strong>?`, async () => {
-            await eliminaAplicacion(idAplicacion);
-        });
-    });
-});
-
 const eliminaAplicacion = async (id_aplicacion) => {
     const response = await realizaPeticionDELETE('/elimina-aplicacion', {id_aplicacion});
 
     if (response.code === 200) {
         document.querySelector(`.aplicacion[data-aplicacion='${id_aplicacion}']`).remove();
+
+        if (document.querySelectorAll('.aplicacion').length === 0) {
+            document.querySelector('.aplicaciones')
+                .appendChild(htmlToElement(`<h4 class="sin-aplicaciones">No hay ninguna aplicación configurada</h4>`));
+        }
     }
 }

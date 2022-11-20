@@ -33,7 +33,7 @@
         {% for aplicacion in aplicaciones %}
             {{ include('user/aplicacion.html.twig', {'aplicacion': aplicacion}) }}
         {% else %}
-            <h3>No hay ninguna aplicación configurada</h3>
+            <h4 class="sin-aplicaciones">No hay ninguna aplicación configurada</h4>
         {% endfor %}
     </div>
 {% endblock %}
