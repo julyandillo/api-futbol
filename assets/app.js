@@ -17,7 +17,7 @@ modalEliminar.querySelector('.modal-btn-cerrar').addEventListener('click', () =>
 })
 
 export const muestraModalParaEliminarConMensaje = (mensaje, callable) => {
-    modalEliminar.querySelector('.modal-msg').textContent = mensaje;
+    modalEliminar.querySelector('.modal-msg').innerHTML = `<p>${mensaje}</p>`;
     modalEliminar.querySelector('.modal-btn-ok').onclick = () => {
         callable();
         modalEliminar.close();

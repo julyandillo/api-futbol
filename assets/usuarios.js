@@ -1,6 +1,6 @@
 import './styles/usuarios.css'
 import {realizaPeticionDELETE, realizaPeticionPOST} from "./utils";
-import {muestraElemento, ocultaElemento} from "./app";
+import {muestraElemento, muestraModalParaEliminarConMensaje, ocultaElemento} from "./app";
 import {htmlToElement} from "./ui";
 
 const inputNombreAplicacion = document.getElementById('input__nombre-aplicacion');
@@ -46,31 +46,33 @@ const generaTokenParaAplicacion = async (id_aplicacion) => {
 }
 
 document.querySelectorAll('.aplicacion-copiar-token').forEach(el => {
-    el.addEventListener('click', () => {
-        navigator.clipboard.writeText(el.closest('.aplicacion-token').querySelector('.div__token').textContent);
+    el.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(el.closest('.aplicacion-token').querySelector('.div__token').textContent);
+
         el.classList.add('aplicacion-copiar-token-success');
         const content = el.innerHTML;
         el.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
         setTimeout(() => {
             el.classList.remove('aplicacion-copiar-token-success');
             el.innerHTML = content;
-        }, 2500);
+        }, 2000);
     });
 });
 
 document.querySelectorAll('.btn__aplicacion-eliminar').forEach(el => {
     el.addEventListener('click', () => {
         const idAplicacion = el.closest('.aplicacion').dataset.aplicacion;
-
-        eliminaAplicacion(idAplicacion)
-            .then(response => {
-                if (response.code === 200) {
-                    document.querySelector(`.aplicacion[data-aplicacion='${idAplicacion}']`).remove();
-                }
-            });
+        const nombre = el.closest('.aplicacion').querySelector('.aplicacion-nombre').textContent;
+        muestraModalParaEliminarConMensaje(`¿Seguro que quieres eliminar la aplicación <strong>${nombre}</strong>?`, async () => {
+            await eliminaAplicacion(idAplicacion);
+        });
     });
 });
 
 const eliminaAplicacion = async (id_aplicacion) => {
-    return await realizaPeticionDELETE('/elimina-aplicacion', {id_aplicacion});
+    const response = await realizaPeticionDELETE('/elimina-aplicacion', {id_aplicacion});
+
+    if (response.code === 200) {
+        document.querySelector(`.aplicacion[data-aplicacion='${id_aplicacion}']`).remove();
+    }
 }
