@@ -11,10 +11,14 @@ import './styles/reset.css';
 import './styles/app.css';
 
 export const modalEliminar = document.getElementById('modal-eliminar');
+export const modalEditar = document.getElementById('modal-editar');
 
-modalEliminar.querySelector('.modal-btn-cerrar').addEventListener('click', () => {
-    modalEliminar.close();
-})
+
+document.querySelectorAll('.modal-btn-cerrar').forEach(el => {
+    el.addEventListener('click', (event) => {
+        event.target.closest('dialog').close();
+    });
+});
 
 export const muestraModalParaEliminarConMensaje = (mensaje, callable) => {
     modalEliminar.querySelector('.modal-msg').innerHTML = `<p>${mensaje}</p>`;
@@ -22,8 +26,17 @@ export const muestraModalParaEliminarConMensaje = (mensaje, callable) => {
         callable();
         modalEliminar.close();
     }
-    
+
     modalEliminar.showModal();
+}
+
+export const muestraModalEditar = (label, callableParaOK) => {
+    modalEditar.querySelector('label').textContent = label;
+    modalEditar.querySelector('.modal-btn-ok').onclick = () => {
+        callableParaOK();
+        modalEditar.close();
+    }
+    modalEditar.showModal();
 }
 
 document.querySelectorAll('[data-toggle]').forEach(el => {

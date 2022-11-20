@@ -1,37 +1,50 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/favicon/apple-touch-icon.png') }}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon/favicon-32x32.png') }}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon/favicon-16x16.png') }}">
-        <link rel="manifest" href="{{ asset('img/favicon/site.webmanifest') }}">
-        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-        {% endblock %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ asset('img/favicon/site.webmanifest') }}">
+    {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
 
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
 
-    <dialog id="modal-eliminar">
-        <div class="modal-content">
-            <div class="modal-header">
-
-            </div>
-            <div class="modal-body">
-                <p class="modal-msg"></p>
-            </div>
-            <div class="modal-footer">
-                <span class="boton boton-warning modal-btn-ok">Sí</span>
-                <span class="boton boton-primary modal-btn-cerrar">No</span>
+<dialog id="modal-eliminar">
+    <div class="modal-content">
+        <div class="modal-header"></div>
+        <div class="modal-body">
+            <p class="modal-msg"></p>
+        </div>
+        <div class="modal-footer">
+            <span class="boton boton-warning modal-btn-ok">Sí</span>
+            <span class="boton boton-primary modal-btn-cerrar">No</span>
+        </div>
+    </div>
+</dialog>
+<dialog id="modal-editar">
+    <div class="modal-content">
+        <div class="modal-header"></div>
+        <div class="modal-body">
+            <div>
+                <label for="input__modal-editar"></label>
+                <input type="text" name="nombre" id="input__modal-editar">
             </div>
         </div>
-    </dialog>
-    </body>
+        <div class="modal-footer">
+            <span class="boton boton-primary modal-btn-ok">Guardar</span>
+            <span class="boton boton-secundary modal-btn-cerrar">Cancelar</span>
+        </div>
+    </div>
+</dialog>
+</body>
 </html>
