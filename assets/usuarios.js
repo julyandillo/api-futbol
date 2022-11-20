@@ -1,6 +1,12 @@
 import './styles/usuarios.css'
 import {realizaPeticionDELETE, realizaPeticionPOST} from "./utils";
-import {muestraElemento, muestraModalParaEliminarConMensaje, ocultaElemento} from "./app";
+import {
+    modalEditar,
+    muestraElemento,
+    muestraModalEditar,
+    muestraModalParaEliminarConMensaje,
+    ocultaElemento
+} from "./app";
 import {htmlToElement} from "./ui";
 
 const inputNombreAplicacion = document.getElementById('input__nombre-aplicacion');
@@ -41,6 +47,13 @@ const acciones = {
         const nombre = event.target.closest('.aplicacion').querySelector('.aplicacion-nombre').textContent;
         muestraModalParaEliminarConMensaje(`¿Seguro que quieres eliminar la aplicación <strong>${nombre}</strong>?`, async () => {
             await eliminaAplicacion(idAplicacion);
+        });
+    },
+    "app-cambiar-nombre": (event) => {
+        const idAplicacion = event.target.closest('.aplicacion').dataset.aplicacion;
+        muestraModalEditar('Nombre', () => {
+            const nuevoNombre = modalEditar.querySelector('#input__modal-editar').value;
+            if (nuevoNombre.length > 0) modificaNombreAplicacion(idAplicacion, nuevoNombre);
         });
     },
 }
@@ -89,4 +102,13 @@ const eliminaAplicacion = async (id_aplicacion) => {
                 .appendChild(htmlToElement(`<h4 class="sin-aplicaciones">No hay ninguna aplicación configurada</h4>`));
         }
     }
+}
+
+const modificaNombreAplicacion = (idAplicacion, nombre) => {
+    realizaPeticionPOST('/aplicacion-nombre', {id_aplicacion: idAplicacion, nombre})
+        .then(response => {
+            const elNombreAplicacion = document.querySelector(`.aplicacion[data-aplicacion="${idAplicacion}"] .aplicacion-nombre`);
+            if (response.code === 200) elNombreAplicacion.textContent = nombre;
+        });
+
 }

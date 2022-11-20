@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserController extends AbstractController
 {
@@ -154,5 +153,37 @@ class UserController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['code' => 200]);
+    }
+
+    #[Route('/aplicacion-nombre', name: 'user_cambia_nombre_aplicacion', methods: ['POST'])]
+    public function cambiaNombreAplicacion(Request $request): Response
+    {
+        if (!$this->tienePeticionParametrosObligatorios($request, ['id_aplicacion', 'nombre'])) {
+            return $this->json([
+                'code' => 400,
+                'msg' => 'No se realizar la petición, parámetros obligatorios "id_aplicacion" y "nombre"',
+            ]);
+        }
+
+        $aplicacion = $this->entityManager
+            ->getRepository(Aplicacion::class)
+            ->find($request->request->get('id_aplicacion'));
+
+        if (!$aplicacion) {
+            return $this->json([
+                'code' => 501,
+                'msg' => 'No existe la aplicación',
+            ]);
+        }
+
+        $aplicacion->setNombre($request->request->get('nombre'));
+        $this->entityManager->getRepository(Aplicacion::class)->save($aplicacion, true);
+
+        return $this->json(['code' => 200]);
+    }
+
+    private function tienePeticionParametrosObligatorios(Request $request, array $parametrosObligatorios): bool
+    {
+        return empty(array_diff($parametrosObligatorios, $request->request->keys()));
     }
 }
