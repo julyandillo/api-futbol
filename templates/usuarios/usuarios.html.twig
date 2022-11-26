@@ -1,9 +1,35 @@
 {% extends 'admin/index.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('usuarios') }}
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('usuarios') }}
 {% endblock %}
 
 {% block contenido %}
+    <h2>Usuarios registrados</h2>
+    <table class="tabla-usuarios mt-2">
+        <thead>
+        <tr>
+            <th>usuario</th>
+            <th>email</th>
+            <th>aplicaciones</th>
+            <th>fecha de creación</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.usuario }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{{ usuario.aplicaciones|length }}</td>
+                    <td>{{ usuario.fechaCreacion|date('d/m/Y H:i:s') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
