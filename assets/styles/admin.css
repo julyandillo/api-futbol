@@ -1,0 +1,22 @@
+.tabla-usuarios {
+    width: 80%;
+    margin-inline: auto;
+    border-collapse: collapse;
+}
+.tabla-usuarios thead {
+    color: white;
+    background-color: rgb(var(--color-azul-oscuro));
+    font-size: 0.9rem;
+}
+.tabla-usuarios th,
+.tabla-usuarios td{
+    text-align: center;
+    padding: 0.25rem;
+}
+.tabla-usuarios tbody tr {
+    background-color: white;
+    color: rgb(var(--color-azul-oscuro));
+}
+.tabla-usuarios tbody>tr:nth-child(2n) {
+    background-color: rgba(var(--color-azul) / .25);
+}

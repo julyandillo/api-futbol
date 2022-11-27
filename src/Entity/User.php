@@ -36,7 +36,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $hash = null;
 
-    #[ORM\OneToMany(mappedBy: 'usuario', targetEntity: Aplicacion::class)]
+    #[ORM\OneToMany(mappedBy: 'usuario', targetEntity: Aplicacion::class, cascade: ["remove"])]
     private Collection $aplicaciones;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
