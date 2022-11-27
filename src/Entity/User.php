@@ -12,8 +12,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['usuario'], message: 'Ya existe un usuario con ese nombre')]
 #[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['usuario'], message: 'Ya existe un usuario con ese nombre')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -40,7 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $aplicaciones;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $fecha_creacion = null;
+    private \DateTimeInterface $fecha_creacion;
 
     public function __construct()
     {
@@ -158,7 +158,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[ORM\PrePersist]
-    private function setFechaCreacion(): void
+    public function setFechaCreacion(): void
     {
         $this->fecha_creacion = new \DateTimeImmutable();
     }
