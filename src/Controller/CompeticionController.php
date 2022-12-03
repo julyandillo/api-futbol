@@ -82,30 +82,4 @@ class CompeticionController extends AbstractController
             'msg' => 'La competeción que se intenta eliminar no existe',
         ]);
     }
-
-    #[Route('/api/competiciones', name: 'api_competiciones', methods: ['GET'])]
-    public function listaCompeticiones(): JsonResponse
-    {
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-
-        return $this->json(array_map(function (Competicion $competicion) use ($normalizer) {
-            return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
-        }, $this->competicionRepository->findAll()));
-    }
-
-    #[Route('/api/competicion/{idCompeticion}/equipos', name: 'api_competicion_equipos', methods: ['GET'])]
-    public function listaEquiposCompeticion(int $idCompeticion): JsonResponse
-    {
-        $competicion = $this->competicionRepository->find($idCompeticion);
-        if (!$competicion) {
-            return $this->json([
-                'msg' => 'No existe una competición con el id ' . $idCompeticion,
-            ], 501);
-        }
-
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-        return $this->json(array_map(function (Equipo $equipo) use ($normalizer) {
-            return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
-        }, $competicion->getEquipos()->toArray()));
-    }
 }
