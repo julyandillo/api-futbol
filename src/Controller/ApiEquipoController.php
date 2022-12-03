@@ -20,7 +20,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/equipo', name: 'api_equipo_')]
-class EquipoController extends AbstractController
+class ApiEquipoController extends AbstractController
 {
     private array $contenidoPeticion = [];
 
