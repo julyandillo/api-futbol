@@ -91,20 +91,14 @@ class ApiEquipoController extends AbstractController
         return empty(array_diff($campos, array_keys($this->contenidoPeticion)));
     }
 
-    #[Route(name: 'modificar', methods: ['PATCH'])]
-    public function modificaEquipo(Request $request, SerializerInterface $serializer): JsonResponse
+    #[Route('/{idEquipo}', name: 'modificar', methods: ['PATCH'])]
+    public function modificaEquipo(int $idEquipo, Request $request, SerializerInterface $serializer): JsonResponse
     {
-        $this->parseaContenidoPeticionJSON($request);
-
-        if (!$this->tieneContenidoPeticionCamposNecesarios(['id'])) {
-            return $this->json([
-                'msg' => 'Es necesario el id del equipo que se va a modificar',
-            ], 400);
-        }
-
-        $equipo = $this->equipoRepository->find($this->contenidoPeticion['id']);
+        $equipo = $this->equipoRepository->find($idEquipo);
         if (!$equipo) {
-            return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $this->contenidoPeticion['id']], 501);
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo
+            ], 501);
         }
 
         $serializer->deserialize($request->getContent(), Equipo::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $equipo]);
