@@ -159,9 +159,14 @@ class Equipo
         $this->competiciones = $competiciones;
     }
 
-    public function agregaCompeticionEnLaQueParticipa(Competicion $competicion): self
+    public function agregaCompeticionEnLaQueParticipa(Competicion $nuevaCompeticion): self
     {
-        $this->competiciones->add($competicion);
+        if (!in_array($nuevaCompeticion->getId(), array_map(function (Competicion $competicionEquipo) {
+            return $competicionEquipo->getId();
+        }, $this->competiciones->toArray()))
+        ) {
+            $this->competiciones->add($nuevaCompeticion);
+        }
 
         return $this;
     }
