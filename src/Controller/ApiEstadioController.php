@@ -76,10 +76,14 @@ class ApiEstadioController extends AbstractController
             ], 502);
         }
 
+        /** @var Estadio $estadio */
         $estadio = $serializer->deserialize($request->getContent(), Estadio::class, 'json');
         $this->estadioRepository->save($estadio, true);
 
-        return $this->json(['msg' => 'Estadio creado correctamente']);
+        return $this->json([
+            'msg' => 'Estadio creado correctamente',
+            'id' => $estadio->getId(),
+        ]);
     }
 
     #[Route('/{idEstadio}', methods: ['PATCH'])]
