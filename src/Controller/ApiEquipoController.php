@@ -6,6 +6,7 @@ use App\Entity\Competicion;
 use App\Entity\Equipo;
 use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
+use App\Util\CompruebaParametrosTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,6 +23,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/api/equipo', name: 'api_equipo_')]
 class ApiEquipoController extends AbstractController
 {
+    use CompruebaParametrosTrait;
+
     private array $contenidoPeticion = [];
 
     public function __construct(private readonly EquipoRepository $equipoRepository)
@@ -59,7 +62,7 @@ class ApiEquipoController extends AbstractController
         $camposObligatorios = ['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'];
         $this->parseaContenidoPeticionJSON($request);
 
-        if (!$this->tieneContenidoPeticionCamposNecesarios($camposObligatorios)) {
+        if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
             return $this->json([
                 'msg' => sprintf('Campos obligatorios para poder crear el equipo: [%s]',
                     implode(', ', array_diff($camposObligatorios, array_keys($this->contenidoPeticion)))),
@@ -84,11 +87,6 @@ class ApiEquipoController extends AbstractController
     private function parseaContenidoPeticionJSON(Request $request): void
     {
         $this->contenidoPeticion = json_decode($request->getContent(), true);
-    }
-
-    private function tieneContenidoPeticionCamposNecesarios(array $campos): bool
-    {
-        return empty(array_diff($campos, array_keys($this->contenidoPeticion)));
     }
 
     #[Route('/{idEquipo}', name: 'modificar', methods: ['PATCH'])]
@@ -126,7 +124,7 @@ class ApiEquipoController extends AbstractController
     {
         $this->parseaContenidoPeticionJSON($request);
 
-        if (!$this->tieneContenidoPeticionCamposNecesarios(['equipo', 'competiciones'])) {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'competiciones'], $request)) {
             return $this->json([
                 'msg' => 'Campos obligatorios: equipo y competiciones',
             ], 400);
@@ -170,7 +168,7 @@ class ApiEquipoController extends AbstractController
     public function eliminaCompeticionEquipo(Request $request, CompeticionRepository $competicionRepository): JsonResponse
     {
         $this->parseaContenidoPeticionJSON($request);
-        if (!$this->tieneContenidoPeticionCamposNecesarios(['equipo', 'competicion'])) {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion'], $request)) {
             return $this->json([
                 'msg' => 'Campos obligatorios: equipo y competicion',
             ], 400);
