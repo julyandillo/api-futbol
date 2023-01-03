@@ -59,9 +59,9 @@ class ApiEstadioController extends AbstractController
         $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
         if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
             return $this->json([
-                'msg' => sprintf('Faltan parámetros obligatorios para crear el estadio: [%s]',
+                'msg' => sprintf('Faltan campos obligatorios para crear el estadio: [%s]',
                     implode(', ', $this->getParametrosObligatoriosFaltantes()))
-            ]);
+            ], 400);
         }
 
         $this->parseaContenidoPeticionJson($request);
