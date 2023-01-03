@@ -59,13 +59,12 @@ class ApiEquipoController extends AbstractController
     #[Route(name: 'nuevo', methods: ['POST'])]
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
-        $camposObligatorios = ['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'];
         $this->parseaContenidoPeticionJson($request);
 
-        if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
+        if (!$this->peticionConParametrosObligatorios(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
             return $this->json([
-                'msg' => sprintf('Campos obligatorios para poder crear el equipo: [%s]',
-                    implode(', ', array_diff($camposObligatorios, array_keys($this->contenidoPeticion)))),
+                'msg' => sprintf('Faltan campos obligatorios para poder crear el equipo: [%s]',
+                    implode(', ', $this->getParametrosObligatoriosFaltantes())),
             ], 400);
         }
 
@@ -129,6 +128,8 @@ class ApiEquipoController extends AbstractController
         if (!$equipo) {
             return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $this->contenidoPeticion['equipo']], 501);
         }
+
+        $equipo->getCompeticiones()->clear();
 
         foreach ($this->contenidoPeticion['competiciones'] as $idCompeticion) {
             $competicion = $competicionRepository->find($idCompeticion);
