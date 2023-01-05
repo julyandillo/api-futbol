@@ -12,6 +12,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -143,6 +144,44 @@ class ApiEquipoController extends AbstractController
         $this->equipoRepository->save($equipo, true);
 
         return $this->json(['msg' => 'Competiciones agregadas correctamente al equipo']);
+    }
+
+    #[Route('/agregarCompeticion', name: 'agregar_competicion', methods: ['POST'])]
+    public function agregaCompeticion(Request $request, CompeticionRepository $competicionRepository): Response
+    {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion'], $request)) {
+            return $this->json([
+                'msg' => sprintf('Faltan parámetros obligatorios para realizar la petición: [%s]',
+                    implode(', ', $this->getParametrosObligatoriosFaltantes())),
+            ], 400);
+        }
+
+        $this->parseaContenidoPeticionJson($request);
+
+        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
+        if (!$equipo) {
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
+            ], 264);
+        }
+
+        $competicion = $competicionRepository->find($this->contenidoPeticion['competicion']);
+        if (!$competicion) {
+            return $this->json([
+                'msg' => 'No existe ninguna competición con el id ' . $this->contenidoPeticion['competicion'],
+            ], 264);
+        }
+
+        if ($equipo->getCompeticiones()->contains($competicion)) {
+            return $this->json([
+                'msg' => 'El equipo ya participa en la competición',
+            ], 264);
+        }
+
+        $equipo->agregaCompeticionEnLaQueParticipa($competicion);
+        $this->equipoRepository->save($equipo, true);
+
+        return $this->json(['msg' => 'Competición agregada correctamente al equipo']);
     }
 
     #[Route('/competiciones/{idEquipo}', name: 'ver_competiciones', methods: ['GET'])]
