@@ -47,7 +47,7 @@ class ApiEstadioController extends AbstractController
         if (!$estadio) {
             return $this->json([
                 'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 204);
+            ], 264);
         }
 
         return $this->json($normalizer->normalize($estadio));
@@ -94,7 +94,7 @@ class ApiEstadioController extends AbstractController
         if (!$estadio) {
             return $this->json([
                 'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 204);
+            ], 264);
         }
 
         $serializer->deserialize($request->getContent(), Estadio::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $estadio]);
@@ -113,7 +113,7 @@ class ApiEstadioController extends AbstractController
         if (!$estadio) {
             return $this->json([
                 'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 204);
+            ], 264);
         }
 
         $this->estadioRepository->remove($estadio, true);
