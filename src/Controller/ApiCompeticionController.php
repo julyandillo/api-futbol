@@ -95,7 +95,6 @@ class ApiCompeticionController extends AbstractController
 
         return $this->json([
             'msg' => 'Equipos agregados correctamente a la competición',
-            'competicion' => $competicion,
         ]);
     }
 }
