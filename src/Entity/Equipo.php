@@ -161,10 +161,7 @@ class Equipo
 
     public function agregaCompeticionEnLaQueParticipa(Competicion $nuevaCompeticion): self
     {
-        if (!in_array($nuevaCompeticion->getId(), array_map(function (Competicion $competicionEquipo) {
-            return $competicionEquipo->getId();
-        }, $this->competiciones->toArray()))
-        ) {
+        if (!$this->competiciones->contains($nuevaCompeticion)) {
             $this->competiciones->add($nuevaCompeticion);
         }
 

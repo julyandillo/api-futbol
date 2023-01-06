@@ -9,6 +9,7 @@ use App\Repository\EquipoRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -130,17 +131,16 @@ class ApiEquipoController extends AbstractController
             return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $this->contenidoPeticion['equipo']], 501);
         }
 
-        $equipo->getCompeticiones()->clear();
+        $competiciones = new ArrayCollection();
 
         foreach ($this->contenidoPeticion['competiciones'] as $idCompeticion) {
             $competicion = $competicionRepository->find($idCompeticion);
-            if (!$competicion) {
-                continue;
-            }
+            if (!$competicion) continue;
 
-            $equipo->agregaCompeticionEnLaQueParticipa($competicion);
+            $competiciones->add($competicion);
         }
 
+        $equipo->setCompeticiones($competiciones);
         $this->equipoRepository->save($equipo, true);
 
         return $this->json(['msg' => 'Competiciones agregadas correctamente al equipo']);
