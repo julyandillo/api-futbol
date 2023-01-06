@@ -39,6 +39,15 @@ class CompeticionRepository extends ServiceEntityRepository
         }
     }
 
+    public function save(Competicion $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return Competicion[] Returns an array of Competicion objects
 //     */

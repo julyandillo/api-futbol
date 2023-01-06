@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: CompeticionRepository::class)]
 class Competicion
@@ -121,9 +122,14 @@ class Competicion
     }
 
 
-    public function agregarEquipo(Equipo $equipo): self
+    public function agregaEquipo(Equipo $equipo): self
     {
-        $this->equipos->add($equipo);
+        if (!$this->equipos->contains($equipo)) {
+            $this->equipos->add($equipo);
+            // como estamos en el lado inverso de la relación hay que actualizar también el equipo para que al
+            // guardar la competición se guarde también la relación en la tabla equipos_competiciones
+            $equipo->agregaCompeticionEnLaQueParticipa($this);
+        }
 
         return $this;
     }
