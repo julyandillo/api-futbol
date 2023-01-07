@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Estadio;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -39,28 +40,76 @@ class EstadioRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Estadio[] Returns an array of Estadio objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('e.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return Estadio[]
+     * @throws Exception
+     */
+    public function getTodosLosEstadiosDelEquipoconId(int $idEquipo): array
+    {
+        $conexion = $this->getEntityManager()->getConnection();
 
-//    public function findOneBySomeField($value): ?Estadio
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $sql = "SELECT estadio_id FROM equipos_estadios WHERE equipo_id = :equipo";
+        $statement = $conexion->prepare($sql);
+        $resultSet = $statement->executeQuery(['equipo' => $idEquipo]);
+
+        $estadios = [];
+        $results = $resultSet->fetchAllAssociative();
+
+        if (!empty($results)) {
+            foreach ($results as $result) {
+                $estadio = $this->find($result['estadio_id']);
+                if (!$estadio) continue;
+
+                $estadios[] = $estadio;
+            }
+        }
+
+        return $estadios;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function guardaRelacionConEquipo(Estadio $estadio, int $idEquipo): void
+    {
+        $conexion = $this->getEntityManager()->getConnection();
+
+        $sql = "INSERT INTO equipos_estadios (equipo_id, estadio_id) VALUES (:equipo, :estadio)";
+        $conexion->executeStatement($sql, [
+            'equipo' => $idEquipo,
+            'estadio' => $estadio->getId(),
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function setEstadioEnUsoParaEquipoConId(Estadio $estadio, int $idEquipo): void
+    {
+        $conexion = $this->getEntityManager()->getConnection();
+        $sql = "UPDATE equipos_estadios SET en_uso = false WHERE equipo_id = :equipo";
+        $conexion->executeStatement($sql, ['equipo' => $idEquipo]);
+
+        $sql = "UPDATE equipos_estadios SET en_uso = true WHERE estadio_id = :estadio AND equipo_id = :equipo";
+        $conexion->executeStatement($sql, [
+            'equipo' => $idEquipo,
+            'estadio' => $estadio->getId(),
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getEstadioActualDelEquipoConId(int $idEquipo): ?Estadio
+    {
+        $conexion = $this->getEntityManager()->getConnection();
+        $sql = "SELECT estadio_id FROM equipos_estadios WHERE equipo_id = :equipo AND en_uso = true";
+        $statement = $conexion->prepare($sql);
+        $resultSet = $statement->executeQuery(['equipo' => $idEquipo]);
+        $idEstadio = $resultSet->fetchOne();
+
+        if (!$idEstadio) return null;
+
+        return $this->find($idEstadio);
+    }
 }

@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Competicion;
 use App\Entity\Equipo;
+use App\Entity\Estadio;
 use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
+use App\Repository\EstadioRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -233,5 +235,96 @@ class ApiEquipoController extends AbstractController
         return $this->json([
             'msg' => 'El equipo ha dejado de participar en la competición con ID ' . $this->contenidoPeticion['competicion'],
         ]);
+    }
+
+    #[Route('/{idEquipo}/estadios', name: 'estadios', requirements: ['idEquipo' => Requirement::DIGITS], methods: ['GET'])]
+    public function estadios(int $idEquipo, EstadioRepository $estadioRepository): Response
+    {
+        $equipo = $this->equipoRepository->find($idEquipo);
+        if (!$equipo) {
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
+            ], 264);
+        }
+
+        try {
+            $estadios = $estadioRepository->getTodosLosEstadiosDelEquipoconId($idEquipo);
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+
+            return $this->json(array_map(function (Estadio $estadio) use ($normalizer) {
+                return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
+            }, $estadios));
+
+        } catch (\Exception $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], 500);
+        }
+    }
+
+    #[Route('/estadio', name: 'set_estadio_actual', methods: ['POST'])]
+    public function setEstadioActual(Request $request, EstadioRepository $estadioRepository): Response
+    {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'estadio'], $request)) {
+            return $this->json([
+                'msg' => sprintf('No se puede realizar la petición, faltan parámetros obligatorios: [%s]',
+                    implode(', ', $this->getParametrosObligatoriosFaltantes()))
+            ], 400);
+        }
+
+        $this->parseaContenidoPeticionJson($request);
+
+        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
+        if (!$equipo) {
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo']
+            ], 264);
+        }
+
+        $estadio = $estadioRepository->find($this->contenidoPeticion['estadio']);
+        if (!$estadio) {
+            return $this->json([
+                'msg' => 'No existe ningún estadio con el id ' . $this->contenidoPeticion['estadio']
+            ], 264);
+        }
+
+        try {
+            $estadioRepository->guardaRelacionConEquipo($estadio, $equipo->getId());
+            $estadioRepository->setEstadioEnUsoParaEquipoConId($estadio, $equipo->getId());
+
+            return $this->json([
+                'msg' => 'Estadio establecido correctamente',
+            ]);
+        } catch (\Exception $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], 500);
+        }
+    }
+
+    #[Route('/{idEquipo}/estadio', name: 'ver_estadio_actual', requirements: ['idEquipo' => Requirement::DIGITS], methods: ['GET'])]
+    public function getEstadioActual(int $idEquipo, EstadioRepository $estadioRepository): Response
+    {
+        $equipo = $this->equipoRepository->find($idEquipo);
+        if (!$equipo) {
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
+            ], 264);
+        }
+
+        try {
+            $estadio = $estadioRepository->getEstadioActualDelEquipoConId($idEquipo);
+
+            return $this->json($estadio);
+
+        } catch (\Exception $ex) {
+            return $this->json([
+                'msg' => 'Ha ocurrido un error al realizar la petición',
+                'error' => $ex,
+            ], 500);
+        }
+
     }
 }
