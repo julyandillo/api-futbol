@@ -22,4 +22,9 @@ trait CompruebaParametrosTrait
     {
         return $this->parametrosFaltantes;
     }
+
+    public function stringConParametrosFaltantes(string $separador = ','): string
+    {
+        return implode($separador, $this->parametrosFaltantes);
+    }
 }
