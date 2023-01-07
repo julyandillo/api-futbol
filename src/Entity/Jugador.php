@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Entity;
+
+use App\Config\Posicion;
+use App\Repository\JugadorRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: JugadorRepository::class)]
+class Jugador
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $apodo = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nombre = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $fechaNacimiento = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $paisNacimiento = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $nacionalidad = null;
+
+    #[ORM\Column(length: 3, enumType: Posicion::class)]
+    private Posicion $posicion;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getApodo(): ?string
+    {
+        return $this->apodo;
+    }
+
+    public function setApodo(string $apodo): self
+    {
+        $this->apodo = $apodo;
+
+        return $this;
+    }
+
+    public function getNombre(): ?string
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(string $nombre): self
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    public function getFechaNacimiento(): ?\DateTimeInterface
+    {
+        return $this->fechaNacimiento;
+    }
+
+    public function setFechaNacimiento(?\DateTimeInterface $fechaNacimiento): self
+    {
+        $this->fechaNacimiento = $fechaNacimiento;
+
+        return $this;
+    }
+
+    public function getPaisNacimiento(): ?string
+    {
+        return $this->paisNacimiento;
+    }
+
+    public function setPaisNacimiento(?string $paisNacimiento): self
+    {
+        $this->paisNacimiento = $paisNacimiento;
+
+        return $this;
+    }
+
+    public function getNacionalidad(): ?string
+    {
+        return $this->nacionalidad;
+    }
+
+    public function setNacionalidad(?string $nacionalidad): self
+    {
+        $this->nacionalidad = $nacionalidad;
+
+        return $this;
+    }
+
+    public function getPosicion(): Posicion
+    {
+        return $this->posicion;
+    }
+
+    public function setPosicion(Posicion $posicion): self
+    {
+        $this->posicion = $posicion;
+
+        return $this;
+    }
+}
