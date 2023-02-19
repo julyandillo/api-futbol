@@ -48,7 +48,7 @@ class CompeticionController extends AbstractController
             return $this->redirectToRoute('competiciones');
         }
 
-        return $this->renderForm('admin/formCompeticion.html.twig', ['form' => $form]);
+        return $this->render('admin/formCompeticion.html.twig', ['form' => $form]);
     }
 
     #[Route('/competicion/{idCompeticion}', name: 'competicion_editar')]
