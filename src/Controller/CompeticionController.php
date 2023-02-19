@@ -29,7 +29,7 @@ class CompeticionController extends AbstractController
         ]);
     }
 
-    #[Route('/competicion', name: 'competicion_nueva', methods: ['POST'])]
+    #[Route('/competicion', name: 'competicion_nueva', methods: ['GET', 'POST'])]
     public function nuevaCompeticion(Request $request): Response
     {
         return $this->manejaFormularioCompeticion(new Competicion(), $request);
