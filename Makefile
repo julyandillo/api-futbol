@@ -1,7 +1,7 @@
 DOCKER_BE = api_enviroment
 
 up:
-	docker-compose up --build -d
+	docker-compose up -d
 
 stop:
 	docker-compose stop
