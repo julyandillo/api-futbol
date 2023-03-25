@@ -74,6 +74,11 @@ class Jugador
         return $this;
     }
 
+    public function getEdad(): int
+    {
+        return $this->fechaNacimiento->diff(new \DateTime())->y;
+    }
+
     public function getPaisNacimiento(): ?string
     {
         return $this->paisNacimiento;
