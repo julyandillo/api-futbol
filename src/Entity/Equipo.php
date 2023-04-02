@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\EquipoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -43,10 +44,14 @@ class Equipo
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $web = null;
 
-    #[ORM\ManyToMany(targetEntity: Competicion::class, inversedBy: 'equipos')]
-    #[ORM\JoinTable(name: 'equipos_competiciones')]
+    #[ORM\OneToMany(targetEntity: EquipoCompeticion::class, mappedBy: 'equipo')]
     #[Ignore]
-    private Collection $competiciones;
+    private Collection $equipoCompeticiones;
+
+    public function __construct()
+    {
+        $this->equipoCompeticiones = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -151,20 +156,15 @@ class Equipo
 
     public function getCompeticiones(): Collection
     {
-        return $this->competiciones;
+        return $this->equipoCompeticiones->map(function (EquipoCompeticion $equipoCompeticion) {
+            return $equipoCompeticion->getCompeticion();
+        });
     }
 
-    public function setCompeticiones(Collection $competiciones): void
+    public function getPlantillas(): Collection
     {
-        $this->competiciones = $competiciones;
-    }
-
-    public function agregaCompeticionEnLaQueParticipa(Competicion $nuevaCompeticion): self
-    {
-        if (!$this->competiciones->contains($nuevaCompeticion)) {
-            $this->competiciones->add($nuevaCompeticion);
-        }
-
-        return $this;
+        return $this->equipoCompeticiones->map(function (EquipoCompeticion $equipoCompeticion) {
+            return $equipoCompeticion->getPlantilla();
+        });
     }
 }

@@ -4,11 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Competicion;
 use App\Entity\Equipo;
+use App\Entity\EquipoCompeticion;
+use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
+use App\Repository\PlantillaRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +26,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class ApiCompeticionController extends AbstractController
 {
     use CompruebaParametrosTrait;
+    use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly CompeticionRepository $competicionRepository)
     {
@@ -67,7 +72,9 @@ class ApiCompeticionController extends AbstractController
     }
 
     #[Route('/{idCompeticion}', name: '_agregar_equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['POST'])]
-    public function agregaEquipos(int $idCompeticion, Request $request, EquipoRepository $equipoRepository): Response
+    public function agregaEquipos(int                 $idCompeticion,
+                                  Request             $request,
+                                  EntityManagerInterface $entityManager): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
             return $this->json([
@@ -75,23 +82,46 @@ class ApiCompeticionController extends AbstractController
             ], 400);
         }
 
-        $contenidoPeticion = json_decode($request->getContent(), true);
+        $this->parseaContenidoPeticionJson($request);
 
-        if (!is_array($contenidoPeticion['equipos'])) {
+        if (!is_array($this->contenidoPeticion['equipos'])) {
             return $this->json([
                 'msg' => 'No se puede realizar la petición, el campo \'equipos\' no es un array',
             ], 400);
         }
 
         $competicion = $this->competicionRepository->find($idCompeticion);
-        foreach ($contenidoPeticion['equipos'] as $idEquipo) {
-            $equipo = $equipoRepository->find($idEquipo);
-            if (!$equipo) continue;
+        foreach ($this->contenidoPeticion['equipos'] as $equipoPlantilla) {
+            if (!array_key_exists('id_quipo', $equipoPlantilla)
+                || !array_key_exists('id_plantilla', $equipoPlantilla)) {
+                continue;
+            }
 
-            $competicion->agregaEquipo($equipo);
+            $equipo = $entityManager->getRepository(Equipo::class)->find($equipoPlantilla['id_equipo']);
+            if (!$equipo) {
+                continue;
+            }
+
+            $plantilla = $entityManager->getRepository(Plantilla::class)->find($equipoPlantilla['id_plantilla']);
+            if (!$plantilla) {
+                continue;
+            }
+
+            if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
+                continue;
+            }
+
+            $participacion = new EquipoCompeticion();
+            $participacion
+                ->setCompeticion($competicion)
+                ->setEquipo($equipo)
+                ->setPlantilla($plantilla);
+
+            $entityManager->persist($participacion);
+
         }
 
-        $this->competicionRepository->save($competicion, true);
+        $entityManager->flush();
 
         return $this->json([
             'msg' => 'Equipos agregados correctamente a la competición',

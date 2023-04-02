@@ -37,12 +37,13 @@ class Competicion
     #[ORM\Column(length: 255, enumType: CategoriaCompeticion::class)]
     private CategoriaCompeticion $categoria;
 
-    #[ORM\ManyToMany(targetEntity: Equipo::class, mappedBy: 'competiciones')]
-    private Collection $equipos;
+    #[ORM\OneToMany(targetEntity: EquipoCompeticion::class, mappedBy: 'competicion')]
+    #[Ignore]
+    private Collection $competicionEquipos;
 
     public function __construct()
     {
-        $this->equipos = new ArrayCollection();
+        $this->competicionEquipos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -112,25 +113,8 @@ class Competicion
 
     public function getEquipos(): Collection
     {
-        return $this->equipos;
-    }
-
-    public function setEquipos(Collection $equipos): Competicion
-    {
-        $this->equipos = $equipos;
-        return $this;
-    }
-
-
-    public function agregaEquipo(Equipo $equipo): self
-    {
-        if (!$this->equipos->contains($equipo)) {
-            $this->equipos->add($equipo);
-            // como estamos en el lado inverso de la relación hay que actualizar también el equipo para que al
-            // guardar la competición se guarde también la relación en la tabla equipos_competiciones
-            $equipo->agregaCompeticionEnLaQueParticipa($this);
-        }
-
-        return $this;
+        return $this->competicionEquipos->map(function (EquipoCompeticion $equipoCompeticion) {
+            return $equipoCompeticion->getEquipo();
+        });
     }
 }

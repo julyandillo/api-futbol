@@ -4,14 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Competicion;
 use App\Entity\Equipo;
+use App\Entity\EquipoCompeticion;
 use App\Entity\Estadio;
+use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
+use App\Repository\PlantillaRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -117,41 +121,10 @@ class ApiEquipoController extends AbstractController
         return $this->json(['msg' => 'Equipo eliminado correctamente']);
     }
 
-    #[Route('/competiciones', name: 'modificar_competiciones', methods: ['POST'])]
-    public function modificaCompeticionesEquipo(Request $request, CompeticionRepository $competicionRepository): JsonResponse
-    {
-        $this->parseaContenidoPeticionJson($request);
-
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'competiciones'], $request)) {
-            return $this->json([
-                'msg' => 'Campos obligatorios: equipo y competiciones',
-            ], 400);
-        }
-
-        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
-        if (!$equipo) {
-            return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $this->contenidoPeticion['equipo']], 501);
-        }
-
-        $competiciones = new ArrayCollection();
-
-        foreach ($this->contenidoPeticion['competiciones'] as $idCompeticion) {
-            $competicion = $competicionRepository->find($idCompeticion);
-            if (!$competicion) continue;
-
-            $competiciones->add($competicion);
-        }
-
-        $equipo->setCompeticiones($competiciones);
-        $this->equipoRepository->save($equipo, true);
-
-        return $this->json(['msg' => 'Competiciones agregadas correctamente al equipo']);
-    }
-
     #[Route('/agregarCompeticion', name: 'agregar_competicion', methods: ['POST'])]
-    public function agregaCompeticion(Request $request, CompeticionRepository $competicionRepository): Response
+    public function agregaCompeticion(Request $request, EntityManagerInterface $entityManager): Response
     {
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion'], $request)) {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla',], $request)) {
             return $this->json([
                 'msg' => sprintf('Faltan parámetros obligatorios para realizar la petición: [%s]',
                     implode(', ', $this->getParametrosObligatoriosFaltantes())),
@@ -167,21 +140,35 @@ class ApiEquipoController extends AbstractController
             ], 264);
         }
 
-        $competicion = $competicionRepository->find($this->contenidoPeticion['competicion']);
+        $competicion = $entityManager->getRepository(Competicion::class)->find($this->contenidoPeticion['competicion']);
         if (!$competicion) {
             return $this->json([
                 'msg' => 'No existe ninguna competición con el id ' . $this->contenidoPeticion['competicion'],
             ], 264);
         }
 
-        if ($equipo->getCompeticiones()->contains($competicion)) {
+        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->contenidoPeticion['plantilla']);
+        if (!$plantilla) {
             return $this->json([
-                'msg' => 'El equipo ya participa en la competición',
+                'msg' => 'No existe ninguna plantilla con el id ' . $this->contenidoPeticion['plantilla'],
+            ], 264);
+        };
+
+        $equipoCompeticion = $entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla);
+        if ($equipoCompeticion) {
+            return $this->json([
+                'msg' => 'El equipo ya participa en la competición con la misma plantilla',
             ], 264);
         }
 
-        $equipo->agregaCompeticionEnLaQueParticipa($competicion);
-        $this->equipoRepository->save($equipo, true);
+        $equipoCompeticion = new EquipoCompeticion();
+        $equipoCompeticion
+            ->setCompeticion($competicion)
+            ->setEquipo($equipo)
+            ->setPlantilla($plantilla);
+
+        $entityManager->persist($equipoCompeticion);
+        $entityManager->flush();
 
         return $this->json(['msg' => 'Competición agregada correctamente al equipo']);
     }
@@ -202,10 +189,10 @@ class ApiEquipoController extends AbstractController
     }
 
     #[Route('/eliminarCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
-    public function eliminaCompeticionEquipo(Request $request, CompeticionRepository $competicionRepository): JsonResponse
+    public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $this->parseaContenidoPeticionJson($request);
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion'], $request)) {
+        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
             return $this->json([
                 'msg' => 'Campos obligatorios: equipo y competicion',
             ], 400);
@@ -213,24 +200,36 @@ class ApiEquipoController extends AbstractController
 
         $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
         if (!$equipo) {
-            return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $this->contenidoPeticion['equipo']], 501);
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
+            ], 264);
         }
 
-        $competicionParaEliminar = $competicionRepository->find($this->contenidoPeticion['competicion']);
-        if (!$competicionParaEliminar) {
+        $competicion = $entityManager->getRepository(Competicion::class)->find($this->contenidoPeticion['competicion']);
+        if (!$competicion) {
             return $this->json([
-                'msg' => 'No existe ninguna competición con el ID ' . $this->contenidoPeticion['competicion'],
-            ], 501);
+                'msg' => 'No existe ninguna competición con el id ' . $this->contenidoPeticion['competicion'],
+            ], 264);
         }
 
-        if (!$equipo->getCompeticiones()->contains($competicionParaEliminar)) {
+        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->contenidoPeticion['plantilla']);
+        if (!$plantilla) {
             return $this->json([
-                'msg' => 'El equipo no participa en la competición con ID ' . $this->contenidoPeticion['competicion'],
+                'msg' => 'No existe ninguna plantilla con el id ' . $this->contenidoPeticion['plantilla'],
+            ], 264);
+        };
+
+        $equipoCompeticion = $entityManager->getRepository(EquipoCompeticion::class)
+            ->load($equipo, $competicion, $plantilla);
+
+        if (!$equipoCompeticion) {
+            return $this->json([
+                'msg' => 'No existe ninguna relación entre el equipo, competición y plantilla solicitados.',
             ], 502);
         }
 
-        $equipo->getCompeticiones()->remove($equipo->getCompeticiones()->indexOf($competicionParaEliminar));
-        $this->equipoRepository->save($equipo, true);
+        $entityManager->remove($equipoCompeticion);
+        $entityManager->flush();
 
         return $this->json([
             'msg' => 'El equipo ha dejado de participar en la competición con ID ' . $this->contenidoPeticion['competicion'],
