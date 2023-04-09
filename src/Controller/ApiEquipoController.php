@@ -7,6 +7,7 @@ use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
 use App\Entity\Estadio;
 use App\Entity\Plantilla;
+use App\Entity\PlantillaJugador;
 use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
@@ -194,7 +195,7 @@ class ApiEquipoController extends AbstractController
         $this->parseaContenidoPeticionJson($request);
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
             return $this->json([
-                'msg' => 'Campos obligatorios: equipo y competicion',
+                'msg' => sprintf('Campos obligatorios: [%s]', $this->stringConParametrosFaltantes()),
             ], 400);
         }
 
@@ -324,6 +325,37 @@ class ApiEquipoController extends AbstractController
                 'error' => $ex,
             ], 500);
         }
+    }
 
+    #[Route('/{idEquipo}/plantillas', name: 'plantillas', requirements: ['idEquipo' => Requirement::DIGITS], methods: ['GET'])]
+    public function getPlantillas(int $idEquipo, EntityManagerInterface $entityManager, NormalizerInterface $normalizer): Response
+    {
+        $equipo = $this->equipoRepository->find($idEquipo);
+        if (!$equipo) {
+            return $this->json([
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
+            ]);
+        }
+
+        $plantillas = array_map(function (EquipoCompeticion $equipoCompeticion) {
+            return $equipoCompeticion->getPlantilla();
+        }, $entityManager->getRepository(EquipoCompeticion::class)->findBy(['equipo' => $equipo,]));
+
+        //$normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+
+        return $this->json(
+            array_map(function (Plantilla $plantilla) use ($normalizer) {
+                return [
+                    'id' => $plantilla->getId(),
+                    'numero_jugadores' => $plantilla->getJugadores()->count(),
+                    'jugadores' => $plantilla->getJugadores()->map(function (PlantillaJugador $plantillaJugador) use ($normalizer) {
+                        return array_merge(
+                            $normalizer->normalize($plantillaJugador->getJugador(), null, ['groups' => 'lista']),
+                            ['dorsal' => $plantillaJugador->getDorsal()]
+                        );
+                    }),
+                ];
+            }, $plantillas)
+        );
     }
 }

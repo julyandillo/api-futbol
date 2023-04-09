@@ -6,6 +6,7 @@ use App\Config\Posicion;
 use App\Repository\JugadorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: JugadorRepository::class)]
 class Jugador
@@ -13,9 +14,11 @@ class Jugador
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('lista')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('lista')]
     private ?string $apodo = null;
 
     #[ORM\Column(length: 255)]
@@ -31,6 +34,7 @@ class Jugador
     private ?string $nacionalidad = null;
 
     #[ORM\Column(length: 3, enumType: Posicion::class)]
+    #[Groups('lista')]
     private Posicion $posicion;
 
     public function getId(): ?int
@@ -113,5 +117,10 @@ class Jugador
         $this->posicion = $posicion;
 
         return $this;
+    }
+
+    public static function getArrayConCamposObligatorios(): array
+    {
+        return ['apodo', 'nombre', 'posicion'];
     }
 }

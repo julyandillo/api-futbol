@@ -7,16 +7,14 @@ use App\Repository\JugadorRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
-use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -31,7 +29,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'detalles', requirements: ['id' => Requirement::DIGITS], methods: ['GET'])]
-    public function index(int $id, NormalizerInterface $normalizer): Response
+    public function index(int $id, NormalizerInterface $normalizer): JsonResponse
     {
         $jugador = $this->jugadorRepository->find($id);
         if (!$jugador) {
@@ -40,15 +38,15 @@ class ApiJugadorController extends AbstractController
             ], 264);
         }
 
-        return $this->json($normalizer->normalize($jugador, 'json', [
+        return $this->json($normalizer->normalize($jugador, null, [
             AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
         ]));
     }
 
     #[Route(methods: ['POST'])]
-    public function guarda(Request $request, SerializerInterface $serializer): Response
+    public function guarda(Request $request, SerializerInterface $serializer): JsonResponse
     {
-        if (!$this->peticionConParametrosObligatorios(['apodo', 'nombre', 'posicion'], $request)) {
+        if (!$this->peticionConParametrosObligatorios(Jugador::getArrayConCamposObligatorios(), $request)) {
             return $this->json([
                 'msg' => sprintf('Faltan campos obligatorios para realizar la petición: [%s]',
                     $this->stringConParametrosFaltantes())
@@ -60,9 +58,8 @@ class ApiJugadorController extends AbstractController
             $this->jugadorRepository->save($jugador, true);
         } catch (NotNormalizableValueException $exception) {
             return $this->json([
-                'code' => 400,
                 'msg' => $exception->getMessage(),
-            ]);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $this->json([
@@ -72,7 +69,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'modificar', requirements: ['id' => Requirement::DIGITS], methods: ['PATCH'])]
-    public function modifica(int $id, Request $request, SerializerInterface $serializer): Response
+    public function modifica(int $id, Request $request, SerializerInterface $serializer): JsonResponse
     {
         $jugador = $this->jugadorRepository->find($id);
         if (!$jugador) {
@@ -90,9 +87,8 @@ class ApiJugadorController extends AbstractController
 
         } catch (NotNormalizableValueException $exception) {
             return $this->json([
-                'code' => 400,
                 'msg' => $exception->getMessage(),
-            ]);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $this->json([
@@ -101,7 +97,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'eliminar', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
-    public function elimina(int $id): Response
+    public function elimina(int $id): JsonResponse
     {
         $jugador = $this->jugadorRepository->find($id);
         if (!$jugador) {

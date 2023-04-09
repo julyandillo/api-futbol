@@ -17,7 +17,7 @@ class PlantillaJugador
     #[ORM\Column(type: Types::SMALLINT)]
     private ?int $dorsal = null;
 
-    #[ORM\ManyToOne(targetEntity: Jugador::class)]
+    #[ORM\ManyToOne(targetEntity: Jugador::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private Jugador $jugador;
 

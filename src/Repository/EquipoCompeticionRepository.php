@@ -51,6 +51,13 @@ class EquipoCompeticionRepository extends ServiceEntityRepository
             ]);
     }
 
+    public function getCompeticionesDePlantilla(Plantilla $plantilla): array
+    {
+        return $this->findBy([
+            'plantilla' => $plantilla,
+        ]);
+    }
+
 //    /**
 //     * @return Participacion[] Returns an array of Participacion objects
 //     */

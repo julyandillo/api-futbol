@@ -72,8 +72,8 @@ class ApiCompeticionController extends AbstractController
     }
 
     #[Route('/{idCompeticion}', name: '_agregar_equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['POST'])]
-    public function agregaEquipos(int                 $idCompeticion,
-                                  Request             $request,
+    public function agregaEquipos(int                    $idCompeticion,
+                                  Request                $request,
                                   EntityManagerInterface $entityManager): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
@@ -91,40 +91,71 @@ class ApiCompeticionController extends AbstractController
         }
 
         $competicion = $this->competicionRepository->find($idCompeticion);
+
+        $errores = [];
+        $posicion = 0;
+        $alMenosUnEquipoAsociado = false;
         foreach ($this->contenidoPeticion['equipos'] as $equipoPlantilla) {
-            if (!array_key_exists('id_quipo', $equipoPlantilla)
+            $posicion++;
+
+            if (!array_key_exists('id_equipo', $equipoPlantilla)
                 || !array_key_exists('id_plantilla', $equipoPlantilla)) {
+                $errores[] = [
+                    'posicion' => $posicion,
+                    'msg' => 'Para poder asociar un equipo a la competición también es necesario una plantilla',
+                ];
                 continue;
             }
 
             $equipo = $entityManager->getRepository(Equipo::class)->find($equipoPlantilla['id_equipo']);
             if (!$equipo) {
+                $errores[] = [
+                    'equipo' => $equipoPlantilla['id_equipo'],
+                    'msg' => 'No existe ningún equipo con este id',
+                ];
                 continue;
             }
 
             $plantilla = $entityManager->getRepository(Plantilla::class)->find($equipoPlantilla['id_plantilla']);
             if (!$plantilla) {
+                $errores[] = [
+                    'plantilla' => $equipoPlantilla['id_plantilla'],
+                    'msg' => 'No exste ninguna plantilla con este id',
+                ];
                 continue;
             }
 
             if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
+                $errores[] = [
+                    'equipo' => $equipoPlantilla['id_equipo'],
+                    'error' => 'El equipo ya tiene asociada una plantilla a esta cometición',
+                ];
                 continue;
             }
 
-            $participacion = new EquipoCompeticion();
-            $participacion
+            $equipoCompeticion = new EquipoCompeticion();
+            $equipoCompeticion
                 ->setCompeticion($competicion)
                 ->setEquipo($equipo)
                 ->setPlantilla($plantilla);
 
-            $entityManager->persist($participacion);
-
+            $entityManager->persist($equipoCompeticion);
+            $alMenosUnEquipoAsociado = true;
         }
 
         $entityManager->flush();
 
-        return $this->json([
-            'msg' => 'Equipos agregados correctamente a la competición',
-        ]);
+        $response = [
+            'msg' => $alMenosUnEquipoAsociado
+                ? 'Equipos agregados correctamente a la competición'
+                : 'No se ha podido asociar ningún equipo a la competición',
+        ];
+
+        if (!empty($errores)) {
+            $response['msg'] .= ' (con errores)';
+            $response['errores'] = $errores;
+        }
+
+        return $this->json($response);
     }
 }

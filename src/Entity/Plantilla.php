@@ -15,7 +15,7 @@ class Plantilla
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToMany(targetEntity: PlantillaJugador::class, mappedBy: 'plantilla')]
+    #[ORM\OneToMany(targetEntity: PlantillaJugador::class, mappedBy: 'plantilla', cascade: ['persist', 'remove'])]
     private Collection $plantillaJugadores;
 
     public function __construct()
@@ -30,12 +30,7 @@ class Plantilla
 
     public function getJugadores(): Collection
     {
-        return $this->plantillaJugadores->map(function (PlantillaJugador $plantillaJugador) {
-            return [
-                $plantillaJugador->getJugador(),
-                $plantillaJugador->getDorsal(),
-            ];
-        });
+        return $this->plantillaJugadores;
     }
 
     public function agregarJugador(Jugador $jugador, int $dorsal): self
