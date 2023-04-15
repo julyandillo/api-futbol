@@ -1,5 +1,15 @@
 FROM php:8.2-fpm-alpine
 
+ARG UID
+
+# Create user and some useful stuff
+RUN adduser -u ${UID} --disabled-password --gecos "" appuser
+RUN mkdir /home/appuser/.ssh
+RUN chown -R appuser:appuser /home/appuser/
+RUN echo "StrictHostKeyChecking no" >> /home/appuser/.ssh/config
+RUN echo "export COLUMNS=300" >> /home/appuser/.bashrc
+RUN echo "alias sf=/usr/bin/console" >> /home/appuser/.bashrc
+
 RUN apk --update --no-cache add \
     bash \
     git \
