@@ -6,6 +6,7 @@ use App\Entity\Jugador;
 use App\Repository\JugadorRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
+use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/jugador', name: 'api_jugador_')]
+#[Tag(name: 'Jugadores')]
 class ApiJugadorController extends AbstractController
 {
     use CompruebaParametrosTrait;

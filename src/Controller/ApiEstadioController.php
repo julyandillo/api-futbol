@@ -7,6 +7,7 @@ use App\Repository\EstadioRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
+use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/estadio', name: 'api_estadio_')]
+#[Tag(name: 'Estadios')]
 class ApiEstadioController extends AbstractController
 {
     use CompruebaParametrosTrait;

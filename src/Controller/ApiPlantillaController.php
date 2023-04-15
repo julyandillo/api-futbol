@@ -10,6 +10,7 @@ use App\Repository\PlantillaRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 
 #[Route('/api/plantilla', name: 'api_plantilla_')]
+#[Tag(name: 'Plantillas')]
 class ApiPlantillaController extends AbstractController
 {
     use CompruebaParametrosTrait;

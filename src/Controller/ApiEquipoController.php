@@ -8,15 +8,13 @@ use App\Entity\EquipoCompeticion;
 use App\Entity\Estadio;
 use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
-use App\Repository\CompeticionRepository;
 use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
-use App\Repository\PlantillaRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +29,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/equipo', name: 'api_equipo_')]
+#[Tag(name: 'Equipos')]
 class ApiEquipoController extends AbstractController
 {
     use CompruebaParametrosTrait;

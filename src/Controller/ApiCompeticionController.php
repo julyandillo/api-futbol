@@ -7,13 +7,13 @@ use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
 use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
-use App\Repository\EquipoRepository;
-use App\Repository\PlantillaRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,6 +23,7 @@ use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[Route('/api/competicion', name: 'api_competicion_')]
+#[OA\Tag(name: 'Competiciones')]
 class ApiCompeticionController extends AbstractController
 {
     use CompruebaParametrosTrait;
@@ -33,7 +34,7 @@ class ApiCompeticionController extends AbstractController
     }
 
     #[Route('/{idCompeticion}', name: 'detalles', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
-    public function detalles(int $idCompeticion): Response
+    public function detalles(int $idCompeticion): JsonResponse
     {
         $competicion = $this->competicionRepository->find($idCompeticion);
         if (!$competicion) {
