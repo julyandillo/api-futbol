@@ -21,22 +21,17 @@ class PlantillaRepository extends ServiceEntityRepository
         parent::__construct($registry, Plantilla::class);
     }
 
-    public function save(Plantilla $entity, bool $flush = false): void
+    public function save(Plantilla $entity): void
     {
         $this->getEntityManager()->persist($entity);
+        $this->getEntityManager()->flush();
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
     }
 
-    public function remove(Plantilla $entity, bool $flush = false): void
+    public function remove(Plantilla $entity): void
     {
         $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        $this->getEntityManager()->flush();
     }
 
 //    /**
