@@ -10,8 +10,18 @@ nelmio_api_doc:
                     type: http
                     scheme: bearer
                     bearerFormat: JWT
+            schemas:
+                Mensaje:
+                    type: object
+                    properties:
+                        msg:
+                            type: string
+                            example: "Contenido del mensaje"
         security:
-            - Bearer: []
+            - Bearer: [ ]
+
     areas: # to filter documented areas
         path_patterns:
             - ^/api(?!/(doc|autenticacion)$) # Accepts routes under /api except /api/doc and /api/autenticacion
+
+    use_validation_groups: true

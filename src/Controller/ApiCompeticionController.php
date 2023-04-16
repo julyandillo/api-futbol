@@ -11,6 +11,7 @@ use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -34,6 +35,16 @@ class ApiCompeticionController extends AbstractController
     }
 
     #[Route('/{idCompeticion}', name: 'detalles', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Muestra los detalles de una competición',
+        content: new Model(type: Competicion::class, groups: ['OA'])
+    )]
+    #[OA\Response(
+        response: 264,
+        description: 'Entidad no encontrada',
+        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+    )]
     public function detalles(int $idCompeticion): JsonResponse
     {
         $competicion = $this->competicionRepository->find($idCompeticion);
@@ -46,7 +57,18 @@ class ApiCompeticionController extends AbstractController
         return $this->json($competicion);
     }
 
+    /**
+     * Muestra una lista con todas las competiciones disponibles
+     */
     #[Route('/todas', name: 'ver_todas', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Array de competiciones, id y nombre',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Competicion::class, groups: ['lista']))
+        )
+    )]
     public function listaCompeticiones(): Response
     {
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));

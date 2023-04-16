@@ -18,23 +18,27 @@ class Competicion
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('lista')]
+    #[Groups(['lista', 'OA'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('lista')]
+    #[Groups(['lista', 'OA'])]
     private ?string $nombre = null;
 
     #[ORM\Column(length: 255, enumType: TipoCompeticion::class)]
+    #[Groups(['OA'])]
     private TipoCompeticion $tipo;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['OA'])]
     private ?\DateTimeInterface $fecha_inicio = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['OA'])]
     private ?\DateTimeInterface $fecha_fin = null;
 
     #[ORM\Column(length: 255, enumType: CategoriaCompeticion::class)]
+    #[Groups(['OA'])]
     private CategoriaCompeticion $categoria;
 
     #[ORM\OneToMany(targetEntity: EquipoCompeticion::class, mappedBy: 'competicion')]
