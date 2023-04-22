@@ -18,15 +18,15 @@ class EquipoCompeticion
         return $this->id;
     }
 
-    #[ORM\ManyToOne(targetEntity: Equipo::class)]
+    #[ORM\ManyToOne(targetEntity: Equipo::class, inversedBy: 'equipoCompeticiones')]
     #[ORM\JoinColumn(nullable: false)]
     private Equipo $equipo;
 
-    #[ORM\ManyToOne(targetEntity: Competicion::class)]
+    #[ORM\ManyToOne(targetEntity: Competicion::class, inversedBy: 'competicionEquipos')]
     #[ORM\JoinColumn(nullable: false)]
     private Competicion $competicion;
 
-    #[ORM\ManyToOne(targetEntity: Plantilla::class)]
+    #[ORM\ManyToOne(targetEntity: Plantilla::class, inversedBy: 'plantillaJugadores')]
     #[ORM\JoinColumn(nullable: false)]
     private Plantilla $plantilla;
 
