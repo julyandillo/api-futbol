@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTOs\EquipoPlantillaDTO;
 use App\Entity\Competicion;
 use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -34,10 +36,15 @@ class ApiCompeticionController extends AbstractController
     {
     }
 
+    /**
+     * Muestra los detalles de una competición
+     * @param int $idCompeticion
+     * @return JsonResponse
+     */
     #[Route('/{idCompeticion}', name: 'detalles', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
         response: 200,
-        description: 'Muestra los detalles de una competición',
+        description: 'OK',
         content: new Model(type: Competicion::class, groups: ['OA'])
     )]
     #[OA\Response(
@@ -59,6 +66,7 @@ class ApiCompeticionController extends AbstractController
 
     /**
      * Muestra una lista con todas las competiciones disponibles
+     * @throws ExceptionInterface
      */
     #[Route('/todas', name: 'ver_todas', methods: ['GET'])]
     #[OA\Response(
@@ -78,8 +86,25 @@ class ApiCompeticionController extends AbstractController
         }, $this->competicionRepository->findAll()));
     }
 
+    /**
+     * Muestra todos los equipos y plantillas que participan en una competición
+     * @throws ExceptionInterface
+     */
     #[Route('/{idCompeticion}/equipos', name: 'equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
-    public function listaEquiposCompeticion(int $idCompeticion): Response
+    #[OA\Response(
+        response: 200,
+        description: 'Array con el id, nombre y país de los equipos que participan en la competición',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(new Model(type: Equipo::class, groups: ['lista']))
+        )
+    )]
+    #[OA\Response(
+        response: 264,
+        description: 'No existe la competición solicitada',
+        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+    )]
+    public function listaEquiposCompeticion(int $idCompeticion): JsonResponse
     {
         $competicion = $this->competicionRepository->find($idCompeticion);
         if (!$competicion) {
@@ -89,15 +114,28 @@ class ApiCompeticionController extends AbstractController
         }
 
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-        return $this->json(array_map(function (Equipo $equipo) use ($normalizer) {
-            return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
-        }, $competicion->getEquipos()->toArray()));
+        return $this->json(array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
+            $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
+            $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
+
+            return $equipoNormalizado;
+        }, $competicion->getEquiposPlantillas()));
     }
 
-    #[Route('/{idCompeticion}', name: '_agregar_equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['POST'])]
+    /**
+     * Agrega equipos y plantillas a una competición.
+     *
+     * Para agregar un equipo a una competición es necesario crear antes una plantilla
+     */
+    #[Route('/{idCompeticion}', name: '_agregar_equipos', requirements: ['idCompeticion' => Requirement::POSITIVE_INT], methods: ['POST'])]
+    #[OA\Response(
+        response: 400,
+        description: 'Petición mal formada',
+        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+    )]
     public function agregaEquipos(int                    $idCompeticion,
                                   Request                $request,
-                                  EntityManagerInterface $entityManager): Response
+                                  EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
             return $this->json([

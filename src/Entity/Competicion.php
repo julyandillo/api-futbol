@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Config\CategoriaCompeticion;
 use App\Config\TipoCompeticion;
+use App\DTOs\EquipoPlantillaDTO;
 use App\Repository\CompeticionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -120,5 +121,12 @@ class Competicion
         return $this->competicionEquipos->map(function (EquipoCompeticion $equipoCompeticion) {
             return $equipoCompeticion->getEquipo();
         });
+    }
+
+    public function getEquiposPlantillas(): array
+    {
+        return array_map(function (EquipoCompeticion $equipoCompeticion){
+            return new EquipoPlantillaDTO($equipoCompeticion->getEquipo(), $equipoCompeticion->getPlantilla());
+        }, $this->competicionEquipos->toArray());
     }
 }
