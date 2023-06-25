@@ -17,6 +17,17 @@ nelmio_api_doc:
                         msg:
                             type: string
                             example: "Contenido del mensaje"
+                EquipoPlantilla:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                        nombre:
+                            type: string
+                        pais:
+                            type: string
+                        plantilla:
+                            type: integer
         security:
             - Bearer: [ ]
 

@@ -93,10 +93,10 @@ class ApiCompeticionController extends AbstractController
     #[Route('/{idCompeticion}/equipos', name: 'equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
         response: 200,
-        description: 'Array con el id, nombre y país de los equipos que participan en la competición',
+        description: 'Array formado por id, nombre y país de cada equipo y el id de plantilla con la que participa en la competición',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(new Model(type: Equipo::class, groups: ['lista']))
+            items: new OA\Items(ref: '#/components/schemas/EquipoPlantilla')
         )
     )]
     #[OA\Response(
