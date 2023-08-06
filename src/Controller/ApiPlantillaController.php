@@ -36,13 +36,11 @@ class ApiPlantillaController extends AbstractController
     #[Route(name: 'crear', methods: ['POST'])]
     public function nuevaPlantilla(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
-        $this->parseaContenidoPeticionJson($request);
         if (!$this->peticionConParametrosObligatorios(['jugadores',], $request)) {
-            return $this->json([
-                'msg' => sprintf('No se puede realizar la petición, faltan parámetros obligatorios: [%s]',
-                    $this->stringConParametrosFaltantes()),
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
+
+        $this->parseaContenidoPeticionJson($request);
 
         if (!is_array($this->contenidoPeticion['jugadores'])) {
             return $this->json([

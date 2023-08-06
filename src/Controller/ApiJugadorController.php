@@ -49,15 +49,13 @@ class ApiJugadorController extends AbstractController
     public function guarda(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(Jugador::getArrayConCamposObligatorios(), $request)) {
-            return $this->json([
-                'msg' => sprintf('Faltan campos obligatorios para realizar la petición: [%s]',
-                    $this->stringConParametrosFaltantes())
-            ], 400);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
 
         try {
             $jugador = $serializer->deserialize($request->getContent(), Jugador::class, 'json');
             $this->jugadorRepository->save($jugador, true);
+
         } catch (NotNormalizableValueException $exception) {
             return $this->json([
                 'msg' => $exception->getMessage(),

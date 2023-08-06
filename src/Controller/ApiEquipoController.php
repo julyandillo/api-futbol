@@ -67,14 +67,11 @@ class ApiEquipoController extends AbstractController
     #[Route(name: 'nuevo', methods: ['POST'])]
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
-        $this->parseaContenidoPeticionJson($request);
-
         if (!$this->peticionConParametrosObligatorios(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
-            return $this->json([
-                'msg' => sprintf('Faltan campos obligatorios para poder crear el equipo: [%s]',
-                    implode(', ', $this->getParametrosObligatoriosFaltantes())),
-            ], 400);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
+
+        $this->parseaContenidoPeticionJson($request);
 
         if ($this->equipoRepository->existeEquipoConNombre($this->contenidoPeticion['nombre'])) {
             return $this->json([
@@ -125,10 +122,7 @@ class ApiEquipoController extends AbstractController
     public function agregaCompeticion(Request $request, EntityManagerInterface $entityManager): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla',], $request)) {
-            return $this->json([
-                'msg' => sprintf('Faltan parámetros obligatorios para realizar la petición: [%s]',
-                    implode(', ', $this->getParametrosObligatoriosFaltantes())),
-            ], 400);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
 
         $this->parseaContenidoPeticionJson($request);
@@ -191,12 +185,11 @@ class ApiEquipoController extends AbstractController
     #[Route('/eliminarCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
     public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $this->parseaContenidoPeticionJson($request);
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
-            return $this->json([
-                'msg' => sprintf('Campos obligatorios: [%s]', $this->stringConParametrosFaltantes()),
-            ], 400);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
+
+        $this->parseaContenidoPeticionJson($request);
 
         $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
         if (!$equipo) {
@@ -266,10 +259,7 @@ class ApiEquipoController extends AbstractController
     public function setEstadioActual(Request $request, EstadioRepository $estadioRepository): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'estadio'], $request)) {
-            return $this->json([
-                'msg' => sprintf('No se puede realizar la petición, faltan parámetros obligatorios: [%s]',
-                    implode(', ', $this->getParametrosObligatoriosFaltantes()))
-            ], 400);
+            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
 
         $this->parseaContenidoPeticionJson($request);

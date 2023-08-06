@@ -2,29 +2,40 @@
 
 namespace App\Util;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 trait CompruebaParametrosTrait
 {
-    private array $parametrosFaltantes = [];
+    private array $parametrosInexistentes = [];
 
     public function peticionConParametrosObligatorios(array $parametrosObligatorios, Request $request): bool
     {
-        $this->parametrosFaltantes = array_diff(
-            $parametrosObligatorios,
-            array_keys(json_decode($request->getContent(), true))
-        );
+        $parametrosPeticion = stristr($request->headers->get('Content-type'), 'application/json') !== false
+            ? array_keys(json_decode($request->getContent(), true))
+            : $request->request->keys();
 
-        return empty($this->parametrosFaltantes);
+        $this->parametrosInexistentes = array_diff($parametrosObligatorios, $parametrosPeticion);
+
+        return empty($this->parametrosInexistentes);
     }
 
-    public function getParametrosObligatoriosFaltantes(): array
+    public function getParametrosObligatoriosInexistentes(): array
     {
-        return $this->parametrosFaltantes;
+        return $this->parametrosInexistentes;
     }
 
-    public function stringConParametrosFaltantes(string $separador = ','): string
+    public function stringConParametrosInexistentes(string $separador = ','): string
     {
-        return implode($separador, $this->parametrosFaltantes);
+        return implode($separador, $this->parametrosInexistentes);
+    }
+
+    public function creaRespuestaConParametrosObligatoriosInexistentes(string $formato = null): JsonResponse
+    {
+        return new JsonResponse([
+            'msg' => sprintf($formato ?? 'No se puede realizar la petición, faltan parámetros obligatorios: [%s]',
+                $this->stringConParametrosInexistentes())
+        ], Response::HTTP_BAD_REQUEST);
     }
 }
