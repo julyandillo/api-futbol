@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\EstadioRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EstadioRepository::class)]
 class Estadio
@@ -12,23 +13,30 @@ class Estadio
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('lista')]
+    #[Groups(['lista'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('lista')]
+    #[Groups(['lista', 'create', 'update'])]
+    #[Assert\NotBlank(groups: ['create'])]
     private ?string $nombre = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['create', 'update'])]
+    #[Assert\NotBlank(groups: ['create'])]
     private ?string $ciudad = null;
 
     #[ORM\Column]
+    #[Groups(['create', 'update'])]
+    #[Assert\NotBlank(groups: ['create'])]
     private ?int $capacidad = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['create', 'update'])]
     private ?string $dimensiones = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['create', 'update'])]
     private ?int $construccion = null;
 
     public function getId(): ?int
