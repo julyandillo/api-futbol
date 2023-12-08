@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 
-#[Route('/api/plantilla', name: 'api_plantilla_')]
+#[Route('/api/plantillas', name: 'api_plantilla_')]
 #[Tag(name: 'Plantillas')]
 class ApiPlantillaController extends AbstractController
 {
@@ -128,7 +128,7 @@ class ApiPlantillaController extends AbstractController
         return $this->json($response);
     }
 
-    #[Route('/todas', name: 'listar', methods: ['GET'])]
+    #[Route(name: 'listar', methods: ['GET'])]
     public function listar(): JsonResponse
     {
         $plantillas = $this->plantillaRepository->findAll();
@@ -149,7 +149,7 @@ class ApiPlantillaController extends AbstractController
         );
     }
 
-    #[Route("/{idPlantilla}", name: "detalles", methods: ['GET'], requirements: ['idPlantilla' => Requirement::DIGITS])]
+    #[Route("/{idPlantilla}", name: "detalles", requirements: ['idPlantilla' => Requirement::DIGITS], methods: ['GET'])]
     public function detalles(int $idPlantilla, NormalizerInterface $normalizer): JsonResponse
     {
         $plantilla = $this->plantillaRepository->find($idPlantilla);

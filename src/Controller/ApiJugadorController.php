@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/jugador', name: 'api_jugador_')]
+#[Route('/api/jugadores', name: 'api_jugador_')]
 #[Tag(name: 'Jugadores')]
 class ApiJugadorController extends AbstractController
 {
@@ -46,7 +46,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route(methods: ['POST'])]
-    public function guarda(Request $request, SerializerInterface $serializer): JsonResponse
+    public function guanuevoJugador(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(Jugador::getArrayConCamposObligatorios(), $request)) {
             return $this->creaRespuestaConParametrosObligatoriosInexistentes();
@@ -69,7 +69,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'modificar', requirements: ['id' => Requirement::DIGITS], methods: ['PATCH'])]
-    public function modifica(int $id, Request $request, SerializerInterface $serializer): JsonResponse
+    public function modificaJugador(int $id, Request $request, SerializerInterface $serializer): JsonResponse
     {
         $jugador = $this->jugadorRepository->find($id);
         if (!$jugador) {
@@ -97,7 +97,7 @@ class ApiJugadorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'eliminar', requirements: ['id' => Requirement::DIGITS], methods: ['DELETE'])]
-    public function elimina(int $id): JsonResponse
+    public function eliminaJugador(int $id): JsonResponse
     {
         $jugador = $this->jugadorRepository->find($id);
         if (!$jugador) {

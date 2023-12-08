@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/estadio', name: 'api_estadio_')]
+#[Route('/api/estadios', name: 'api_estadio_')]
 #[OA\Tag(name: 'Estadios')]
 class ApiEstadioController extends AbstractController
 {
@@ -38,7 +38,7 @@ class ApiEstadioController extends AbstractController
      *
      * @return Response
      */
-    #[Route('/todos', name: 'listar', methods: ['GET'])]
+    #[Route(name: 'listar', methods: ['GET'])]
     #[OA\Response(
         response: 200,
         description: ' Array con id y nombre de todos los estadios ordenado alfabéticamente por nombre',

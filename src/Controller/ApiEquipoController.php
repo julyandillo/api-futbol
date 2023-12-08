@@ -28,7 +28,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/equipo', name: 'api_equipo_')]
+#[Route('/api/equipos', name: 'api_equipo_')]
 #[Tag(name: 'Equipos')]
 class ApiEquipoController extends AbstractController
 {
@@ -54,7 +54,7 @@ class ApiEquipoController extends AbstractController
         return $this->json($normalizer->normalize($equipo));
     }
 
-    #[Route('/todos', name: 'listar', methods: ['GET'])]
+    #[Route(name: 'listar', methods: ['GET'])]
     public function listaEquipos(): JsonResponse
     {
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
@@ -94,11 +94,15 @@ class ApiEquipoController extends AbstractController
         $equipo = $this->equipoRepository->find($idEquipo);
         if (!$equipo) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $idEquipo
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
             ], 501);
         }
 
-        $serializer->deserialize($request->getContent(), Equipo::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $equipo]);
+        $serializer->deserialize(
+            $request->getContent(),
+            Equipo::class, 'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $equipo]
+        );
         $this->equipoRepository->save($equipo, true);
 
         return $this->json(['msg' => 'Equipo modificado correctamente']);
@@ -118,19 +122,19 @@ class ApiEquipoController extends AbstractController
         return $this->json(['msg' => 'Equipo eliminado correctamente']);
     }
 
-    #[Route('/agregarCompeticion', name: 'agregar_competicion', methods: ['POST'])]
-    public function agregaCompeticion(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/{idEquipo}/competiciones', name: 'agregar_competicion', methods: ['POST'])]
+    public function agregaPlantillaCompeticion(int $idEquipo, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla',], $request)) {
+        if (!$this->peticionConParametrosObligatorios(['competicion', 'plantilla',], $request)) {
             return $this->creaRespuestaConParametrosObligatoriosInexistentes();
         }
 
         $this->parseaContenidoPeticionJson($request);
 
-        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
+        $equipo = $this->equipoRepository->find($idEquipo);
         if (!$equipo) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
+                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
             ], 264);
         }
 
@@ -167,8 +171,8 @@ class ApiEquipoController extends AbstractController
         return $this->json(['msg' => 'Competición agregada correctamente al equipo']);
     }
 
-    #[Route('/competiciones/{idEquipo}', name: 'ver_competiciones', methods: ['GET'])]
-    public function muestraCompeticionesEquipo(int $idEquipo): JsonResponse
+    #[Route('/{idEquipo}/competiciones', name: 'ver_competiciones', methods: ['GET'])]
+    public function obtieneCompeticionesEquipo(int $idEquipo): JsonResponse
     {
         $equipo = $this->equipoRepository->find($idEquipo);
         if (!$equipo) {
@@ -177,12 +181,14 @@ class ApiEquipoController extends AbstractController
 
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
 
-        return $this->json(array_map(function (Competicion $competicion) use ($normalizer) {
-            return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
-        }, $equipo->getCompeticiones()->toArray()));
+        return $this->json([
+            'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
+                return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
+            }, $equipo->getCompeticiones()->toArray()),
+        ]);
     }
 
-    #[Route('/eliminarCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
+    #[Route('/eliminaCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
     public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
@@ -267,14 +273,14 @@ class ApiEquipoController extends AbstractController
         $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
         if (!$equipo) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo']
+                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
             ], 264);
         }
 
         $estadio = $estadioRepository->find($this->contenidoPeticion['estadio']);
         if (!$estadio) {
             return $this->json([
-                'msg' => 'No existe ningún estadio con el id ' . $this->contenidoPeticion['estadio']
+                'msg' => 'No existe ningún estadio con el id ' . $this->contenidoPeticion['estadio'],
             ], 264);
         }
 

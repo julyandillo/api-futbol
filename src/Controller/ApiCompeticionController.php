@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/api/competicion', name: 'api_competicion_')]
+#[Route('/api/competiciones', name: 'api_competicion_')]
 #[OA\Tag(name: 'Competiciones')]
 class ApiCompeticionController extends AbstractController
 {
@@ -68,7 +68,7 @@ class ApiCompeticionController extends AbstractController
      * Muestra una lista con todas las competiciones disponibles
      * @throws ExceptionInterface
      */
-    #[Route('/todas', name: 'ver_todas', methods: ['GET'])]
+    #[Route(name: 'ver_todas', methods: ['GET'])]
     #[OA\Response(
         response: 200,
         description: 'Array de competiciones, id y nombre',
