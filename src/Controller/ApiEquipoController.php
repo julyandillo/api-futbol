@@ -59,9 +59,11 @@ class ApiEquipoController extends AbstractController
     {
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
 
-        return $this->json(array_map(function (Equipo $equipo) use ($normalizer) {
-            return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
-        }, $this->equipoRepository->findAll()));
+        return $this->json([
+            'equipos' => array_map(function (Equipo $equipo) use ($normalizer) {
+                return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
+            }, $this->equipoRepository->findAll())
+        ]);
     }
 
     #[Route(name: 'nuevo', methods: ['POST'])]
@@ -168,7 +170,7 @@ class ApiEquipoController extends AbstractController
         $entityManager->persist($equipoCompeticion);
         $entityManager->flush();
 
-        return $this->json(['msg' => 'Competición agregada correctamente al equipo']);
+        return $this->json(['msg' => 'El equipo se ha agregado correctamente a la competición']);
     }
 
     #[Route('/{idEquipo}/competiciones', name: 'ver_competiciones', methods: ['GET'])]
@@ -249,9 +251,11 @@ class ApiEquipoController extends AbstractController
             $estadios = $estadioRepository->getTodosLosEstadiosDelEquipoconId($idEquipo);
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
 
-            return $this->json(array_map(function (Estadio $estadio) use ($normalizer) {
-                return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
-            }, $estadios));
+            return $this->json([
+                'estadios' => array_map(function (Estadio $estadio) use ($normalizer) {
+                    return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
+                }, $estadios)
+            ]);
 
         } catch (\Exception $ex) {
             return $this->json([
@@ -291,6 +295,7 @@ class ApiEquipoController extends AbstractController
             return $this->json([
                 'msg' => 'Estadio establecido correctamente',
             ]);
+
         } catch (\Exception $ex) {
             return $this->json([
                 'msg' => 'Se ha producido un error al ejecutar la petición',
@@ -341,7 +346,7 @@ class ApiEquipoController extends AbstractController
         return $this->json(
             array_map(function (Plantilla $plantilla) use ($normalizer) {
                 return [
-                    'id' => $plantilla->getId(),
+                    'id_plantilla' => $plantilla->getId(),
                     'numero_jugadores' => $plantilla->getJugadores()->count(),
                     'jugadores' => $plantilla->getJugadores()->map(function (PlantillaJugador $plantillaJugador) use ($normalizer) {
                         return array_merge(

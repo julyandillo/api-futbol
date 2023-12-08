@@ -51,10 +51,11 @@ class ApiEstadioController extends AbstractController
     {
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
 
-        return $this->json(array_map(function (Estadio $estadio) use ($normalizer) {
+        return $this->json([
+            'estadios' => array_map(function (Estadio $estadio) use ($normalizer) {
                 return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
-            }, $this->estadioRepository->findAll())
-        );
+            }, $this->estadioRepository->findAll()),
+        ]);
     }
 
     /**
@@ -98,8 +99,8 @@ class ApiEstadioController extends AbstractController
         content: new OA\JsonContent(
             properties: [
                 new OA\Property(property: 'msg', type: 'string'),
-                new OA\Property(property: 'id', description: 'ID del nuevo estadio creado', type: 'integer')
-                ],
+                new OA\Property(property: 'id', description: 'ID del nuevo estadio creado', type: 'integer'),
+            ],
             type: 'object'
         )
     )]

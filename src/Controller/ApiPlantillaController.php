@@ -139,14 +139,14 @@ class ApiPlantillaController extends AbstractController
             ]);
         }
 
-        return $this->json(
-            array_map(function (Plantilla $plantilla) {
+        return $this->json([
+            'plantillas' => array_map(function (Plantilla $plantilla) {
                 return [
                     'id_plantilla' => $plantilla->getId(),
                     'jugadores' => $plantilla->getJugadores()->count(),
                 ];
             }, $plantillas)
-        );
+        ]);
     }
 
     #[Route("/{idPlantilla}", name: "detalles", requirements: ['idPlantilla' => Requirement::DIGITS], methods: ['GET'])]

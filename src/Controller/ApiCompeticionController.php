@@ -81,9 +81,11 @@ class ApiCompeticionController extends AbstractController
     {
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
 
-        return $this->json(array_map(function (Competicion $competicion) use ($normalizer) {
-            return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
-        }, $this->competicionRepository->findAll()));
+        return $this->json([
+            'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
+                return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
+            }, $this->competicionRepository->findAll()),
+        ]);
     }
 
     /**
@@ -114,12 +116,14 @@ class ApiCompeticionController extends AbstractController
         }
 
         $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-        return $this->json(array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
-            $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
-            $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
+        return $this->json([
+            'equipos' => array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
+                $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
+                $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
 
-            return $equipoNormalizado;
-        }, $competicion->getEquiposPlantillas()));
+                return $equipoNormalizado;
+            }, $competicion->getEquiposPlantillas()),
+        ]);
     }
 
     /**
