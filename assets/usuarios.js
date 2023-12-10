@@ -1,13 +1,14 @@
 import './styles/usuarios.css'
-import {realizaPeticionDELETE, realizaPeticionPOST} from "./utils";
+
+import {realizaPeticionDELETE, realizaPeticionPOST} from "./utils.js";
+import {htmlToElement} from "./ui.js";
 import {
     modalEditar,
     muestraElemento,
     muestraModalEditar,
     muestraModalParaEliminarConMensaje,
     ocultaElemento
-} from "./app";
-import {htmlToElement} from "./ui";
+} from "./app.js";
 
 const inputNombreAplicacion = document.getElementById('input__nombre-aplicacion');
 const divNuevaAplicacion = document.getElementById('div__nueva-aplicacion');

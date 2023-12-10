@@ -1,5 +1,5 @@
 import './styles/admin.css';
-import {realizaPeticionDELETE} from "./utils";
+import {realizaPeticionDELETE} from "./utils.js";
 
 document.body.addEventListener('click', (event) => {
     const accion = event.target.closest('[data-accion]')?.dataset.accion;

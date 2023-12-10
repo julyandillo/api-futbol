@@ -1,14 +1,9 @@
-/*
- * Welcome to your app's main JavaScript file!
- *
- * We recommend including the built version of this JavaScript file
- * (and its CSS file) in your base layout (base.html.twig).
- */
-
-require('@fortawesome/fontawesome-free/css/all.min.css');
-
 import './styles/reset.css';
 import './styles/app.css';
+import './styles/ui.css';
+import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+
+import '@fortawesome/fontawesome-free';
 
 export const modalEliminar = document.getElementById('modal-eliminar');
 export const modalEditar = document.getElementById('modal-editar');

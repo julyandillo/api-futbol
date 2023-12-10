@@ -1,8 +1,7 @@
 {% extends 'admin/index.html.twig' %}
 
 {% block javascripts %}
-    {{ parent() }}
-    {{ encore_entry_script_tags('competiciones') }}
+    {{ importmap(['app', 'competiciones']) }}
 {% endblock %}
 
 {% block contenido %}

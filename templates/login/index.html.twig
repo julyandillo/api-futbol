@@ -2,14 +2,8 @@
 
 {% block title %}Inicio de sesión{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('login') }}
-{% endblock %}
-
 {% block javascripts %}
-    {{ parent() }}
-    {{ encore_entry_script_tags('login') }}
+    {{ importmap(['app', 'login']) }}
 {% endblock %}
 
 {% block body %}

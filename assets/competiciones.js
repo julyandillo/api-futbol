@@ -1,5 +1,5 @@
-import {muestraModalParaEliminarConMensaje} from "./app";
-import {realizaPeticionDELETE} from "./utils";
+import {muestraModalParaEliminarConMensaje} from "./app.js";
+import {realizaPeticionDELETE} from "./utils.js";
 
 const competicionesTags = document.querySelector('.competiciones-tags');
 document.addEventListener('DOMContentLoaded', () => {

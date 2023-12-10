@@ -2,14 +2,8 @@
 
 {% block title %}API Fútbol | Administración{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('ui') }}
-{% endblock %}
-
 {% block javascripts %}
-    {{ parent() }}
-    {{ encore_entry_script_tags('ui') }}
+    {{ importmap(['app', 'ui']) }}
 {% endblock %}
 
 {% block body %}
