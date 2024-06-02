@@ -15,3 +15,9 @@ destroy:
 
 bash:
 	docker exec -it --user ${UID} ${DOCKER_BE} bash
+
+start:
+	docker exec -it --user ${UID} ${DOCKER_BE} symfony server:start -d
+
+init:
+	$(MAKE) up && $(MAKE) start
