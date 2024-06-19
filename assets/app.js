@@ -1,9 +1,8 @@
+import 'bootstrap-icons/font/bootstrap-icons.min.css';
+
 import './styles/reset.css';
 import './styles/app.css';
 import './styles/ui.css';
-import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
-
-import '@fortawesome/fontawesome-free';
 
 export const modalEliminar = document.getElementById('modal-eliminar');
 export const modalEditar = document.getElementById('modal-editar');

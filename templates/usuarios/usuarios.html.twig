@@ -23,7 +23,7 @@
                     <td>{{ usuario.email }}</td>
                     <td>{{ usuario.aplicaciones|length }}</td>
                     <td>{{ usuario.fechaCreacion|date('d/m/Y H:i:s') }}</td>
-                    <td><span class="boton boton-warning btn__eliminar-usuario" data-usuario="{{ usuario.userIdentifier }}" data-accion="usuario-eliminar"><i class="fa-solid fa-trash-can"></i></span></td>
+                    <td><span class="boton boton-warning btn__eliminar-usuario" data-usuario="{{ usuario.userIdentifier }}" data-accion="usuario-eliminar"><i class="bi bi-trash"></i></span></td>
                 </tr>
             {% endfor %}
         </tbody>
