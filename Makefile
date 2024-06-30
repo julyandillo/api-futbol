@@ -21,3 +21,7 @@ start:
 
 init:
 	$(MAKE) up && $(MAKE) start
+
+log:
+	docker exec -it --user ${UID} ${DOCKER_BE} symfony server:log
+
