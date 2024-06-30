@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -81,13 +82,21 @@ class ApiEquipoController extends AbstractController
             ], 502);
         }
 
-        $equipo = $serializer->deserialize($request->getContent(), Equipo::class, 'json');
-        $this->equipoRepository->save($equipo, true);
+        try {
+            $equipo = $serializer->deserialize($request->getContent(), Equipo::class, 'json');
+            $this->equipoRepository->save($equipo, true);
 
-        return $this->json([
-            'msg' => 'Equipo guardado correctamente',
-            'id' => $equipo->getId(),
-        ]);
+            return $this->json([
+                'msg' => 'Equipo guardado correctamente',
+                'id' => $equipo->getId(),
+            ]);
+
+        } catch (NotNormalizableValueException $e) {
+            return $this->json([
+                'msg' => sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
+                    $e->getPath(), implode($e->getExpectedTypes()), $e->getCurrentType()),
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     #[Route('/{idEquipo}', name: 'modificar', methods: ['PATCH'])]
@@ -100,14 +109,22 @@ class ApiEquipoController extends AbstractController
             ], 501);
         }
 
-        $serializer->deserialize(
-            $request->getContent(),
-            Equipo::class, 'json',
-            [AbstractNormalizer::OBJECT_TO_POPULATE => $equipo]
-        );
-        $this->equipoRepository->save($equipo, true);
+        try {
+            $serializer->deserialize(
+                $request->getContent(),
+                Equipo::class, 'json',
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $equipo]
+            );
+            $this->equipoRepository->save($equipo, true);
 
-        return $this->json(['msg' => 'Equipo modificado correctamente']);
+            return $this->json(['msg' => 'Equipo modificado correctamente']);
+
+        } catch (NotNormalizableValueException $e) {
+            return $this->json([
+                'msg' => sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
+                    $e->getPath(), implode($e->getExpectedTypes()), $e->getCurrentType()),
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     #[Route('/{idEquipo}', name: 'eliminar', methods: ['DELETE'])]
