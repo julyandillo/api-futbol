@@ -22,9 +22,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
+use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -83,7 +85,9 @@ class ApiEquipoController extends AbstractController
         }
 
         try {
-            $equipo = $serializer->deserialize($request->getContent(), Equipo::class, 'json');
+            $equipo = $serializer->deserialize($request->getContent(), Equipo::class, 'json', [
+                DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS => true,
+            ]);
             $this->equipoRepository->save($equipo, true);
 
             return $this->json([
@@ -91,10 +95,16 @@ class ApiEquipoController extends AbstractController
                 'id' => $equipo->getId(),
             ]);
 
-        } catch (NotNormalizableValueException $e) {
+        } catch (PartialDenormalizationException $e) {
+            $errores = [];
+            /** @var NotNormalizableValueException $exception */
+            foreach ($e->getErrors() as $exception) {
+                $errores[] = sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
+                    $exception->getPath(), implode($exception->getExpectedTypes()), $exception->getCurrentType());
+            }
             return $this->json([
-                'msg' => sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
-                    $e->getPath(), implode($e->getExpectedTypes()), $e->getCurrentType()),
+                'msg' => 'Error de validación',
+                'detalles' => $errores,
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -119,10 +129,16 @@ class ApiEquipoController extends AbstractController
 
             return $this->json(['msg' => 'Equipo modificado correctamente']);
 
-        } catch (NotNormalizableValueException $e) {
+        } catch (PartialDenormalizationException $e) {
+            $errores = [];
+            /** @var NotNormalizableValueException $exception */
+            foreach ($e->getErrors() as $exception) {
+                $errores[] = sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
+                    $exception->getPath(), implode($exception->getExpectedTypes()), $exception->getCurrentType());
+            }
             return $this->json([
-                'msg' => sprintf("El atributo '%s' debe ser de tipo '%s' ('%s' dado)",
-                    $e->getPath(), implode($e->getExpectedTypes()), $e->getCurrentType()),
+                'msg' => 'Error de validación',
+                'detalles' => $errores,
             ], Response::HTTP_BAD_REQUEST);
         }
     }
