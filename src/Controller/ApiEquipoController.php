@@ -24,7 +24,7 @@ use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -60,7 +60,7 @@ class ApiEquipoController extends AbstractController
     #[Route(name: 'listar', methods: ['GET'])]
     public function listaEquipos(): JsonResponse
     {
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
         return $this->json([
             'equipos' => array_map(function (Equipo $equipo) use ($normalizer) {
@@ -214,7 +214,7 @@ class ApiEquipoController extends AbstractController
             return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $idEquipo], 501);
         }
 
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
         return $this->json([
             'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
