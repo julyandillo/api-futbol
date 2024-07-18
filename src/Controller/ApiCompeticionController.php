@@ -10,7 +10,6 @@ use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -22,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[Route('/api/competiciones', name: 'api_competicion_')]
@@ -66,7 +65,6 @@ class ApiCompeticionController extends AbstractController
 
     /**
      * Muestra una lista con todas las competiciones disponibles
-     * @throws ExceptionInterface
      */
     #[Route(name: 'ver_todas', methods: ['GET'])]
     #[OA\Response(
@@ -79,18 +77,25 @@ class ApiCompeticionController extends AbstractController
     )]
     public function listaCompeticiones(): Response
     {
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+        try {
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
-        return $this->json([
-            'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
-                return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
-            }, $this->competicionRepository->findAll()),
-        ]);
+            return $this->json([
+                'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
+                    return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
+                }, $this->competicionRepository->findAll()),
+            ]);
+
+        } catch (ExceptionInterface $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Muestra todos los equipos y plantillas que participan en una competición
-     * @throws ExceptionInterface
      */
     #[Route('/{idCompeticion}/equipos', name: 'equipos', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
@@ -108,22 +113,30 @@ class ApiCompeticionController extends AbstractController
     )]
     public function listaEquiposCompeticion(int $idCompeticion): JsonResponse
     {
-        $competicion = $this->competicionRepository->find($idCompeticion);
-        if (!$competicion) {
+        try {
+            $competicion = $this->competicionRepository->find($idCompeticion);
+            if (!$competicion) {
+                return $this->json([
+                    'msg' => 'No existe una competición con el id ' . $idCompeticion,
+                ], 264);
+            }
+
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
             return $this->json([
-                'msg' => 'No existe una competición con el id ' . $idCompeticion,
-            ], 264);
+                'equipos' => array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
+                    $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
+                    $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
+
+                    return $equipoNormalizado;
+                }, $competicion->getEquiposPlantillas()),
+            ]);
+
+        } catch (ExceptionInterface $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-        return $this->json([
-            'equipos' => array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
-                $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
-                $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
-
-                return $equipoNormalizado;
-            }, $competicion->getEquiposPlantillas()),
-        ]);
     }
 
     /**

@@ -6,7 +6,6 @@ use App\Entity\Estadio;
 use App\Repository\EstadioRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
-use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -49,7 +48,7 @@ class ApiEstadioController extends AbstractController
     )]
     public function index(): Response
     {
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
         return $this->json([
             'estadios' => array_map(function (Estadio $estadio) use ($normalizer) {
@@ -63,7 +62,6 @@ class ApiEstadioController extends AbstractController
      * @param int $idEstadio
      * @param NormalizerInterface $normalizer
      * @return Response
-     * @throws ExceptionInterface
      */
     #[Route('/{idEstadio}', requirements: ['idEstadio' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
@@ -73,15 +71,23 @@ class ApiEstadioController extends AbstractController
     )]
     public function detalles(int $idEstadio, NormalizerInterface $normalizer): Response
     {
-        $estadio = $this->estadioRepository->find($idEstadio);
+        try {
+            $estadio = $this->estadioRepository->find($idEstadio);
 
-        if (!$estadio) {
+            if (!$estadio) {
+                return $this->json([
+                    'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
+                ], 264);
+            }
+
+            return $this->json($normalizer->normalize($estadio));
+
+        } catch (ExceptionInterface $ex) {
             return $this->json([
-                'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 264);
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return $this->json($normalizer->normalize($estadio));
     }
 
     /**
@@ -106,7 +112,7 @@ class ApiEstadioController extends AbstractController
     )]
     #[OA\Response(
         response: 400,
-        description: 'No se puede realizar la petición, petición mal formada',
+        description: 'No se puede realizar la petición',
         content: new OA\JsonContent(ref: '#/components/schemas/Mensaje'),
     )]
     #[OA\Response(

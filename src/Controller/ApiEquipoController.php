@@ -12,7 +12,6 @@ use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
 use App\Util\CompruebaParametrosTrait;
 use App\Util\ParseaPeticionJsonTrait;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
@@ -45,28 +45,43 @@ class ApiEquipoController extends AbstractController
     #[Route('/{idEquipo}', name: 'ver', requirements: ['idEquipo' => Requirement::DIGITS], methods: ['GET'])]
     public function index(int $idEquipo, NormalizerInterface $normalizer): JsonResponse
     {
-        $equipo = $this->equipoRepository->find($idEquipo);
+        try {
+            $equipo = $this->equipoRepository->find($idEquipo);
 
-        if (!$equipo) {
+            if (!$equipo) {
+                return $this->json([
+                    'msg' => 'No existe ningún equipo con el ID ' . $idEquipo,
+                ], 501);
+            }
+
+            return $this->json($normalizer->normalize($equipo));
+
+        } catch (ExceptionInterface $ex) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el ID ' . $idEquipo,
-            ], 501);
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        //return $this->json(json_decode($serializer->serialize($equipo, 'json'), true));
-        return $this->json($normalizer->normalize($equipo));
     }
 
     #[Route(name: 'listar', methods: ['GET'])]
     public function listaEquipos(): JsonResponse
     {
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
+        try {
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
-        return $this->json([
-            'equipos' => array_map(function (Equipo $equipo) use ($normalizer) {
-                return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
-            }, $this->equipoRepository->findAll())
-        ]);
+            return $this->json([
+                'equipos' => array_map(function (Equipo $equipo) use ($normalizer) {
+                    return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
+                }, $this->equipoRepository->findAll())
+            ]);
+
+        } catch (ExceptionInterface $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route(name: 'nuevo', methods: ['POST'])]
@@ -209,18 +224,26 @@ class ApiEquipoController extends AbstractController
     #[Route('/{idEquipo}/competiciones', name: 'ver_competiciones', methods: ['GET'])]
     public function obtieneCompeticionesEquipo(int $idEquipo): JsonResponse
     {
-        $equipo = $this->equipoRepository->find($idEquipo);
-        if (!$equipo) {
-            return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $idEquipo], 501);
+        try {
+            $equipo = $this->equipoRepository->find($idEquipo);
+            if (!$equipo) {
+                return $this->json(['msg' => 'No existe ningún equipo con el ID ' . $idEquipo], 501);
+            }
+
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
+
+            return $this->json([
+                'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
+                    return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
+                }, $equipo->getCompeticiones()->toArray()),
+            ]);
+
+        } catch (ExceptionInterface $ex) {
+            return $this->json([
+                'msg' => 'Se ha producido un error al ejecutar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
-
-        return $this->json([
-            'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
-                return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
-            }, $equipo->getCompeticiones()->toArray()),
-        ]);
     }
 
     #[Route('/eliminaCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
@@ -259,7 +282,7 @@ class ApiEquipoController extends AbstractController
         if (!$equipoCompeticion) {
             return $this->json([
                 'msg' => 'No existe ninguna relación entre el equipo, competición y plantilla solicitados.',
-            ], 502);
+            ], 264);
         }
 
         $entityManager->remove($equipoCompeticion);
@@ -282,7 +305,7 @@ class ApiEquipoController extends AbstractController
 
         try {
             $estadios = $estadioRepository->getTodosLosEstadiosDelEquipoconId($idEquipo);
-            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
             return $this->json([
                 'estadios' => array_map(function (Estadio $estadio) use ($normalizer) {
@@ -290,11 +313,11 @@ class ApiEquipoController extends AbstractController
                 }, $estadios)
             ]);
 
-        } catch (\Exception $ex) {
+        } catch (\Exception|ExceptionInterface $ex) {
             return $this->json([
                 'msg' => 'Se ha producido un error al ejecutar la petición',
                 'error' => $ex,
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -333,7 +356,7 @@ class ApiEquipoController extends AbstractController
             return $this->json([
                 'msg' => 'Se ha producido un error al ejecutar la petición',
                 'error' => $ex,
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -356,39 +379,45 @@ class ApiEquipoController extends AbstractController
             return $this->json([
                 'msg' => 'Ha ocurrido un error al realizar la petición',
                 'error' => $ex,
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/{idEquipo}/plantillas', name: 'plantillas', requirements: ['idEquipo' => Requirement::DIGITS], methods: ['GET'])]
     public function getPlantillas(int $idEquipo, EntityManagerInterface $entityManager, NormalizerInterface $normalizer): Response
     {
-        $equipo = $this->equipoRepository->find($idEquipo);
-        if (!$equipo) {
+        try {
+            $equipo = $this->equipoRepository->find($idEquipo);
+            if (!$equipo) {
+                return $this->json([
+                    'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
+                ]);
+            }
+
+            $plantillas = array_map(function (EquipoCompeticion $equipoCompeticion) {
+                return $equipoCompeticion->getPlantilla();
+            }, $entityManager->getRepository(EquipoCompeticion::class)->findBy(['equipo' => $equipo,]));
+
+            return $this->json(
+                array_map(function (Plantilla $plantilla) use ($normalizer) {
+                    return [
+                        'id_plantilla' => $plantilla->getId(),
+                        'numero_jugadores' => $plantilla->getJugadores()->count(),
+                        'jugadores' => $plantilla->getJugadores()->map(function (PlantillaJugador $plantillaJugador) use ($normalizer) {
+                            return array_merge(
+                                $normalizer->normalize($plantillaJugador->getJugador(), null, ['groups' => 'lista']),
+                                ['dorsal' => $plantillaJugador->getDorsal()]
+                            );
+                        }),
+                    ];
+                }, $plantillas)
+            );
+
+        } catch (ExceptionInterface $ex) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $idEquipo,
-            ]);
+                'msg' => 'Ha ocurrido un error al realizar la petición',
+                'error' => $ex,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $plantillas = array_map(function (EquipoCompeticion $equipoCompeticion) {
-            return $equipoCompeticion->getPlantilla();
-        }, $entityManager->getRepository(EquipoCompeticion::class)->findBy(['equipo' => $equipo,]));
-
-        //$normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader())));
-
-        return $this->json(
-            array_map(function (Plantilla $plantilla) use ($normalizer) {
-                return [
-                    'id_plantilla' => $plantilla->getId(),
-                    'numero_jugadores' => $plantilla->getJugadores()->count(),
-                    'jugadores' => $plantilla->getJugadores()->map(function (PlantillaJugador $plantillaJugador) use ($normalizer) {
-                        return array_merge(
-                            $normalizer->normalize($plantillaJugador->getJugador(), null, ['groups' => 'lista']),
-                            ['dorsal' => $plantillaJugador->getDorsal()]
-                        );
-                    }),
-                ];
-            }, $plantillas)
-        );
     }
 }
