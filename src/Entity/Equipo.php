@@ -149,6 +149,10 @@ class Equipo
 
     public function setWeb(string $web): self
     {
+        if (!str_starts_with($web, 'https://')) {
+            $web = 'https://' . $web;
+        }
+
         $this->web = $web;
 
         return $this;
