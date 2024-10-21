@@ -39,6 +39,10 @@ class Estadio
     #[Groups(['create', 'update'])]
     private ?int $construccion = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['create', 'update'])]
+    private ?string $pais = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -103,4 +107,16 @@ class Estadio
 
         return $this;
     }
+
+    public function getPais(): ?string
+    {
+        return $this->pais;
+    }
+
+    public function setPais(?string $pais): Estadio
+    {
+        $this->pais = $pais;
+        return $this;
+    }
+
 }
