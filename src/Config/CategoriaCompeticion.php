@@ -10,6 +10,8 @@ enum CategoriaCompeticion: string
     case EuropeLeague = 'EUROPA_LEAGUE';
     case Mundial = 'MUNDIAL';
     case Eurocopa = 'EUROCOPA';
+    case ChampionsLeagueLegacy = 'CHAMPIONS_LEAGUE_LEGACY';
+    case EuropeLeagueLegacy = 'EUROPA_LEAGUE_LEGACY';
 
     public function nameForSelect(): string
     {
@@ -20,6 +22,8 @@ enum CategoriaCompeticion: string
             self::Liga => 'Liga',
             self::Mundial => 'Mundial',
             self::Eurocopa => 'Eurocopa',
+            self::ChampionsLeagueLegacy => 'Champions League (antiguo formato)',
+            self::EuropeLeagueLegacy => 'Europe League (antiguo formato)',
         };
     }
 }
