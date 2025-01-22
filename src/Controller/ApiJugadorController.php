@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Jugador;
 use App\Repository\JugadorRepository;
-use App\Util\CompruebaParametrosTrait;
+use App\Util\ParamsCheckerTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Tag(name: 'Jugadores')]
 class ApiJugadorController extends AbstractController
 {
-    use CompruebaParametrosTrait;
+    use ParamsCheckerTrait;
     use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly JugadorRepository $jugadorRepository)
@@ -49,7 +49,7 @@ class ApiJugadorController extends AbstractController
     public function guanuevoJugador(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(Jugador::getArrayConCamposObligatorios(), $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         try {

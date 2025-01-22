@@ -10,7 +10,7 @@ use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
 use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
-use App\Util\CompruebaParametrosTrait;
+use App\Util\ParamsCheckerTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
@@ -35,7 +35,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Tag(name: 'Equipos')]
 class ApiEquipoController extends AbstractController
 {
-    use CompruebaParametrosTrait;
+    use ParamsCheckerTrait;
     use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly EquipoRepository $equipoRepository)
@@ -88,7 +88,7 @@ class ApiEquipoController extends AbstractController
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);
@@ -176,7 +176,7 @@ class ApiEquipoController extends AbstractController
     public function agregaPlantillaCompeticion(int $idEquipo, Request $request, EntityManagerInterface $entityManager): Response
     {
         if (!$this->peticionConParametrosObligatorios(['competicion', 'plantilla',], $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);
@@ -250,7 +250,7 @@ class ApiEquipoController extends AbstractController
     public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);
@@ -325,7 +325,7 @@ class ApiEquipoController extends AbstractController
     public function setEstadioActual(Request $request, EstadioRepository $estadioRepository): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'estadio'], $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);

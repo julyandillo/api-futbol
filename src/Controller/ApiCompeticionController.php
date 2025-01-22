@@ -8,7 +8,7 @@ use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
 use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
-use App\Util\CompruebaParametrosTrait;
+use App\Util\ParamsCheckerTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -28,7 +28,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[OA\Tag(name: 'Competiciones')]
 class ApiCompeticionController extends AbstractController
 {
-    use CompruebaParametrosTrait;
+    use ParamsCheckerTrait;
     use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly CompeticionRepository $competicionRepository)

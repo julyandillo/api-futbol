@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Estadio;
 use App\Repository\EstadioRepository;
-use App\Util\CompruebaParametrosTrait;
+use App\Util\ParamsCheckerTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[OA\Tag(name: 'Estadios')]
 class ApiEstadioController extends AbstractController
 {
-    use CompruebaParametrosTrait;
+    use ParamsCheckerTrait;
     use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly EstadioRepository $estadioRepository)
@@ -124,7 +124,7 @@ class ApiEstadioController extends AbstractController
     {
         $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
         if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);

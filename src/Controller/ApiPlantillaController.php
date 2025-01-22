@@ -7,7 +7,7 @@ use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
 use App\Repository\EquipoCompeticionRepository;
 use App\Repository\PlantillaRepository;
-use App\Util\CompruebaParametrosTrait;
+use App\Util\ParamsCheckerTrait;
 use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Tag(name: 'Plantillas')]
 class ApiPlantillaController extends AbstractController
 {
-    use CompruebaParametrosTrait;
+    use ParamsCheckerTrait;
     use ParseaPeticionJsonTrait;
 
     public function __construct(private readonly PlantillaRepository $plantillaRepository)
@@ -37,7 +37,7 @@ class ApiPlantillaController extends AbstractController
     public function nuevaPlantilla(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['jugadores',], $request)) {
-            return $this->creaRespuestaConParametrosObligatoriosInexistentes();
+            return $this->buildResponeWithMissingMandatoryParams();
         }
 
         $this->parseaContenidoPeticionJson($request);
