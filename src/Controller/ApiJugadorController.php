@@ -11,8 +11,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -40,9 +41,16 @@ class ApiJugadorController extends AbstractController
             ], 264);
         }
 
-        return $this->json($normalizer->normalize($jugador, null, [
-            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-        ]));
+        try {
+            return $this->json($normalizer->normalize($jugador, null, [
+                AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            ]));
+
+        } catch (ExceptionInterface $exception) {
+            return $this->json([
+                'msg' => $exception->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route(methods: ['POST'])]
