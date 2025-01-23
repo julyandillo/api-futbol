@@ -25,3 +25,14 @@ init:
 log:
 	docker exec -it --user ${UID} ${DOCKER_BE} symfony server:log
 
+clear:
+	docker exec -it --user ${UID} ${DOCKER_BE} symfony console cache:clear
+
+install:
+	docker exec -it --user ${UID} ${DOCKER_BE} symfony composer install
+
+compile:
+	docker exec -it --user ${UID} ${DOCKER_BE} symfony console asset-map:compile
+
+prepare:
+	$(MAKE) install && $(MAKE) compile
