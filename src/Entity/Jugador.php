@@ -37,6 +37,12 @@ class Jugador
     #[Groups('lista')]
     private Posicion $posicion;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $altura = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $peso = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -122,5 +128,29 @@ class Jugador
     public static function getArrayConCamposObligatorios(): array
     {
         return ['apodo', 'nombre', 'posicion'];
+    }
+
+    public function getAltura(): ?int
+    {
+        return $this->altura;
+    }
+
+    public function setAltura(?int $altura): static
+    {
+        $this->altura = $altura;
+
+        return $this;
+    }
+
+    public function getPeso(): ?float
+    {
+        return $this->peso;
+    }
+
+    public function setPeso(?float $peso): static
+    {
+        $this->peso = $peso;
+
+        return $this;
     }
 }
