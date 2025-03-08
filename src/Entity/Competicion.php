@@ -46,9 +46,13 @@ class Competicion
     #[Ignore]
     private Collection $competicionEquipos;
 
+    #[ORM\OneToMany(targetEntity: Jornada::class, mappedBy: 'competicion')]
+    private Collection $jornadas;
+
     public function __construct()
     {
         $this->competicionEquipos = new ArrayCollection();
+        $this->jornadas = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -128,5 +132,17 @@ class Competicion
         return array_map(function (EquipoCompeticion $equipoCompeticion){
             return new EquipoPlantillaDTO($equipoCompeticion->getEquipo(), $equipoCompeticion->getPlantilla());
         }, $this->competicionEquipos->toArray());
+    }
+
+    public function setJornadas(ArrayCollection $jornadas): self
+    {
+        $this->jornadas = $jornadas;
+        return $this;
+    }
+
+    public function addJornada(Jornada $jornada): self
+    {
+        $this->jornadas->add($jornada);
+        return $this;
     }
 }
