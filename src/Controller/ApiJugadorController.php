@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Jugador;
 use App\Repository\JugadorRepository;
+use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
-use App\Util\ParseaPeticionJsonTrait;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ApiJugadorController extends AbstractController
 {
     use ParamsCheckerTrait;
-    use ParseaPeticionJsonTrait;
+    use JsonParserRequest;
 
     public function __construct(private readonly JugadorRepository $jugadorRepository)
     {

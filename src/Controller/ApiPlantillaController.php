@@ -7,8 +7,8 @@ use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
 use App\Repository\EquipoCompeticionRepository;
 use App\Repository\PlantillaRepository;
+use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
-use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ApiPlantillaController extends AbstractController
 {
     use ParamsCheckerTrait;
-    use ParseaPeticionJsonTrait;
+    use JsonParserRequest;
 
     public function __construct(private readonly PlantillaRepository $plantillaRepository)
     {

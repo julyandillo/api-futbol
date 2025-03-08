@@ -8,8 +8,8 @@ use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
 use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
+use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
-use App\Util\ParseaPeticionJsonTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -29,7 +29,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class ApiCompeticionController extends AbstractController
 {
     use ParamsCheckerTrait;
-    use ParseaPeticionJsonTrait;
+    use JsonParserRequest;
 
     public function __construct(private readonly CompeticionRepository $competicionRepository)
     {

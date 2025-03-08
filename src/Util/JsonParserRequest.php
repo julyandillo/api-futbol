@@ -4,7 +4,7 @@ namespace App\Util;
 
 use Symfony\Component\HttpFoundation\Request;
 
-trait ParseaPeticionJsonTrait
+trait JsonParserRequest
 {
     private array $contenidoPeticion = [];
 

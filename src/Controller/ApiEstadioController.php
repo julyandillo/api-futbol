@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Estadio;
 use App\Repository\EstadioRepository;
+use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
-use App\Util\ParseaPeticionJsonTrait;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ApiEstadioController extends AbstractController
 {
     use ParamsCheckerTrait;
-    use ParseaPeticionJsonTrait;
+    use JsonParserRequest;
 
     public function __construct(private readonly EstadioRepository $estadioRepository)
     {
