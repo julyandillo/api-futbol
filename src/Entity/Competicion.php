@@ -145,4 +145,9 @@ class Competicion
         $this->jornadas->add($jornada);
         return $this;
     }
+
+    public function getJornadas(): Collection
+    {
+        return $this->jornadas;
+    }
 }

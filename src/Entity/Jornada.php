@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\JornadaRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: JornadaRepository::class)]
 class Jornada
@@ -15,13 +16,16 @@ class Jornada
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups('list')]
     private ?int $number = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $start_date = null;
+    #[Groups('list')]
+    private ?\DateTimeInterface $dateStart = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $end_date = null;
+    #[Groups('list')]
+    private ?\DateTimeInterface $dateEnd = null;
 
     #[ORM\ManyToOne(targetEntity: Competicion::class, inversedBy: "jornadas")]
     private Competicion $competicion;
@@ -43,26 +47,26 @@ class Jornada
         return $this;
     }
 
-    public function getStartDate(): ?\DateTimeInterface
+    public function getDateStart(): ?\DateTimeInterface
     {
-        return $this->start_date;
+        return $this->dateStart;
     }
 
-    public function setStartDate(\DateTimeInterface $start_date): static
+    public function setDateStart(\DateTimeInterface $dateStart): static
     {
-        $this->start_date = $start_date;
+        $this->dateStart = $dateStart;
 
         return $this;
     }
 
-    public function getEndDate(): ?\DateTimeInterface
+    public function getDateEnd(): ?\DateTimeInterface
     {
-        return $this->end_date;
+        return $this->dateEnd;
     }
 
-    public function setEndDate(\DateTimeInterface $end_date): static
+    public function setDateEnd(\DateTimeInterface $dateEnd): static
     {
-        $this->end_date = $end_date;
+        $this->dateEnd = $dateEnd;
 
         return $this;
     }
