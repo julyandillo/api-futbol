@@ -160,9 +160,9 @@ class ApiCompeticionController extends AbstractController
             ], 400);
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
-        if (!is_array($this->contenidoPeticion['equipos'])) {
+        if (!is_array($this->jsonContent['equipos'])) {
             return $this->json([
                 'msg' => 'No se puede realizar la petición, el campo \'equipos\' no es un array',
             ], 400);
@@ -173,7 +173,7 @@ class ApiCompeticionController extends AbstractController
         $errores = [];
         $posicion = 0;
         $alMenosUnEquipoAsociado = false;
-        foreach ($this->contenidoPeticion['equipos'] as $equipoPlantilla) {
+        foreach ($this->jsonContent['equipos'] as $equipoPlantilla) {
             $posicion++;
 
             if (!array_key_exists('id_equipo', $equipoPlantilla)

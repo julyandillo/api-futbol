@@ -6,10 +6,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 trait JsonParserRequest
 {
-    private array $contenidoPeticion = [];
+    private array $jsonContent = [];
 
-    public function parseaContenidoPeticionJson(Request $request): void
+    /**
+     * @throws \JsonException
+     */
+    public function parseJsonRequest(Request $request): void
     {
-        $this->contenidoPeticion = json_decode($request->getContent(), true);
+        $this->jsonContent = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
 }

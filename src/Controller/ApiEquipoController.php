@@ -91,11 +91,11 @@ class ApiEquipoController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
-        if ($this->equipoRepository->existeEquipoConNombre($this->contenidoPeticion['nombre'])) {
+        if ($this->equipoRepository->existeEquipoConNombre($this->jsonContent['nombre'])) {
             return $this->json([
-                'msg' => sprintf('Ya existe un equipo con el nombre \'%s\'', $this->contenidoPeticion['nombre']),
+                'msg' => sprintf('Ya existe un equipo con el nombre \'%s\'', $this->jsonContent['nombre']),
             ], 502);
         }
 
@@ -179,7 +179,7 @@ class ApiEquipoController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
         $equipo = $this->equipoRepository->find($idEquipo);
         if (!$equipo) {
@@ -188,17 +188,17 @@ class ApiEquipoController extends AbstractController
             ], 264);
         }
 
-        $competicion = $entityManager->getRepository(Competicion::class)->find($this->contenidoPeticion['competicion']);
+        $competicion = $entityManager->getRepository(Competicion::class)->find($this->jsonContent['competicion']);
         if (!$competicion) {
             return $this->json([
-                'msg' => 'No existe ninguna competición con el id ' . $this->contenidoPeticion['competicion'],
+                'msg' => 'No existe ninguna competición con el id ' . $this->jsonContent['competicion'],
             ], 264);
         }
 
-        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->contenidoPeticion['plantilla']);
+        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->jsonContent['plantilla']);
         if (!$plantilla) {
             return $this->json([
-                'msg' => 'No existe ninguna plantilla con el id ' . $this->contenidoPeticion['plantilla'],
+                'msg' => 'No existe ninguna plantilla con el id ' . $this->jsonContent['plantilla'],
             ], 264);
         };
 
@@ -253,26 +253,26 @@ class ApiEquipoController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
-        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
+        $equipo = $this->equipoRepository->find($this->jsonContent['equipo']);
         if (!$equipo) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
+                'msg' => 'No existe ningún equipo con el id ' . $this->jsonContent['equipo'],
             ], 264);
         }
 
-        $competicion = $entityManager->getRepository(Competicion::class)->find($this->contenidoPeticion['competicion']);
+        $competicion = $entityManager->getRepository(Competicion::class)->find($this->jsonContent['competicion']);
         if (!$competicion) {
             return $this->json([
-                'msg' => 'No existe ninguna competición con el id ' . $this->contenidoPeticion['competicion'],
+                'msg' => 'No existe ninguna competición con el id ' . $this->jsonContent['competicion'],
             ], 264);
         }
 
-        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->contenidoPeticion['plantilla']);
+        $plantilla = $entityManager->getRepository(Plantilla::class)->find($this->jsonContent['plantilla']);
         if (!$plantilla) {
             return $this->json([
-                'msg' => 'No existe ninguna plantilla con el id ' . $this->contenidoPeticion['plantilla'],
+                'msg' => 'No existe ninguna plantilla con el id ' . $this->jsonContent['plantilla'],
             ], 264);
         };
 
@@ -289,7 +289,7 @@ class ApiEquipoController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'msg' => 'El equipo ha dejado de participar en la competición con ID ' . $this->contenidoPeticion['competicion'],
+            'msg' => 'El equipo ha dejado de participar en la competición con ID ' . $this->jsonContent['competicion'],
         ]);
     }
 
@@ -328,19 +328,19 @@ class ApiEquipoController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
-        $equipo = $this->equipoRepository->find($this->contenidoPeticion['equipo']);
+        $equipo = $this->equipoRepository->find($this->jsonContent['equipo']);
         if (!$equipo) {
             return $this->json([
-                'msg' => 'No existe ningún equipo con el id ' . $this->contenidoPeticion['equipo'],
+                'msg' => 'No existe ningún equipo con el id ' . $this->jsonContent['equipo'],
             ], 264);
         }
 
-        $estadio = $estadioRepository->find($this->contenidoPeticion['estadio']);
+        $estadio = $estadioRepository->find($this->jsonContent['estadio']);
         if (!$estadio) {
             return $this->json([
-                'msg' => 'No existe ningún estadio con el id ' . $this->contenidoPeticion['estadio'],
+                'msg' => 'No existe ningún estadio con el id ' . $this->jsonContent['estadio'],
             ], 264);
         }
 

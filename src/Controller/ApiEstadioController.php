@@ -127,15 +127,15 @@ class ApiEstadioController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
         $estadio = $this->estadioRepository->findOneBy([
-            'nombre' => $this->contenidoPeticion['nombre'],
+            'nombre' => $this->jsonContent['nombre'],
         ]);
 
         if ($estadio) {
             return $this->json([
-                'msg' => sprintf('Ya existe un estadio con el nombre \'%s\'', $this->contenidoPeticion['nombre']),
+                'msg' => sprintf('Ya existe un estadio con el nombre \'%s\'', $this->jsonContent['nombre']),
             ], 502);
         }
 

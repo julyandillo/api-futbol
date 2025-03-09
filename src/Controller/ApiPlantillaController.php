@@ -40,15 +40,15 @@ class ApiPlantillaController extends AbstractController
             return $this->buildResponeWithMissingMandatoryParams();
         }
 
-        $this->parseaContenidoPeticionJson($request);
+        $this->parseJsonRequest($request);
 
-        if (!is_array($this->contenidoPeticion['jugadores'])) {
+        if (!is_array($this->jsonContent['jugadores'])) {
             return $this->json([
                 'msg' => 'No se puede realizar la petición, \'jugadores\' debe ser un array',
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if (empty($this->contenidoPeticion['jugadores'])) {
+        if (empty($this->jsonContent['jugadores'])) {
             return $this->json([
                 'msg' => 'No se puede crear una plantilla sin jugadores'
             ], Response::HTTP_BAD_REQUEST);
@@ -58,7 +58,7 @@ class ApiPlantillaController extends AbstractController
         $posicion = 0;
         $plantilla = new Plantilla();
 
-        foreach ($this->contenidoPeticion['jugadores'] as $rawJugador) {
+        foreach ($this->jsonContent['jugadores'] as $rawJugador) {
             $posicion++;
 
             if (!array_key_exists('id', $rawJugador)
