@@ -3,10 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\ArbitroRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ArbitroRepository::class)]
 class Arbitro
@@ -14,24 +13,24 @@ class Arbitro
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['list', 'view'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: false)]
+    #[Groups(['list', 'view'])]
     private ?string $name = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('view')]
+    private ?string $fullname = null;
+
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups('view')]
     private ?\DateTimeInterface $birthdate = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
+    #[Groups('view')]
     private ?string $country = null;
-
-    #[ORM\OneToMany(targetEntity: Partido::class, mappedBy: 'arbitro')]
-    private Collection $partidos;
-
-    public function __construct()
-    {
-        $this->partidos = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -74,8 +73,15 @@ class Arbitro
         return $this;
     }
 
-    public function getPartidos(): Collection
+    public function getFullname(): ?string
     {
-        return $this->partidos;
+        return $this->fullname;
     }
+
+    public function setFullname(?string $fullname): static
+    {
+        $this->fullname = $fullname;
+        return $this;
+    }
+
 }
