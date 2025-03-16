@@ -16,7 +16,7 @@ class JornadaRepository extends ServiceEntityRepository
         parent::__construct($registry, Jornada::class);
     }
 
-    public function save(Jornada $jornada, bool $flush = false): void
+    public function save(Jornada $jornada, bool $flush = true): void
     {
         $this->getEntityManager()->persist($jornada);
 

@@ -40,4 +40,21 @@ class ArbitroRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    public function save(mixed $arbitro, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($arbitro);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Arbitro $arbitro, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($arbitro);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }

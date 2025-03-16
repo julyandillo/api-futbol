@@ -43,12 +43,12 @@ class ApiCompeticionController extends AbstractController
     #[Route('/{idCompeticion}', name: 'detalles', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
         response: 200,
-        description: 'OK',
+        description: 'Detalles de la competición',
         content: new Model(type: Competicion::class, groups: ['OA'])
     )]
     #[OA\Response(
         response: 264,
-        description: 'Entidad no encontrada',
+        description: 'Petición procesada con errores',
         content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
     )]
     public function detalles(int $idCompeticion): JsonResponse
@@ -236,4 +236,5 @@ class ApiCompeticionController extends AbstractController
 
         return $this->json($response);
     }
+
 }

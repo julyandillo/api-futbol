@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\JornadaRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: JornadaRepository::class)]
@@ -13,21 +14,24 @@ class Jornada
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('list')]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups('list')]
+    #[Groups(['detail', 'list'])]
     private ?int $number = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups('list')]
+    #[Groups('detail')]
     private ?\DateTimeInterface $dateStart = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups('list')]
+    #[Groups('detail')]
     private ?\DateTimeInterface $dateEnd = null;
 
-    #[ORM\ManyToOne(targetEntity: Competicion::class, inversedBy: "jornadas")]
+    #[ORM\ManyToOne(targetEntity: Competicion::class, cascade: ['remove'], inversedBy: "jornadas")]
+    #[Groups('full')]
+    #[OA\Property(description: 'ID de la competición a la que pertenece', type: 'integer')]
     private Competicion $competicion;
 
     public function getId(): ?int

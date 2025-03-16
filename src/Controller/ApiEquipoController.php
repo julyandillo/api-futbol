@@ -88,7 +88,7 @@ class ApiEquipoController extends AbstractController
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         $this->parseJsonRequest($request);
@@ -176,7 +176,7 @@ class ApiEquipoController extends AbstractController
     public function agregaPlantillaCompeticion(int $idEquipo, Request $request, EntityManagerInterface $entityManager): Response
     {
         if (!$this->peticionConParametrosObligatorios(['competicion', 'plantilla',], $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         $this->parseJsonRequest($request);
@@ -250,7 +250,7 @@ class ApiEquipoController extends AbstractController
     public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         $this->parseJsonRequest($request);
@@ -325,7 +325,7 @@ class ApiEquipoController extends AbstractController
     public function setEstadioActual(Request $request, EstadioRepository $estadioRepository): Response
     {
         if (!$this->peticionConParametrosObligatorios(['equipo', 'estadio'], $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         $this->parseJsonRequest($request);

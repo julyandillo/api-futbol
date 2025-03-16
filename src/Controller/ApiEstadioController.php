@@ -124,7 +124,7 @@ class ApiEstadioController extends AbstractController
     {
         $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
         if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         $this->parseJsonRequest($request);

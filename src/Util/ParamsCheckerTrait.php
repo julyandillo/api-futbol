@@ -10,10 +10,13 @@ trait ParamsCheckerTrait
 {
     private array $missingMandatoryParams = [];
 
+    /**
+     * @throws \JsonException
+     */
     public function peticionConParametrosObligatorios(array $mandatoryParams, Request $request): bool
     {
-        $requestParams = stripos($request->headers->get('Content-type'), 'application/json') !== false
-            ? array_keys(json_decode($request->getContent(), true))
+        $requestParams = $request->getContentTypeFormat() === 'json'
+            ? array_keys(json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR))
             : $request->request->keys();
 
         $this->missingMandatoryParams = array_diff($mandatoryParams, $requestParams);
@@ -31,7 +34,7 @@ trait ParamsCheckerTrait
         return implode($separator, $this->missingMandatoryParams);
     }
 
-    public function buildResponeWithMissingMandatoryParams(string $format = null): JsonResponse
+    public function buildResponseWithMissingMandatoryParams(string $format = null): JsonResponse
     {
         return new JsonResponse([
             'msg' => sprintf($format ?? 'No se puede realizar la petición, faltan parámetros obligatorios: [%s]',

@@ -14,6 +14,9 @@ nelmio_api_doc:
                 Mensaje:
                     type: object
                     properties:
+                        code:
+                            type: integer
+                            example: "264"
                         msg:
                             type: string
                             example: "Contenido del mensaje"

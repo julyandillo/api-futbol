@@ -57,7 +57,7 @@ class ApiJugadorController extends AbstractController
     public function guanuevoJugador(Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$this->peticionConParametrosObligatorios(Jugador::getArrayConCamposObligatorios(), $request)) {
-            return $this->buildResponeWithMissingMandatoryParams();
+            return $this->buildResponseWithMissingMandatoryParams();
         }
 
         try {
