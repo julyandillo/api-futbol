@@ -30,8 +30,10 @@ RUN curl https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x 
 RUN composer self-update
 
 ## Install Symfony binary
-RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' | bash \
-    && apk add symfony-cli
+RUN curl -sS https://get.symfony.com/cli/installer | bash
+
+# Añadir Symfony CLI al PATH
+ENV PATH="/root/.symfony/bin:${PATH}"
 
 RUN rm -rf /var/cache/apk/*
 
