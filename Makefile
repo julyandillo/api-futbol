@@ -8,10 +8,13 @@ stop:
 	docker compose stop
 
 build:
-	docker compose build --no-cache --build-arg UID=${UID}
+	docker compose build --build-arg UID=${UID}
+
+rebuild:
+	docker compose build --pull --no-cache --build-arg UID=${UID}
 
 destroy:
-	docker compose down
+	docker compose down --remove-orphans
 
 bash:
 	docker exec -it --user ${UID} ${DOCKER_BE} bash
