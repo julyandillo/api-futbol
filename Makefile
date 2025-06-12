@@ -8,7 +8,7 @@ stop:
 	docker compose stop
 
 build:
-	docker compose build --build-arg UID=${UID}
+	docker compose build --no-cache --build-arg UID=${UID}
 
 destroy:
 	docker compose down
