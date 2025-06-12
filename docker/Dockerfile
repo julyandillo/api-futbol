@@ -14,8 +14,7 @@ RUN apk --update --no-cache add \
     bash \
     git \
     curl \
-    wget \
-    unzip
+    wget
 
 # Install PHP extensions
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
@@ -29,11 +28,13 @@ RUN curl https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x 
 RUN composer self-update
 
 ## Install Symfony binary
-RUN curl -sS https://get.symfony.com/cli/installer | bash
-
-# Añadir Symfony CLI al PATH
-ENV PATH="/root/.symfony/bin:${PATH}"
+RUN curl curl -sS https://get.symfony.com/cli/installer | bash \
+    && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony \
+    && chmod +x /usr/local/bin/symfony
 
 RUN rm -rf /var/cache/apk/*
+
+# Limpia cualquier archivo residual
+RUN rm -rf /tmp/*
 
 WORKDIR /var/www
