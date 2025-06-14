@@ -22,6 +22,7 @@
         "symfony/flex": "^2",
         "symfony/form": "7.2.*",
         "symfony/framework-bundle": "7.2.*",
+      "symfony/intl": "7.2.*",
         "symfony/mailer": "7.2.*",
         "symfony/property-access": "7.2.*",
         "symfony/property-info": "7.2.*",
@@ -89,8 +90,11 @@
         }
     },
     "require-dev": {
+      "symfony/debug-bundle": "7.2.*",
         "symfony/maker-bundle": "^v1.59.1",
+      "symfony/monolog-bundle": "^3.0",
         "symfony/stopwatch": "7.2.*",
+      "symfony/var-dumper": "7.2.*",
         "symfony/web-profiler-bundle": "7.2.*"
     }
 }
