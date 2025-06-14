@@ -28,7 +28,7 @@ RUN curl https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x 
 RUN composer self-update
 
 ## Install Symfony binary
-RUN curl curl -sS https://get.symfony.com/cli/installer | bash \
+RUN curl -sS https://get.symfony.com/cli/installer | bash \
     && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony \
     && chmod +x /usr/local/bin/symfony
 
