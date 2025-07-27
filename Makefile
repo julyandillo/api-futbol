@@ -26,7 +26,7 @@ init:
 	$(MAKE) up && $(MAKE) start
 
 log:
-	docker exec -it --user ${UID} ${DOCKER_BE} symfony server:log
+	U_ID=${UID} docker exec -it --user ${UID} ${DOCKER_BE} symfony server:log
 
 clear:
 	docker exec -it --user ${UID} ${DOCKER_BE} symfony console cache:clear

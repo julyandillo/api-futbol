@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\ApiCursor\ApiCursor;
 use App\Entity\Estadio;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
@@ -108,8 +109,41 @@ class EstadioRepository extends ServiceEntityRepository
         $resultSet = $statement->executeQuery(['equipo' => $idEquipo]);
         $idEstadio = $resultSet->fetchOne();
 
-        if (!$idEstadio) return null;
+        if (!$idEstadio) {
+            return null;
+        }
 
         return $this->find($idEstadio);
+    }
+
+    public function findByCursor(ApiCursor $cursor, int $limit): array
+    {
+        $queryBuilder = $this->createQueryBuilder('e');
+
+        if (empty($cursor->getOrderBy())) {
+            $queryBuilder
+                ->where("e.id > :ordering")
+                ->setParameter('ordering', $cursor->getLastValue())
+                ->orderBy('e.id', 'ASC');
+
+        } else {
+            foreach ($cursor->getOrderBy() as $field => $order) {
+                $queryBuilder
+                    ->orderBy("e.$field", $order);
+
+                if ($cursor->getLastValue()) {
+                    $queryBuilder
+                        ->andWhere("e.$field " . ($order === 'ASC' ? '>' : '<') . " :ordering")
+                        ->setParameter('ordering', $cursor->getLastValue());
+                }
+
+            }
+        }
+
+        $query = $queryBuilder
+            ->getQuery()
+            ->setMaxResults($limit);
+
+        return $query->getResult();
     }
 }

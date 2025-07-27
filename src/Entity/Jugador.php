@@ -6,7 +6,10 @@ use App\Config\Posicion;
 use App\Repository\JugadorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[ORM\Entity(repositoryClass: JugadorRepository::class)]
 class Jugador
@@ -18,29 +21,37 @@ class Jugador
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('lista')]
+    #[Groups(['create', 'lista'])]
     private ?string $apodo = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['create', 'lista'])]
     private ?string $nombre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups('create')]
+    #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
+    #[OA\Property(type: 'string', format: 'date')]
     private ?\DateTimeInterface $fechaNacimiento = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('create')]
     private ?string $paisNacimiento = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('create')]
     private ?string $nacionalidad = null;
 
     #[ORM\Column(length: 3, enumType: Posicion::class)]
-    #[Groups('lista')]
+    #[Groups(['create', 'lista'])]
     private Posicion $posicion;
 
     #[ORM\Column(nullable: true)]
+    #[Groups('create')]
     private ?int $altura = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups('create')]
     private ?float $peso = null;
 
     public function getId(): ?int

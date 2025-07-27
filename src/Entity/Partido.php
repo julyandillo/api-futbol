@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\PartidoRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[ORM\Entity(repositoryClass: PartidoRepository::class)]
 class Partido
@@ -15,6 +17,7 @@ class Partido
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Context([DateTimeNormalizer::FORMAT_KEY => DATE_ATOM])]
     private ?\DateTimeInterface $datetime = null;
 
     #[ORM\Column(nullable: true)]

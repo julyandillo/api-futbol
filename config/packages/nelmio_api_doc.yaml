@@ -11,15 +11,64 @@ nelmio_api_doc:
                     scheme: bearer
                     bearerFormat: JWT
             schemas:
+              OK:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: integer
+                    description: "HTTP Status Code"
+              Created:
+                allOf:
+                  - $ref: '#/components/schemas/OK'
+                  - type: object
+                  - properties:
+                      id:
+                        type: integer
+                        description: "ID de la nueva entidad recién creada"
+                  - required:
+                      - id
+              Error:
+                type: object
+                discriminator:
+                  propertyName: code
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    minimun: 400
+                    maximun: 599
+                    description: "HTTP Status Code"
+                  message:
+                    type: string
+                    description: "Detalles del error"
+                required:
+                  - code
+                  - message
                 Mensaje:
                     type: object
                     properties:
                         code:
                             type: integer
-                            example: "264"
-                        msg:
+                            example: "500"
+                        message:
                             type: string
                             example: "Contenido del mensaje"
+              404: ## '404' se usará como valor del campo code (discriminator)
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      message:
+                        example: "Entidad no encontrada"
+              400:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      message:
+                        example: "No se puede realizar la petición, faltan parámetros obligatorios"
                 EquipoPlantilla:
                     type: object
                     properties:

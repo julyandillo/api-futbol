@@ -27,7 +27,7 @@ class Estadio
     private ?string $ciudad = null;
 
     #[ORM\Column]
-    #[Groups(['create', 'update'])]
+    #[Groups(['create', 'update', 'lista'])]
     #[Assert\NotBlank(groups: ['create'])]
     private ?int $capacidad = null;
 
