@@ -16,7 +16,7 @@ class Partido
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Context([DateTimeNormalizer::FORMAT_KEY => DATE_ATOM])]
     private ?\DateTimeInterface $datetime = null;
 

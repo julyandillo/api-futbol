@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\AplicacionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: AplicacionRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -25,7 +24,7 @@ class Aplicacion
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'aplicaciones')]
     private User $usuario;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $fecha_creacion = null;
 
     public function getId(): ?int
