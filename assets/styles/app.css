@@ -27,7 +27,7 @@
 
 body {
     font-family: Lato, system-ui;
-    font-size: var(--fs-400);
+    font-size: 14px;
     background: #f4f4f4;
 }
 
