@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 ARG UID
 
@@ -8,13 +8,11 @@ RUN mkdir /home/appuser/.ssh
 RUN chown -R appuser:appuser /home/appuser/
 RUN echo "StrictHostKeyChecking no" >> /home/appuser/.ssh/config
 RUN echo "export COLUMNS=300" >> /home/appuser/.bashrc
-RUN echo "alias sf=/usr/bin/console" >> /home/appuser/.bashrc
+RUN echo "alias sf=/usr/local/bin/symfony" >> /home/appuser/.bashrc
 
 RUN apk --update --no-cache add \
     bash \
-    git \
-    curl \
-    wget
+    curl
 
 # Install PHP extensions
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
