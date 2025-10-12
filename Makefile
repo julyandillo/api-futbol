@@ -1,4 +1,4 @@
-DOCKER_BE = api_enviroment
+DOCKER_BE = api-futbol-php
 UID = $(shell id -u)
 
 up:
