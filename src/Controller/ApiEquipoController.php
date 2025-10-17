@@ -308,7 +308,7 @@ class ApiEquipoController extends AbstractController
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
             return $this->json([
-                'estadios' => array_map(function (Estadio $estadio) use ($normalizer) {
+                'estadios' => array_map(static function (Estadio $estadio) use ($normalizer) {
                     return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
                 }, $estadios)
             ]);
@@ -345,6 +345,12 @@ class ApiEquipoController extends AbstractController
         }
 
         try {
+            if ($estadio->getId() === $estadioRepository->getEstadioActualDelEquipoConId($equipo->getId())) {
+                return $this->json([
+                    'msg' => 'El estadio ya se encuentra establecido para el equipo'
+                ]);
+            }
+
             $estadioRepository->guardaRelacionConEquipo($estadio, $equipo->getId());
             $estadioRepository->setEstadioEnUsoParaEquipoConId($estadio, $equipo->getId());
 
