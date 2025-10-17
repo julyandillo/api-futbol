@@ -50,19 +50,21 @@ class EstadioRepository extends ServiceEntityRepository
         $conexion = $this->getEntityManager()->getConnection();
 
         $sql = "SELECT estadio_id FROM equipos_estadios WHERE equipo_id = :equipo";
-        $statement = $conexion->prepare($sql);
-        $resultSet = $statement->executeQuery(['equipo' => $idEquipo]);
+        $resultSet = $conexion->executeQuery($sql, ['equipo' => $idEquipo]);
 
-        $estadios = [];
         $results = $resultSet->fetchAllAssociative();
 
-        if (!empty($results)) {
-            foreach ($results as $result) {
-                $estadio = $this->find($result['estadio_id']);
-                if (!$estadio) continue;
+        if (empty($results)) {
+            return [];
+        }
 
-                $estadios[] = $estadio;
+        foreach ($results as $result) {
+            $estadio = $this->find($result['estadio_id']);
+            if (!$estadio) {
+                continue;
             }
+
+            $estadios[] = $estadio;
         }
 
         return $estadios;
@@ -105,8 +107,7 @@ class EstadioRepository extends ServiceEntityRepository
     {
         $conexion = $this->getEntityManager()->getConnection();
         $sql = "SELECT estadio_id FROM equipos_estadios WHERE equipo_id = :equipo AND en_uso = true";
-        $statement = $conexion->prepare($sql);
-        $resultSet = $statement->executeQuery(['equipo' => $idEquipo]);
+        $resultSet = $conexion->executeQuery($sql, ['equipo' => $idEquipo]);
         $idEstadio = $resultSet->fetchOne();
 
         if (!$idEstadio) {
