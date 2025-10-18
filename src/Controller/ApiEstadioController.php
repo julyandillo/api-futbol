@@ -39,6 +39,9 @@ class ApiEstadioController extends AbstractController
 
     /**
      * Obtiene una lista con todos los estadios disponibles
+     *
+     * Devuelve un cursor para obtener los siguientes resultados. Si en la petición aparece un cursor, los demás
+     * parámetros serán ignorados y sólo se tendrá en cuenta el cursor
      */
     #[Route(name: 'listar', methods: ['GET'])]
     #[OA\Response(
@@ -52,20 +55,7 @@ class ApiEstadioController extends AbstractController
     public function listAction(Request $request): Response
     {
         try {
-            $cursor = $this->getCursorForRequest($request);
-            if (empty($cursor->getOrderBy()) && !$request->query->has('order')) {
-                $cursor->setOrderBy(['nombre' => 'ASC']);
-
-            } else if ($request->query->has('order') && !in_array(strtolower($request->query->get('order')), ['nombre', 'capacidad', 'construccion'])) {
-                return $this->buildResponseWithErrorMessage('Sólo esta permitida la ordenación por \'nombre\', \'capacidad\' o \'constuccion\'');
-
-            } else if ($request->query->has('order')) {
-                $direction = strtoupper($request->query->get('direction', 'ASC'));
-                if ($direction !== 'ASC' && $direction !== 'DESC') {
-                    return $this->buildResponseWithErrorMessage('El orden debe ser \'ASC\' o \'DESC\'');
-                }
-                $cursor->setOrderBy([$request->query->get('order') => $direction]);
-            }
+            $cursor = $this->getCursorForRequest($request, ['nombre', 'capacidad', 'construccion'], 'nombre');
 
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
@@ -103,7 +93,7 @@ class ApiEstadioController extends AbstractController
             return $this->json($response);
 
         } catch (APIException $e) {
-            return $this->buildExceptionResponse($e);
+            return $this->buildExceptionResponse($e, $e->getCode());
         }
     }
 
