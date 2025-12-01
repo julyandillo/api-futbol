@@ -2,58 +2,43 @@
 
 namespace App\ApiCursor;
 
-use App\Exception\ApiCursorException;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Query\Parameter;
 
 class ApiCursor implements \JsonSerializable
 {
-    private int $lastID;
+    const int MAX_VALUES = 50;
+
+    const string LAST_PAGE = 'last_page';
+
+    private array $filters = [];
 
     public function __construct(
-        private int|string|null $lastValue = null,
-        private array           $filters = [],
-        private array           $orderBy = [])
+        private int                      $lastID = 0,
+        private int                      $offset = 0,
+        private int                      $limit = 10,
+        private array                    $rawFilters = [],
+        private array                    $orderBy = ['id' => 'ASC'],
+        private int                      $totalRows = 0,
+        private readonly ArrayCollection $parameters = new ArrayCollection())
     {
-        $this->lastID = 0;
     }
-
 
     public function encode(): string
     {
         return base64_encode(json_encode($this));
     }
 
-    /**
-     * @throws ApiCursorException
-     */
-    public static function decode(string $encodedCursor): ApiCursor
-    {
-        $rawCursor = json_decode(base64_decode($encodedCursor), true);
-
-        if (!isset($rawCursor['last_item'])) {
-            throw new ApiCursorException('Cursor last item not set');
-        }
-
-        return new self($rawCursor['last_item'], $rawCursor['filters'] ?? [], $rawCursor['order_by'] ?? []);
-    }
-
     public function jsonSerialize(): mixed
     {
         return [
-            'last_item' => $this->lastValue,
-            'filters' => $this->filters,
+            'last_id' => $this->lastID,
+            'limit' => $this->limit,
+            'offset' => $this->offset,
+            'filters' => $this->rawFilters,
             'order_by' => $this->orderBy,
+            'total_rows' => $this->totalRows,
         ];
-    }
-
-    public function setLastValue(int|string $lastValue): void
-    {
-        $this->lastValue = $lastValue;
-
-    }
-
-    public function getLastValue(): int|string|null
-    {
-        return $this->lastValue;
     }
 
     public function getFilters(): array
@@ -67,6 +52,11 @@ class ApiCursor implements \JsonSerializable
         return $this;
     }
 
+    public function hasFilters(): bool
+    {
+        return !empty($this->filters);
+    }
+
     public function getOrderBy(): array
     {
         return $this->orderBy;
@@ -75,6 +65,7 @@ class ApiCursor implements \JsonSerializable
     public function setOrderBy(array $orderBy): ApiCursor
     {
         $this->orderBy = $orderBy;
+
         return $this;
     }
 
@@ -89,4 +80,80 @@ class ApiCursor implements \JsonSerializable
         return $this;
     }
 
+    public function getOffset(): int
+    {
+        return $this->offset;
+    }
+
+    public function setOffset(int $offset): ApiCursor
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
+    public function setLimit(int $limit): ApiCursor
+    {
+        $this->limit = min($limit, self::MAX_VALUES);
+        return $this;
+    }
+
+    public function useDefaultOrder(): bool
+    {
+        return empty($this->orderBy) || empty(array_diff_assoc($this->orderBy, ['id' => 'ASC']));
+    }
+
+    public function setTotalRows(int $totalRows): ApiCursor
+    {
+        $this->totalRows = $totalRows;
+        return $this;
+    }
+
+    public function hasMorePages(): bool
+    {
+        return $this->offset + $this->limit <= $this->totalRows;
+    }
+
+    public function getNextPage(): string
+    {
+        if (!$this->hasMorePages()) {
+            return self::LAST_PAGE;
+        }
+
+        $this->offset += $this->limit;
+
+        return $this->encode();
+    }
+
+    public function isFirstFetch(): bool
+    {
+        return $this->totalRows === 0;
+    }
+
+    public function addFilter(string $string): static
+    {
+        $this->filters[] = $string;
+        return $this;
+    }
+
+    public function getParameters(): ArrayCollection
+    {
+        return $this->parameters;
+    }
+
+    public function addParameter(Parameter $parameter): static
+    {
+        $this->parameters->add($parameter);
+        return $this;
+    }
+
+    public function addRawFilter(string $filter, mixed $value): static
+    {
+        $this->rawFilters[$filter] = $value;
+        return $this;
+    }
 }

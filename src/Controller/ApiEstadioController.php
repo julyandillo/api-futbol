@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
+use App\ApiCursor\ApiCursor;
+use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Estadio;
 use App\Exception\APIException;
 use App\Repository\EstadioRepository;
-use App\Util\CursorBuilder;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
@@ -31,9 +32,9 @@ class ApiEstadioController extends AbstractController
     use ParamsCheckerTrait;
     use JsonParserRequest;
     use ResponseBuilder;
-    use CursorBuilder;
 
-    public function __construct(private readonly EstadioRepository $estadioRepository)
+    public function __construct(private readonly EstadioRepository $estadioRepository,
+                                private readonly ApiCursorBuilder  $cursorBuilder)
     {
     }
 
@@ -55,12 +56,18 @@ class ApiEstadioController extends AbstractController
     public function listAction(Request $request): Response
     {
         try {
-            $cursor = $this->getCursorForRequest($request, ['nombre', 'capacidad', 'construccion'], 'nombre');
+            $this->cursorBuilder->setAllowFieldOrders(['nombre', 'capacidad', 'construccion']);
+            $this->cursorBuilder->setAllowFieldFilters([
+                'capacidad',
+                'capacidad_min',
+                'capacidad_max',
+                'construccion',
+                'construccion_min',
+                'construccion_max',
+            ]);
+            $cursor = $this->cursorBuilder->buildCursorWithRequest($request);
 
-            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
-
-            $limit = (int)min($request->query->get('limit', 10), 25);
-            $stadiums = $this->estadioRepository->findByCursor($cursor, $limit);
+            $stadiums = $this->estadioRepository->findByCursor($cursor);
 
             if (empty($stadiums)) {
                 return $this->json([
@@ -72,22 +79,15 @@ class ApiEstadioController extends AbstractController
             $lastStadium = $stadiums[count($stadiums) - 1];
             $cursor->setLastID($lastStadium->getId());
 
-            if (strtolower($request->query->get('order')) === 'capacidad') {
-                $cursor->setLastValue($lastStadium->getCapacidad());
-            } else if (strtolower($request->query->get('order')) === 'construccion') {
-                $cursor->setLastValue($lastStadium->getConstruccion());
-            } else {
-                $cursor->setLastValue($lastStadium->getNombre());
-            }
-
+            $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
             $response = [
                 'estadios' => array_map(static function (Estadio $estadio) use ($normalizer) {
                     return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
                 }, $stadiums),
             ];
 
-            if (count($stadiums) === $limit) {
-                $response['cursor'] = $cursor->encode();
+            if (($nextPage = $cursor->getNextPage()) !== ApiCursor::LAST_PAGE) {
+                $response[ApiCursorBuilder::CURSOR_PARAMETER_NAME] = $nextPage;
             }
 
             return $this->json($response);

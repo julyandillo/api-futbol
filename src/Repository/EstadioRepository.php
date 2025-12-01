@@ -2,43 +2,23 @@
 
 namespace App\Repository;
 
-use App\ApiCursor\ApiCursor;
 use App\Entity\Estadio;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Estadio>
+ * @extends ApiRepository<Estadio>
  *
  * @method Estadio|null find($id, $lockMode = null, $lockVersion = null)
  * @method Estadio|null findOneBy(array $criteria, array $orderBy = null)
  * @method Estadio[]    findAll()
  * @method Estadio[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class EstadioRepository extends ServiceEntityRepository
+class EstadioRepository extends ApiRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Estadio::class);
-    }
-
-    public function save(Estadio $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(Estadio $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        parent::__construct($registry, Estadio::class, 'e');
     }
 
     /**
@@ -117,34 +97,5 @@ class EstadioRepository extends ServiceEntityRepository
         return $this->find($idEstadio);
     }
 
-    public function findByCursor(ApiCursor $cursor, int $limit): array
-    {
-        $queryBuilder = $this->createQueryBuilder('e');
 
-        if (empty($cursor->getOrderBy())) {
-            $queryBuilder
-                ->where("e.id > :ordering")
-                ->setParameter('ordering', $cursor->getLastValue())
-                ->orderBy('e.id', 'ASC');
-
-        } else {
-            foreach ($cursor->getOrderBy() as $field => $order) {
-                $queryBuilder
-                    ->orderBy("e.$field", $order);
-
-                if ($cursor->getLastValue()) {
-                    $queryBuilder
-                        ->andWhere("e.$field " . ($order === 'ASC' ? '>' : '<') . " :ordering")
-                        ->setParameter('ordering', $cursor->getLastValue());
-                }
-
-            }
-        }
-
-        $query = $queryBuilder
-            ->getQuery()
-            ->setMaxResults($limit);
-
-        return $query->getResult();
-    }
 }
