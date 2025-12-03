@@ -115,7 +115,7 @@ class ApiCursor implements \JsonSerializable
 
     public function hasMorePages(): bool
     {
-        return $this->offset + $this->limit <= $this->totalRows;
+        return $this->offset + $this->limit < $this->totalRows;
     }
 
     public function getNextPage(): string
