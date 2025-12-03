@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
-use App\ApiCursor\ApiCursor;
 use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Estadio;
 use App\Exception\APIException;
 use App\Repository\EstadioRepository;
+use App\Util\CursorResponseModifierTrait;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
@@ -32,6 +32,7 @@ class ApiEstadioController extends AbstractController
     use ParamsCheckerTrait;
     use JsonParserRequest;
     use ResponseBuilder;
+    use CursorResponseModifierTrait;
 
     public function __construct(private readonly EstadioRepository $estadioRepository,
                                 private readonly ApiCursorBuilder  $cursorBuilder)
@@ -83,9 +84,7 @@ class ApiEstadioController extends AbstractController
                 }, $stadiums),
             ];
 
-            if (($nextPage = $cursor->getNextPage()) !== ApiCursor::LAST_PAGE) {
-                $response[ApiCursorBuilder::CURSOR_PARAMETER_NAME] = $nextPage;
-            }
+            $this->addNextPageToResponse($response, $cursor);
 
             return $this->json($response);
 
