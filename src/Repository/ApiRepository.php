@@ -18,11 +18,11 @@ class ApiRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param <T> $entity
+     * @param object $entity
      * @param bool $flush
      * @return void
      */
-    public function save($entity, bool $flush = false): void
+    public function save(object $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -32,11 +32,11 @@ class ApiRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param <T> $entity
+     * @param object $entity
      * @param bool $flush
      * @return void
      */
-    public function remove($entity, bool $flush = false): void
+    public function remove(object $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -82,9 +82,16 @@ class ApiRepository extends ServiceEntityRepository
         }
 
 
-        return $queryBuilder
+        $results = $queryBuilder
             ->setMaxResults($cursor->getLimit())
             ->getQuery()
-            ->getResult();
+            ->execute();
+
+        if (!empty($results) && $cursor->useDefaultOrder()) {
+            $lastResult = $results[count($results) - 1];
+            $cursor->setLastID($lastResult->getId());
+        }
+
+        return $results;
     }
 }

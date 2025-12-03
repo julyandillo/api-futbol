@@ -76,9 +76,6 @@ class ApiEstadioController extends AbstractController
                 ]);
             }
 
-            $lastStadium = $stadiums[count($stadiums) - 1];
-            $cursor->setLastID($lastStadium->getId());
-
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
             $response = [
                 'estadios' => array_map(static function (Estadio $estadio) use ($normalizer) {
