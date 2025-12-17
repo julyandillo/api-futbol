@@ -109,6 +109,12 @@ class ApiCursorBuilder
 
             $fieldSanitized = str_replace(['_max', '_min'], '', $field);
 
+            if (str_contains($fieldSanitized, '_')) {
+                $words = explode('_', $fieldSanitized);
+                $fieldSanitized = array_shift($words);
+                $fieldSanitized .= implode('', array_map('ucfirst', $words));
+            }
+
             $cursor->addParameter(new Parameter($fieldSanitized, $request->query->get($field)));
             $cursor->addFilter("$fieldSanitized $operator :$fieldSanitized");
 
