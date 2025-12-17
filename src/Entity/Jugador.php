@@ -29,7 +29,7 @@ class Jugador
     private ?string $nombre = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Groups('create')]
+    #[Groups(['create', 'lista'])]
     #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     #[OA\Property(type: 'string', format: 'date')]
     private ?\DateTimeInterface $fechaNacimiento = null;
