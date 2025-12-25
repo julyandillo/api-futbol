@@ -3,7 +3,6 @@
 namespace App\ApiCursor;
 
 use App\Exception\ApiCursorException;
-use Doctrine\ORM\Query\Parameter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -38,14 +37,21 @@ class ApiCursorBuilder
             throw new ApiCursorException('Cursor last ID not set');
         }
 
-        return new ApiCursor(
+        $cursor = new ApiCursor(
             $rawCursor['last_id'],
             (int)$rawCursor['offset'],
             (int)$rawCursor['limit'],
-            $rawCursor['filters'] ?? [],
             $rawCursor['order_by'] ?? [],
             isset($rawCursor['total_rows']) ? (int)$rawCursor['total_rows'] : 0,
         );
+
+        if (!empty($rawCursor['filters']) && is_array($rawCursor['filters'])) {
+            foreach ($rawCursor['filters'] as $filter => $value) {
+                $cursor->addSqlFilter($filter, $value);
+            }
+        }
+
+        return $cursor;
     }
 
     public function setAllowFieldOrders(array $allowFieldOrders): static
@@ -101,27 +107,11 @@ class ApiCursorBuilder
                 continue;
             }
 
-            $operator = match (true) {
-                str_ends_with($field, '_max') => '<=',
-                str_ends_with($field, '_min') => '>=',
-                default => '=',
-            };
-
-            $fieldSanitized = str_replace(['_max', '_min'], '', $field);
-
-            if (str_contains($fieldSanitized, '_')) {
-                $words = explode('_', $fieldSanitized);
-                $fieldSanitized = array_shift($words);
-                $fieldSanitized .= implode('', array_map('ucfirst', $words));
-            }
-
-            $cursor->addParameter(new Parameter($fieldSanitized, $request->query->get($field)));
-            $cursor->addFilter("$fieldSanitized $operator :$fieldSanitized");
-
-            // para poder codificar los filtros para la siguiente petición tal y como vienen en la petición original
-            $cursor->addRawFilter($field, $request->query->get($field));
+            $cursor->addSqlFilter($field, $request->query->get($field));
         }
 
         return $cursor;
     }
+
+
 }

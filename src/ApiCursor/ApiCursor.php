@@ -11,13 +11,15 @@ class ApiCursor implements \JsonSerializable
 
     const string LAST_PAGE = 'last_page';
 
+    private array $rawFilters = [];
     private array $filters = [];
+
+    private string $sql = '';
 
     public function __construct(
         private int                      $lastID = 0,
         private int                      $offset = 0,
         private int                      $limit = 10,
-        private array                    $rawFilters = [],
         private array                    $orderBy = ['id' => 'ASC'],
         private int                      $totalRows = 0,
         private readonly ArrayCollection $parameters = new ArrayCollection())
@@ -31,7 +33,7 @@ class ApiCursor implements \JsonSerializable
 
     public function jsonSerialize(): mixed
     {
-        return [
+        $fields = [
             'last_id' => $this->lastID,
             'limit' => $this->limit,
             'offset' => $this->offset,
@@ -39,17 +41,13 @@ class ApiCursor implements \JsonSerializable
             'order_by' => $this->orderBy,
             'total_rows' => $this->totalRows,
         ];
+
+        return empty($this->sql) ? $fields : array_merge($fields, ['sql' => $this->sql]);
     }
 
     public function getFilters(): array
     {
         return $this->filters;
-    }
-
-    public function setFilters(array $filters): ApiCursor
-    {
-        $this->filters = $filters;
-        return $this;
     }
 
     public function hasFilters(): bool
@@ -134,12 +132,6 @@ class ApiCursor implements \JsonSerializable
         return $this->totalRows === 0;
     }
 
-    public function addFilter(string $string): static
-    {
-        $this->filters[] = $string;
-        return $this;
-    }
-
     public function getParameters(): ArrayCollection
     {
         return $this->parameters;
@@ -154,6 +146,36 @@ class ApiCursor implements \JsonSerializable
     public function addRawFilter(string $filter, mixed $value): static
     {
         $this->rawFilters[$filter] = $value;
+        return $this;
+    }
+
+    public function setSql(string $sql): void
+    {
+        $this->sql = $sql;
+    }
+
+    public function addSqlFilter(string $field, mixed $value): static
+    {
+        $operator = match (true) {
+            str_ends_with($field, '_max') => '<=',
+            str_ends_with($field, '_min') => '>=',
+            default => '=',
+        };
+
+        $fieldSanitized = str_replace(['_max', '_min'], '', $field);
+
+        if (str_contains($fieldSanitized, '_')) {
+            $words = explode('_', $fieldSanitized);
+            $fieldSanitized = array_shift($words);
+            $fieldSanitized .= implode('', array_map('ucfirst', $words));
+        }
+
+        $this->addParameter(new Parameter($fieldSanitized, $value));
+        $this->filters[] = "$fieldSanitized $operator :$fieldSanitized";
+
+        // para poder codificar los filtros para la siguiente petición tal y como vienen en la petición original
+        $this->addRawFilter($field, $value);
+
         return $this;
     }
 }

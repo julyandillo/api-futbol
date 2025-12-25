@@ -49,14 +49,8 @@ class ApiRepository extends ServiceEntityRepository
      * @param ApiCursor $cursor
      * @return T[]
      */
-    public function findByCursor(ApiCursor $cursor): array
+    public function findByCursor(ApiCursor $cursor, bool $debugSQL = false): array
     {
-        if ($cursor->isFirstFetch()) {
-            // cuando en la petición no se encuentre el parámetro con la página siguiente codificada se calcularán
-            // las páginas disponibles en función del total de filas
-            $cursor->setTotalRows($this->count());
-        }
-
         $queryBuilder = $this->createQueryBuilder($this->entityAlias);
 
         if ($cursor->hasFilters()) {
@@ -65,6 +59,17 @@ class ApiRepository extends ServiceEntityRepository
             }
 
             $queryBuilder->setParameters($cursor->getParameters());
+        }
+
+        if ($cursor->isFirstFetch()) {
+            // cuando en la petición no se encuentre el parámetro con la página siguiente codificada se calcularán
+            // las páginas disponibles en función del total de filas
+
+            $cursor->setTotalRows((int)$queryBuilder
+                ->select("COUNT({$this->entityAlias}.id)")
+                ->getQuery()
+                ->getSingleScalarResult()
+            );
         }
 
         if ($cursor->useDefaultOrder()) {
@@ -81,11 +86,17 @@ class ApiRepository extends ServiceEntityRepository
             }
         }
 
-
-        $results = $queryBuilder
+        $query = $queryBuilder
+            // en el caso de que se calcule también el número total de filas el select sería incorrecto aquí
+            ->select($this->entityAlias)
             ->setMaxResults($cursor->getLimit())
-            ->getQuery()
-            ->execute();
+            ->getQuery();
+
+        if ($debugSQL) {
+            $cursor->setSql($query->getSQL());
+        }
+
+        $results = $query->execute();
 
         if (!empty($results) && $cursor->useDefaultOrder()) {
             $lastResult = $results[count($results) - 1];
