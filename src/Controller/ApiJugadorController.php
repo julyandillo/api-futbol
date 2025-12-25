@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Jugador;
+use App\Exception\APIException;
 use App\Repository\JugadorRepository;
 use App\Util\JsonParserRequest;
+use App\Util\PagesCursorTrait;
 use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -31,8 +34,12 @@ class ApiJugadorController extends AbstractController
     use ParamsCheckerTrait;
     use JsonParserRequest;
     use ResponseBuilder;
+    use PagesCursorTrait;
 
-    public function __construct(private readonly JugadorRepository $jugadorRepository)
+    public function __construct(
+        private readonly JugadorRepository $jugadorRepository,
+        private readonly ApiCursorBuilder  $apiCursorBuilder
+    )
     {
     }
 
@@ -56,7 +63,7 @@ class ApiJugadorController extends AbstractController
         description: 'Error al procesar la petición',
         content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
-    public function index(?Jugador $jugador, NormalizerInterface $normalizer): JsonResponse
+    public function indexAction(?Jugador $jugador, NormalizerInterface $normalizer): JsonResponse
     {
         if (!$jugador) {
             return $this->buildNotFoundResponse('Jugador no encontrado');
@@ -187,5 +194,58 @@ class ApiJugadorController extends AbstractController
         return $this->json([
             'msg' => 'Jugador eliminado correctamente',
         ]);
+    }
+
+    /**
+     * Muestra un listado de jugadores con posibilidad de filtrado
+     */
+    #[Route(methods: ['GET'])]
+    public function listAction(
+        Request $request,
+        NormalizerInterface $normalizer
+    ): JsonResponse
+    {
+        try {
+            $this->apiCursorBuilder->setAllowFieldOrders(['nombre', 'apodo', 'peso', 'altura', 'fecha_nacimiento']);
+            $this->apiCursorBuilder->setAllowFieldFilters([
+                'pais_nacimiento',
+                'posicion',
+                'altura',
+                'altura_max',
+                'altura_min',
+                'peso',
+                'peso_max',
+                'peso_min',
+                'fecha_nacimiento',
+                'fecha_nacimiento_min',
+                'fecha_nacimiento_max',
+            ]);
+
+            $cursor = $this->apiCursorBuilder->buildCursorWithRequest($request);
+
+            $players = $this->jugadorRepository->findByCursor($cursor);
+
+            if (empty($players)) {
+                return $this->json(['players' => []]);
+            }
+
+            // $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
+            $context = [
+                'groups' => 'lista',
+            ];
+
+            $response = [
+                'jugadores' => array_map(static function (Jugador $jugador) use ($normalizer, $context) {
+                    return $normalizer->normalize($jugador, null, $context);
+                }, $players),
+            ];
+
+            $this->addNextPageFieldTo($response, $cursor);
+
+            return $this->json($response);
+
+        } catch (APIException $exception) {
+            return $this->buildExceptionResponse($exception, $exception->getCode());
+        }
     }
 }
