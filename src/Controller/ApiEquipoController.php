@@ -345,7 +345,7 @@ class ApiEquipoController extends AbstractController
         }
 
         try {
-            if ($estadio->getId() === $estadioRepository->getEstadioActualDelEquipoConId($equipo->getId())) {
+            if ($estadio->getId() === $estadioRepository->getEstadioActualDelEquipoConId($equipo->getId())?->getId()) {
                 return $this->json([
                     'msg' => 'El estadio ya se encuentra establecido para el equipo'
                 ]);
