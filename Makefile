@@ -1,5 +1,9 @@
 DOCKER_BE = api-futbol-php
 UID = $(shell id -u)
+GID = $(shell id -g)
+
+export UID
+export GID
 
 up:
 	docker compose up -d

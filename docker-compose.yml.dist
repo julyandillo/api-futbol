@@ -18,6 +18,7 @@ services:
       - ./:/var/www
     networks:
       - api-futbol-network
+    user: "${UID}:${GID}"
 
   db:
     container_name: mariadb_api_futbol
