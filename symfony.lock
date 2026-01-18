@@ -65,9 +65,6 @@
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
-    "lcobucci/clock": {
-        "version": "2.1.0"
-    },
     "lcobucci/jwt": {
         "version": "4.0.4"
     },
@@ -82,9 +79,6 @@
         "files": [
             "config/packages/lexik_jwt_authentication.yaml"
         ]
-    },
-    "namshi/jose": {
-        "version": "7.2.3"
     },
     "nelmio/api-doc-bundle": {
         "version": "4.11",
@@ -282,9 +276,6 @@
     },
     "symfony/polyfill-mbstring": {
         "version": "v1.24.0"
-    },
-    "symfony/polyfill-php56": {
-        "version": "v1.20.0"
     },
     "symfony/polyfill-php81": {
         "version": "v1.24.0"

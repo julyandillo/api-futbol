@@ -34,7 +34,7 @@ trait ParamsCheckerTrait
         return implode($separator, $this->missingMandatoryParams);
     }
 
-    public function buildResponseWithMissingMandatoryParams(string $format = null): JsonResponse
+    public function buildResponseWithMissingMandatoryParams(?string $format = null): JsonResponse
     {
         return new JsonResponse([
             'msg' => sprintf($format ?? 'No se puede realizar la petición, faltan parámetros obligatorios: [%s]',
