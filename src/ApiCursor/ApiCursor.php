@@ -31,7 +31,7 @@ class ApiCursor implements \JsonSerializable
         return base64_encode(json_encode($this));
     }
 
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
         $fields = [
             'last_id' => $this->lastID,
@@ -57,10 +57,13 @@ class ApiCursor implements \JsonSerializable
 
     public function getOrderBy(): array
     {
-        return $this->orderBy;
+        return array_combine(
+            array_map(fn (string $field) => $this->sanitizeFieldName($field), array_keys($this->orderBy)),
+            array_values($this->orderBy)
+        );
     }
 
-    public function setOrderBy(array $orderBy): ApiCursor
+    public function setOrderBy(array $orderBy): static
     {
         $this->orderBy = $orderBy;
 
@@ -72,7 +75,7 @@ class ApiCursor implements \JsonSerializable
         return $this->lastID;
     }
 
-    public function setLastID(int $lastID): ApiCursor
+    public function setLastID(int $lastID): static
     {
         $this->lastID = $lastID;
         return $this;
@@ -162,13 +165,7 @@ class ApiCursor implements \JsonSerializable
             default => '=',
         };
 
-        $fieldSanitized = str_replace(['_max', '_min'], '', $field);
-
-        if (str_contains($fieldSanitized, '_')) {
-            $words = explode('_', $fieldSanitized);
-            $fieldSanitized = array_shift($words);
-            $fieldSanitized .= implode('', array_map('ucfirst', $words));
-        }
+        $fieldSanitized = $this->sanitizeFieldName($field);
 
         $this->addParameter(new Parameter($fieldSanitized, $value));
         $this->filters[] = "$fieldSanitized $operator :$fieldSanitized";
@@ -177,5 +174,24 @@ class ApiCursor implements \JsonSerializable
         $this->addRawFilter($field, $value);
 
         return $this;
+    }
+
+    /**
+     * Limpia el nombre del parámetro que se usa en la API para que coincida con el nombre del campo de las entidades
+     *
+     * - Elimina los subfijos '_min' y '_max'
+     * - Convierte de snake_case a camelCase
+     */
+    public function sanitizeFieldName(string $field): string
+    {
+        $fieldSanitized = str_replace(['_max', '_min'], '', $field);
+
+        if (str_contains($fieldSanitized, '_')) {
+            $words = explode('_', $fieldSanitized);
+            $fieldSanitized = array_shift($words);
+            $fieldSanitized .= implode('', array_map('ucfirst', $words));
+        }
+
+        return $fieldSanitized;
     }
 }
