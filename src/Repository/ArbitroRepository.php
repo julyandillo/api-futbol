@@ -4,36 +4,17 @@ namespace App\Repository;
 
 use App\Entity\Arbitro;
 use App\Entity\Competicion;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Arbitro>
+ * @extends ApiRepository<Arbitro>
  */
-class ArbitroRepository extends ServiceEntityRepository
+class ArbitroRepository extends ApiRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Arbitro::class);
-    }
-
-    public function save(mixed $arbitro, bool $flush = true): void
-    {
-        $this->getEntityManager()->persist($arbitro);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(Arbitro $arbitro, bool $flush = true): void
-    {
-        $this->getEntityManager()->remove($arbitro);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        parent::__construct($registry, Arbitro::class, 'a');
     }
 
     public function findByCompetition(Competicion $competicion): array

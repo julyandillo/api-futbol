@@ -4,6 +4,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Symfony\Component\Config\Loader\ParamConfigurator as Param;
+
 /**
  * This class provides array-shapes for configuring the services and bundles of an application.
  *
@@ -186,7 +188,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         only_exceptions?: bool|Param, // Default: false
  *         only_main_requests?: bool|Param, // Default: false
  *         dsn?: scalar|null|Param, // Default: "file:%kernel.cache_dir%/profiler"
- *         collect_serializer_data?: bool|Param, // Enables the serializer data collector and profiler panel. // Default: false
+ *         collect_serializer_data?: true|Param, // Default: true
  *     },
  *     workflows?: bool|array{
  *         enabled?: bool|Param, // Default: false
@@ -230,7 +232,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         enabled?: bool|Param, // Default: false
  *         resource: scalar|null|Param,
  *         type?: scalar|null|Param,
- *         cache_dir?: scalar|null|Param, // Deprecated: Setting the "framework.router.cache_dir.cache_dir" configuration option is deprecated. It will be removed in version 8.0. // Default: "%kernel.build_dir%"
  *         default_uri?: scalar|null|Param, // The default URI used to generate URLs in a non-HTTP context. // Default: null
  *         http_port?: scalar|null|Param, // Default: 80
  *         https_port?: scalar|null|Param, // Default: 443
@@ -254,8 +255,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         gc_maxlifetime?: scalar|null|Param,
  *         save_path?: scalar|null|Param, // Defaults to "%kernel.cache_dir%/sessions" if the "handler_id" option is not null.
  *         metadata_update_threshold?: int|Param, // Seconds to wait between 2 session metadata updates. // Default: 0
- *         sid_length?: int|Param, // Deprecated: Setting the "framework.session.sid_length.sid_length" configuration option is deprecated. It will be removed in version 8.0. No alternative is provided as PHP 8.4 has deprecated the related option.
- *         sid_bits_per_character?: int|Param, // Deprecated: Setting the "framework.session.sid_bits_per_character.sid_bits_per_character" configuration option is deprecated. It will be removed in version 8.0. No alternative is provided as PHP 8.4 has deprecated the related option.
  *     },
  *     request?: bool|array{ // Request configuration
  *         enabled?: bool|Param, // Default: false
@@ -329,11 +328,10 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     },
  *     validation?: bool|array{ // Validation configuration
  *         enabled?: bool|Param, // Default: true
- *         cache?: scalar|null|Param, // Deprecated: Setting the "framework.validation.cache.cache" configuration option is deprecated. It will be removed in version 8.0.
  *         enable_attributes?: bool|Param, // Default: true
  *         static_method?: list<scalar|null|Param>,
  *         translation_domain?: scalar|null|Param, // Default: "validators"
- *         email_validation_mode?: "html5"|"html5-allow-no-tld"|"strict"|"loose"|Param, // Default: "html5"
+ *         email_validation_mode?: "html5"|"html5-allow-no-tld"|"strict"|Param, // Default: "html5"
  *         mapping?: array{
  *             paths?: list<scalar|null|Param>,
  *         },
@@ -345,9 +343,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         auto_mapping?: array<string, array{ // Default: []
  *             services?: list<scalar|null|Param>,
  *         }>,
- *     },
- *     annotations?: bool|array{
- *         enabled?: bool|Param, // Default: false
  *     },
  *     serializer?: bool|array{ // Serializer configuration
  *         enabled?: bool|Param, // Default: true
@@ -380,7 +375,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     },
  *     property_info?: bool|array{ // Property info configuration
  *         enabled?: bool|Param, // Default: true
- *         with_constructor_extractor?: bool|Param, // Registers the constructor extractor.
+ *         with_constructor_extractor?: bool|Param, // Registers the constructor extractor. // Default: true
  *     },
  *     cache?: array{ // Cache configuration
  *         prefix_seed?: scalar|null|Param, // Used to namespace cache keys when using several apps with the same shared backend. // Default: "_%kernel.project_dir%.%kernel.container_class%"
@@ -474,7 +469,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         max_host_connections?: int|Param, // The maximum number of connections to a single host.
  *         default_options?: array{
  *             headers?: array<string, mixed>,
- *             vars?: list<mixed>,
+ *             vars?: array<string, mixed>,
  *             max_redirects?: int|Param, // The maximum number of redirects to follow.
  *             http_version?: scalar|null|Param, // The default HTTP version, typically 1.1 or 2.0, leave to null for the best version.
  *             resolve?: array<string, scalar|null|Param>,
@@ -497,7 +492,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null|Param, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null|Param, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool|Param, // Default: false
@@ -550,7 +545,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null|Param, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null|Param, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool|Param, // Default: false
@@ -904,7 +899,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  * @psalm-type SecurityConfig = array{
  *     access_denied_url?: scalar|null|Param, // Default: null
  *     session_fixation_strategy?: "none"|"migrate"|"invalidate"|Param, // Default: "migrate"
- *     hide_user_not_found?: bool|Param, // Deprecated: The "hide_user_not_found" option is deprecated and will be removed in 8.0. Use the "expose_security_errors" option instead.
  *     expose_security_errors?: \Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::None|\Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::AccountStatus|\Symfony\Component\Security\Http\Authentication\ExposeSecurityLevel::All|Param, // Default: "none"
  *     erase_credentials?: bool|Param, // Default: true
  *     access_decision_manager?: array{
@@ -1147,9 +1141,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                     claim?: scalar|null|Param, // Claim which contains the user identifier (e.g.: sub, email..). // Default: "sub"
  *                     audience: scalar|null|Param, // Audience set in the token, for validation purpose.
  *                     issuers: list<scalar|null|Param>,
- *                     algorithm?: array<mixed>,
  *                     algorithms: list<scalar|null|Param>,
- *                     key?: scalar|null|Param, // Deprecated: The "key" option is deprecated and will be removed in 8.0. Use the "keyset" option instead. // JSON-encoded JWK used to sign the token (must contain a "kty" key).
  *                     keyset?: scalar|null|Param, // JSON-encoded JWKSet used to sign the token (must contain a list of valid public keys).
  *                     encryption?: bool|array{
  *                         enabled?: bool|Param, // Default: false
@@ -1313,7 +1305,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     }>,
  *     autoescape_service?: scalar|null|Param, // Default: null
  *     autoescape_service_method?: scalar|null|Param, // Default: null
- *     base_template_class?: scalar|null|Param, // Deprecated: The child node "base_template_class" at path "twig.base_template_class" is deprecated.
  *     cache?: scalar|null|Param, // Default: true
  *     charset?: scalar|null|Param, // Default: "%kernel.charset%"
  *     debug?: bool|Param, // Default: "%kernel.debug%"
@@ -1384,17 +1375,10 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         ...<mixed>
  *     },
  * }
- * @psalm-type WebProfilerConfig = array{
- *     toolbar?: bool|array{ // Profiler toolbar configuration
- *         enabled?: bool|Param, // Default: false
- *         ajax_replace?: bool|Param, // Replace toolbar on AJAX requests // Default: false
- *     },
- *     intercept_redirects?: bool|Param, // Default: false
- *     excluded_ajax_paths?: scalar|null|Param, // Default: "^/((index|app(_[\\w]+)?)\\.php/)?_wdt"
- * }
  * @psalm-type NelmioApiDocConfig = array{
- *     type_info?: bool|Param, // Use the symfony/type-info component for determining types. // Default: false
- *     use_validation_groups?: bool|Param, // If true, `groups` passed to @Model annotations will be used to limit validation constraints // Default: false
+ *     type_info?: bool|Param, // Use the symfony/type-info component for determining types. // Default: true
+ *     use_validation_groups?: bool|Param, // If true, `groups` passed to #[Model] attributes will be used to limit validation constraints // Default: false
+ *     operation_id_generation?: \Nelmio\ApiDocBundle\Describer\OperationIdGeneration::ALWAYS_PREPEND|\Nelmio\ApiDocBundle\Describer\OperationIdGeneration::CONDITIONALLY_PREPEND|\Nelmio\ApiDocBundle\Describer\OperationIdGeneration::NO_PREPEND|"always_prepend"|"conditionally_prepend"|"no_prepend"|Param, // How to generate operation ids // Default: "always_prepend"
  *     cache?: array{
  *         pool?: scalar|null|Param, // define cache pool to use // Default: null
  *         item_id?: scalar|null|Param, // define cache item id // Default: null
@@ -1407,13 +1391,21 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         redocly_config?: array<mixed>,
  *         stoplight_config?: array<mixed>,
  *     },
- *     areas?: array<string, array{ // Default: {"default":{"path_patterns":[],"host_patterns":[],"with_annotation":false,"with_attribute":false,"documentation":[],"name_patterns":[],"disable_default_routes":false,"cache":[]}}
+ *     areas?: array<string, array{ // Default: {"default":{"path_patterns":[],"host_patterns":[],"with_attribute":false,"documentation":[],"name_patterns":[],"disable_default_routes":false,"cache":[],"security":[]}}
  *         path_patterns?: list<scalar|null|Param>,
  *         host_patterns?: list<scalar|null|Param>,
  *         name_patterns?: list<scalar|null|Param>,
- *         with_annotation?: bool|Param, // Deprecated: The "with_annotation" option is deprecated. Use "with_attribute" instead. // whether to filter by annotation // Default: false
- *         with_attribute?: bool|Param, // whether to filter by attribute // Default: false
- *         disable_default_routes?: bool|Param, // if set disables default routes without annotations // Default: false
+ *         security?: array<string, array{ // Default: []
+ *             type?: scalar|null|Param,
+ *             scheme?: scalar|null|Param,
+ *             in?: scalar|null|Param,
+ *             name?: scalar|null|Param,
+ *             description?: scalar|null|Param,
+ *             openIdConnectUrl?: scalar|null|Param,
+ *             ...<mixed>
+ *         }>,
+ *         with_attribute?: bool|Param, // whether to filter by attributes // Default: false
+ *         disable_default_routes?: bool|Param, // if set disables default routes without attributes // Default: false
  *         documentation?: array<string, mixed>,
  *         cache?: array{
  *             pool?: scalar|null|Param, // define cache pool to use // Default: null
@@ -1451,7 +1443,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         bubble?: bool|Param, // Default: true
  *         interactive_only?: bool|Param, // Default: false
  *         app_name?: scalar|null|Param, // Default: null
- *         fill_extra_context?: bool|Param, // Default: false
  *         include_stacktraces?: bool|Param, // Default: false
  *         process_psr_3_messages?: array{
  *             enabled?: bool|null|Param, // Default: null
@@ -1471,7 +1462,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         activation_strategy?: scalar|null|Param, // Default: null
  *         stop_buffering?: bool|Param, // Default: true
  *         passthru_level?: scalar|null|Param, // Default: null
- *         excluded_404s?: list<scalar|null|Param>,
  *         excluded_http_codes?: list<array{ // Default: []
  *             code?: scalar|null|Param,
  *             urls?: list<scalar|null|Param>,
@@ -1485,9 +1475,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         url?: scalar|null|Param,
  *         exchange?: scalar|null|Param,
  *         exchange_name?: scalar|null|Param, // Default: "log"
- *         room?: scalar|null|Param,
- *         message_format?: scalar|null|Param, // Default: "text"
- *         api_version?: scalar|null|Param, // Default: null
  *         channel?: scalar|null|Param, // Default: null
  *         bot_name?: scalar|null|Param, // Default: "Monolog"
  *         use_attachment?: scalar|null|Param, // Default: true
@@ -1496,9 +1483,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         icon_emoji?: scalar|null|Param, // Default: null
  *         webhook_url?: scalar|null|Param,
  *         exclude_fields?: list<scalar|null|Param>,
- *         team?: scalar|null|Param,
- *         notify?: scalar|null|Param, // Default: false
- *         nickname?: scalar|null|Param, // Default: "Monolog"
  *         token?: scalar|null|Param,
  *         region?: scalar|null|Param,
  *         source?: scalar|null|Param,
@@ -1516,12 +1500,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         store?: scalar|null|Param, // Default: null
  *         connection_timeout?: scalar|null|Param,
  *         persistent?: bool|Param,
- *         dsn?: scalar|null|Param,
- *         hub_id?: scalar|null|Param, // Default: null
- *         client_id?: scalar|null|Param, // Default: null
- *         auto_log_stacks?: scalar|null|Param, // Default: false
- *         release?: scalar|null|Param, // Default: null
- *         environment?: scalar|null|Param, // Default: null
  *         message_type?: scalar|null|Param, // Default: 0
  *         parse_mode?: scalar|null|Param, // Default: null
  *         disable_webpage_preview?: bool|null|Param, // Default: null
@@ -1531,7 +1509,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         topic?: int|Param, // Default: null
  *         factor?: int|Param, // Default: 1
  *         tags?: list<scalar|null|Param>,
- *         console_formater_options?: mixed, // Deprecated: "monolog.handlers..console_formater_options.console_formater_options" is deprecated, use "monolog.handlers..console_formater_options.console_formatter_options" instead.
  *         console_formatter_options?: mixed, // Default: []
  *         formatter?: scalar|null|Param,
  *         nested?: bool|Param, // Default: false
@@ -1541,15 +1518,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             port?: scalar|null|Param, // Default: 12201
  *             chunk_size?: scalar|null|Param, // Default: 1420
  *             encoder?: "json"|"compressed_json"|Param,
- *         },
- *         mongo?: string|array{
- *             id?: scalar|null|Param,
- *             host?: scalar|null|Param,
- *             port?: scalar|null|Param, // Default: 27017
- *             user?: scalar|null|Param,
- *             pass?: scalar|null|Param,
- *             database?: scalar|null|Param, // Default: "monolog"
- *             collection?: scalar|null|Param, // Default: "logs"
  *         },
  *         mongodb?: string|array{
  *             id?: scalar|null|Param, // ID of a MongoDB\Client service
@@ -1593,7 +1561,6 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             id: scalar|null|Param,
  *             method?: scalar|null|Param, // Default: null
  *         },
- *         lazy?: bool|Param, // Default: true
  *         verbosity_levels?: array{
  *             VERBOSITY_QUIET?: scalar|null|Param, // Default: "ERROR"
  *             VERBOSITY_NORMAL?: scalar|null|Param, // Default: "WARNING"
@@ -1606,6 +1573,14 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             elements?: list<scalar|null|Param>,
  *         },
  *     }>,
+ * }
+ * @psalm-type WebProfilerConfig = array{
+ *     toolbar?: bool|array{ // Profiler toolbar configuration
+ *         enabled?: bool|Param, // Default: false
+ *         ajax_replace?: bool|Param, // Replace toolbar on AJAX requests // Default: false
+ *     },
+ *     intercept_redirects?: bool|Param, // Default: false
+ *     excluded_ajax_paths?: scalar|null|Param, // Default: "^/((index|app(_[\\w]+)?)\\.php/)?_wdt"
  * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
@@ -1632,10 +1607,10 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *         twig?: TwigConfig,
  *         twig_extra?: TwigExtraConfig,
- *         web_profiler?: WebProfilerConfig,
  *         nelmio_api_doc?: NelmioApiDocConfig,
  *         debug?: DebugConfig,
  *         monolog?: MonologConfig,
+ *         web_profiler?: WebProfilerConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1662,9 +1637,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
  *         twig?: TwigConfig,
  *         twig_extra?: TwigExtraConfig,
- *         web_profiler?: WebProfilerConfig,
  *         nelmio_api_doc?: NelmioApiDocConfig,
  *         monolog?: MonologConfig,
+ *         web_profiler?: WebProfilerConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

@@ -7,8 +7,8 @@ use App\Repository\JugadorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 #[ORM\Entity(repositoryClass: JugadorRepository::class)]
