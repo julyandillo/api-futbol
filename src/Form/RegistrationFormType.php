@@ -4,14 +4,11 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\IsTrue;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegistrationFormType extends AbstractType
 {
@@ -26,23 +23,17 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Contraseña',
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Introduce una contraseña',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'La contraseña debe tener al menos {{ limit }} caracteres',
-                        // max length allowed by Symfony for security reasons
-                        'max' => 4096,
-                    ]),
+                    new Assert\NotBlank(message: 'Introduce una contraseña'),
+                    new Assert\Length(
+                        min: 6,
+                        minMessage: 'La contraseña debe tener al menos {{ limit }} caracteres',
+                    ),
                 ],
             ])
             ->add('email', EmailType::class, [
                 'mapped' => true,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Introduce un email',
-                    ]),
+                    new Assert\NotBlank(message: 'Introduce un email'),
                 ],
             ])
         ;
