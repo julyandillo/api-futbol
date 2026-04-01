@@ -113,6 +113,13 @@ class UserController extends AbstractController
             ]);
         }
 
+        $expirationDate = new \DateTimeImmutable(date(DATE_ATOM, time() + $_ENV['JWT_TTL']));
+
+        $aplicacion->setFechaExpiracionToken($expirationDate);
+
+        $this->entityManager->persist($aplicacion);
+        $this->entityManager->flush();
+
         return $this->json([
             'code' => 200,
             'token' => $JWTManager->create($usuarioAplicacion),

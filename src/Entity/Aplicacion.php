@@ -27,6 +27,9 @@ class Aplicacion
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $fecha_creacion = null;
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeInterface $fecha_expiracion_token = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,5 +79,21 @@ class Aplicacion
     public function setFechaCreacion(): void
     {
         $this->fecha_creacion = new \DateTimeImmutable();
+    }
+
+    public function getFechaExpiracionToken(): ?\DateTimeInterface
+    {
+        return $this->fecha_expiracion_token;
+    }
+
+    public function setFechaExpiracionToken(?\DateTimeInterface $fecha_expiracion_token): self
+    {
+        $this->fecha_expiracion_token = $fecha_expiracion_token;
+        return $this;
+    }
+
+    public function existeToken(): bool
+    {
+        return null !== $this->fecha_expiracion_token;
     }
 }

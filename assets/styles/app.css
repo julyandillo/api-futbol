@@ -343,3 +343,7 @@ dialog {
     visibility: hidden;
     opacity: 0;
 }
+
+.small-text {
+    font-size: var(--fs-300);
+}
