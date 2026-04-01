@@ -4,8 +4,9 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -19,9 +20,13 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
+    private EntityManagerInterface $entityManager;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
+
+        $this->entityManager = $this->getEntityManager();
     }
 
     /**
@@ -30,9 +35,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function add(User $entity, bool $flush = true): void
     {
-        $this->_em->persist($entity);
+        $this->entityManager->persist($entity);
         if ($flush) {
-            $this->_em->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -42,9 +47,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function remove(User $entity, bool $flush = true): void
     {
-        $this->_em->remove($entity);
+        $this->entityManager->remove($entity);
         if ($flush) {
-            $this->_em->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -58,8 +63,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
 
         $user->setPassword($newHashedPassword);
-        $this->_em->persist($user);
-        $this->_em->flush();
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 
     // /**
