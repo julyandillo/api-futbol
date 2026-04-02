@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#27544B">
-    <title>{% block title %}Welcome!{% endblock %}</title>
+
+    <title>{% block title %}API Fútbol{% endblock %}</title>
+
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon/favicon-16x16.png') }}">
@@ -16,7 +18,29 @@
 </head>
 <body>
 {% block body %}
+{% block menu %}
+    <div id="menu">
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_admin_usuarios') }}" class="opcion-menu">
+                <span class="icono-menu"><i class="bi bi-people"></i></span>
+                <span class="desktop">Usuarios</span>
+            </a>
+            <a href="{{ path('competiciones') }}" class="opcion-menu">
+                <span class="icono-menu"><i class="bi bi-newspaper"></i></span>
+                <span class="desktop">Competiciones</span>
+            </a>
+        {% endif %}
+        <a href="{{ path('app_logout') }}" class="opcion-menu">
+            <span class="icono-menu"><i class="bi bi-door-open"></i></span>
+            <span class="desktop">Salir</span>
+        </a>
+    </div>
 {% endblock %}
+
+<div class="contenido">
+    {% block contenido %}
+    {% endblock %}
+</div>
 
 <dialog id="modal-eliminar">
     <div class="modal-content">
@@ -46,4 +70,5 @@
     </div>
 </dialog>
 </body>
+{% endblock %}
 </html>

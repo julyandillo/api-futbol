@@ -6,25 +6,3 @@
     {{ importmap(['app', 'ui']) }}
 {% endblock %}
 
-{% block body %}
-    <div id="menu">
-        {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('app_admin_usuarios') }}" class="opcion-menu">
-                <span class="icono-menu"><i class="bi bi-people"></i></span>
-                <span class="desktop">Usuarios</span>
-            </a>
-            <a href="{{ path('competiciones') }}" class="opcion-menu">
-                <span class="icono-menu"><i class="bi bi-newspaper"></i></span>
-                <span class="desktop">Competiciones</span>
-            </a>
-        {% endif %}
-        <a href="{{ path('app_logout') }}" class="opcion-menu">
-            <span class="icono-menu"><i class="bi bi-door-open"></i></span>
-            <span class="desktop">Salir</span>
-        </a>
-    </div>
-    <div class="contenido">
-        {% block contenido %}
-        {% endblock %}
-    </div>
-{% endblock %}
