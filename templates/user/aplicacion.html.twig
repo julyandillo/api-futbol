@@ -1,13 +1,17 @@
+{% trans_default_domain 'user' %}
+
 <div class="aplicacion sombra" data-aplicacion="{{ aplicacion.id }}">
     <div class="aplicacion-info">
         <div class="aplicacion-nombre">{{ aplicacion.nombre }}</div>
-        <div class="aplicacion-fecha small-text">[fecha de creación: {{ aplicacion.fechaCreacion|date("d/m/Y H:i:s") }}
+        <div class="aplicacion-fecha small-text">[{{ 'creation date'|trans }}
+            : {{ aplicacion.fechaCreacion|date("d/m/Y H:i:s") }}
             ]
         </div>
     </div>
 
     <div class="aplicacion-acciones">
-        <span class="boton boton-primary btn__aplicacion-token" data-accion="app-token">Generar token</span>
+        <span class="boton boton-primary btn__aplicacion-token"
+              data-accion="app-token">{{ 'Generate token'|trans }}</span>
         <span class="boton boton-azul btn__aplicacion-cambiar-nombre" data-accion="app-cambiar-nombre"><i class="bi bi-pencil"></i></span>
         <span class="boton boton-warning btn__aplicacion-eliminar" data-accion="app-eliminar"><i class="bi bi-trash3-fill"></i></span>
     </div>
@@ -16,12 +20,12 @@
     <div class="aplicacion-token {% if not aplicacion.existeToken %}oculto{% endif %}">
         <div class="aplicacion-token-cabecera">
             {% if aplicacion.existeToken %}
-                <div class="aplicacion-token-expiracion">token generado - fecha de
-                    expiración: {{ aplicacion.fechaExpiracionToken|date("d/m/Y H:i:s") }}</div>
+                <div class="aplicacion-token-expiracion">{{ 'generated token'|trans }} - {{ 'expiration date'|trans }}
+                    : {{ aplicacion.fechaExpiracionToken|date("d/m/Y H:i:s") }}</div>
             {% else %}
                 <div>token</div>
                 <div class="aplicacion-copiar-token" data-accion="app-token-copiar"><i class="bi bi-trash"></i></i><span
-                            class="texto">copiar</span></div>
+                            class="texto">{{ 'copy'|trans }}</span></div>
             {% endif %}
         </div>
 
@@ -30,8 +34,8 @@
                 <div class="div__token">
                 </div>
                 <div class="small-text">
-                    * una vez cerrada esta vista el token ya no se podrá volver a mostrar, por favor, almacénalo en un
-                    lugar seguro [expiracion: {{ aplicacion.fechaExpiracionToken|date('d/m/Y H:i:s') }}]
+                    * {{ 'Once this window is closed, the token will no longer be displayed. Please save it in a safe place.'|trans }}
+                    [{{ 'expiration date'|trans }}: {{ aplicacion.fechaExpiracionToken|date('d/m/Y H:i:s') }}]
                 </div>
             </div>
             <div class="error oculto"></div>

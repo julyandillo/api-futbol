@@ -1,3 +1,5 @@
+{% trans_default_domain 'user' %}
+
 {% extends 'admin/index.html.twig' %}
 
 {% block javascripts %}
@@ -5,19 +7,20 @@
 {% endblock %}
 
 {% block contenido %}
-    <h2>Aplicaciones</h2>
+    <h2>{{ 'Apps'|trans }}</h2>
 
     <div class="mt-2">
-        <span class="boton boton-primary" data-toggle="div__nueva-aplicacion"> Nueva aplicación</span>
+        <span class="boton boton-primary" data-toggle="div__nueva-aplicacion"> {{ 'New app'|trans }}</span>
     </div>
 
     <div id="div__nueva-aplicacion" class="div__nueva-aplicacion oculto">
         <div class="form-nueva-aplicacion">
-            <div>Nombre:</div>
+            <div>{{ 'Name'|trans }}:</div>
             <div class="div__nombre-aplicacion">
                 <input type="text" id="input__nombre-aplicacion" name="nombre-aplicacion">
             </div>
-            <div><span id="btn__guardar-aplicacion" class="boton boton-primary"><i class="bi bi-floppy2"></i> Guardar</span>
+            <div><span id="btn__guardar-aplicacion" class="boton boton-primary"><i
+                            class="bi bi-floppy2"></i> {{ 'Save'|trans }}</span>
             </div>
         </div>
         <div class="error oculto"></div>
@@ -27,7 +30,7 @@
         {% for aplicacion in aplicaciones %}
             {{ include('user/aplicacion.html.twig', {'aplicacion': aplicacion}) }}
         {% else %}
-            <h4 class="sin-aplicaciones">No hay ninguna aplicación configurada</h4>
+            <h4 class="sin-aplicaciones">{{ 'No registered applications'|trans }}</h4>
         {% endfor %}
     </div>
 {% endblock %}
