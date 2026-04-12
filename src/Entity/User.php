@@ -162,4 +162,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->fecha_creacion = new \DateTimeImmutable();
     }
+
+    public function isRealUser(): bool
+    {
+        return $this->hash === null;
+    }
 }

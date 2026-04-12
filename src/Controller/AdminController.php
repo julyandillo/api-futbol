@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,9 +28,7 @@ class AdminController extends AbstractController
     public function usuarios(UserRepository $userRepository): Response
     {
         return $this->render('admin/usuarios.html.twig', [
-            'usuarios' => array_filter($userRepository->findAll(), static function (User $usuario) {
-                return in_array('ROLE_USER', $usuario->getRoles());
-            }),
+            'usuarios' => array_filter($userRepository->findAllRealUsers()),
         ]);
     }
 
