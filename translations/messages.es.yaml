@@ -1,0 +1,5 @@
+generic:
+  400: 'No se puede realizar la petición, faltan parámetros obligatorios: [%params%]'
+
+admin:
+  delete: 'El usuario "%username%" no existe'

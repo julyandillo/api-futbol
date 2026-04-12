@@ -8,10 +8,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 class AdminController extends AbstractController
 {
+    public function __construct(private readonly TranslatorInterface $translator)
+    {
+    }
+
     #[Route('/admin', name: 'app_admin')]
     public function index(): Response
     {
@@ -24,7 +29,7 @@ class AdminController extends AbstractController
     public function usuarios(UserRepository $userRepository): Response
     {
         return $this->render('admin/usuarios.html.twig', [
-            'usuarios' => array_filter($userRepository->findAll(), function (User $usuario) {
+            'usuarios' => array_filter($userRepository->findAll(), static function (User $usuario) {
                 return in_array('ROLE_USER', $usuario->getRoles());
             }),
         ]);
@@ -36,7 +41,7 @@ class AdminController extends AbstractController
         if (!$request->request->has('usuario')) {
             return $this->json([
                 'code' => 400,
-                'msg' => 'No se puede realizar la petición, falta el parámetro "usuario"',
+                'msg' => $this->translator->trans('generic.400', ['%params%' => 'usuario'], 'messages'),
                 ]);
         }
 
@@ -45,7 +50,7 @@ class AdminController extends AbstractController
         if (!$usuario) {
             return $this->json([
                 'code' => 401,
-                'msg' => sprintf('No existe ningún usuario con el username "%s"', $request->request->get('usuario')),
+                'msg' => $this->translator->trans('admin.delete', ['%username%' => $request->request->get('usuario')], 'messages'),
             ]);
         }
 
