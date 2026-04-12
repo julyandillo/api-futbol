@@ -1,10 +1,11 @@
 {% extends 'base.html.twig' %}
 
+{% trans_default_domain 'login' %}
 {% block javascripts %}
     {{ importmap(['app', 'registro']) }}
 {% endblock %}
 
-{% block title %}Nuevo usuario{% endblock %}
+{% block title %}{{ parent() }} | {{ 'Register'|trans }}{% endblock %}
 
 {% block body %}
     <div class="contenido">
@@ -30,7 +31,7 @@
             {{ form_widget(registrationForm.email) }}
         </div>
 
-        <button type="submit" class="boton boton-primary mt-2">Crear cuenta</button>
+        <button type="submit" class="boton boton-primary mt-2">{{ 'Create account'|trans }}</button>
         {{ form_end(registrationForm) }}
     </div>
 {% endblock %}

@@ -2,6 +2,8 @@
 
 namespace App\Config;
 
+use Symfony\Component\Translation\TranslatableMessage;
+
 enum CategoriaCompeticion: string
 {
     case Liga = 'LIGA';
@@ -13,17 +15,19 @@ enum CategoriaCompeticion: string
     case ChampionsLeagueLegacy = 'CHAMPIONS_LEAGUE_LEGACY';
     case EuropeLeagueLegacy = 'EUROPA_LEAGUE_LEGACY';
 
-    public function nameForSelect(): string
+    public function nameForSelect(): TranslatableMessage
     {
-        return match ($this) {
+        $message = match ($this) {
             self::EuropeLeague => 'UEFA Europe League',
             self::ChampionsLeague => 'UEFA Champions League',
             self::CopaDelRey => 'Copa del Rey',
-            self::Liga => 'Liga',
-            self::Mundial => 'Mundial',
-            self::Eurocopa => 'Eurocopa',
-            self::ChampionsLeagueLegacy => 'Champions League (antiguo formato)',
-            self::EuropeLeagueLegacy => 'Europe League (antiguo formato)',
+            self::Liga => 'League',
+            self::Mundial => 'World Cup',
+            self::Eurocopa => 'Eurocup',
+            self::ChampionsLeagueLegacy => 'UEFA Champions League (old format)',
+            self::EuropeLeagueLegacy => 'UEFA Europe League (old fortmat)',
         };
+
+        return new TranslatableMessage($message, [], 'forms');
     }
 }

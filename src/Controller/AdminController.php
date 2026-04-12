@@ -23,7 +23,7 @@ class AdminController extends AbstractController
     #[Route('/admin/usuarios', name: 'app_admin_usuarios')]
     public function usuarios(UserRepository $userRepository): Response
     {
-        return $this->render('usuarios/usuarios.html.twig', [
+        return $this->render('admin/usuarios.html.twig', [
             'usuarios' => array_filter($userRepository->findAll(), function (User $usuario) {
                 return in_array('ROLE_USER', $usuario->getRoles());
             }),
@@ -45,7 +45,7 @@ class AdminController extends AbstractController
         if (!$usuario) {
             return $this->json([
                 'code' => 401,
-                'msg' => spirntf('No existe ningún usuario con el username "%s"', $request->request->get('usuario')),
+                'msg' => sprintf('No existe ningún usuario con el username "%s"', $request->request->get('usuario')),
             ]);
         }
 

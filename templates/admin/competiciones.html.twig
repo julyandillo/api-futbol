@@ -1,5 +1,7 @@
 {% extends 'admin/index.html.twig' %}
 
+{% trans_default_domain 'admin' %}
+
 {% block javascripts %}
     {{ importmap(['app', 'competiciones']) }}
 {% endblock %}
@@ -7,10 +9,11 @@
 {% block contenido %}
     <div class="competiciones-acciones">
         <span>
-            <a href="{{ path('competicion_nueva') }}" class="boton boton-primary"><i class="bi bi-plus-square"></i> Nueva competición</a>
+            <a href="{{ path('competicion_nueva') }}" class="boton boton-primary"><i
+                        class="bi bi-plus-square"></i> {{ 'New competition'|trans }}</a>
         </span>
         {% if competiciones|length > 0 %}
-            <span>Categorías:</span>
+            <span>{{ 'Categories'|trans }}:</span>
             <div class="competiciones-tags"></div>
         {% endif %}
     </div>
@@ -19,7 +22,7 @@
         {% for competicion in competiciones %}
             {{ include('admin/competicion.html.twig', {competicion: competicion}) }}
         {% else %}
-            <h1>No hay competiciones disponibles</h1>
+            <h1>{{ 'No competitions availables'|trans }}</h1>
         {% endfor %}
     </div>
 {% endblock %}

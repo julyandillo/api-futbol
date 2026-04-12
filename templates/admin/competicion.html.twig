@@ -22,7 +22,7 @@
     </div>
 
     <div class="competicion-fechas">
-        <div>inicio: {{ competicion.fechaInicio|date('d-m-Y') }}</div>
-        <div>fin: {{ competicion.fechaFin|date('d-m-Y') }}</div>
+        <div>{{ 'begin'|trans([], 'admin') }}: {{ competicion.fechaInicio|date('d-m-Y') }}</div>
+        <div>{{ 'end'|trans([], 'admin') }}: {{ competicion.fechaFin|date('d-m-Y') }}</div>
     </div>
 </div>

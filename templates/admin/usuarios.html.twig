@@ -1,18 +1,20 @@
 {% extends 'admin/index.html.twig' %}
 
+{% trans_default_domain 'admin' %}
+
 {% block javascripts %}
     {{ importmap(['app', 'admin']) }}
 {% endblock %}
 
 {% block contenido %}
-    <h2>Usuarios registrados</h2>
+    <h2>{{ 'Users'|trans }}</h2>
     <table class="tabla-usuarios mt-2">
         <thead>
         <tr>
-            <th>usuario</th>
+            <th>{{ 'user'|trans }}</th>
             <th>email</th>
-            <th>aplicaciones</th>
-            <th>fecha de creación</th>
+            <th>{{ 'apps'|trans }}</th>
+            <th>{{ 'creation date'|trans }}</th>
             <th></th>
         </tr>
         </thead>

@@ -2,6 +2,8 @@
 
 namespace App\Config;
 
+use Symfony\Component\Translation\TranslatableMessage;
+
 enum TipoCompeticion: string
 {
     case Liga = 'LIGA';
@@ -10,14 +12,16 @@ enum TipoCompeticion: string
     case TorneoSoloConEliminatorias = 'TORNEO_KO';
     case TorneoConLigaPrevia = 'TORNEO_CON_LIGA_PREVIA';
 
-    public function nameForSelect(): string
+    public function nameForSelect(): TranslatableMessage
     {
-        return match ($this) {
-            self::Liga => 'Liga',
-            self::TorneoSoloConEliminatorias => 'Sólo eliminatorias',
-            self::TorneoConGruposDobles => 'Torneo con fase de grupos de doble enfrentamiento',
-            self::TorneoConGruposSimples => 'Torneo con fase de grupos de único enfrentamiento',
-            self::TorneoConLigaPrevia => 'Torneo con fase de liga previa a las eliminatorias',
+        $message = match ($this) {
+            self::Liga => 'League',
+            self::TorneoSoloConEliminatorias => 'Only qualifying round',
+            self::TorneoConGruposDobles => 'Tournament featuring a double-round-robin group stage',
+            self::TorneoConGruposSimples => 'Tournament with a single-match group stage',
+            self::TorneoConLigaPrevia => 'Tournament featuring a group stage prior to the knockout rounds',
         };
+
+        return new TranslatableMessage($message, [], 'forms');
     }
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#27544B">
 
-    <title>{% block title %}API Fútbol{% endblock %}</title>
+    <title>{% block title %}{{ '{app_name}'|trans }}{% endblock %}</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon/favicon-32x32.png') }}">
@@ -23,16 +23,16 @@
         {% if is_granted('ROLE_ADMIN') %}
             <a href="{{ path('app_admin_usuarios') }}" class="opcion-menu">
                 <span class="icono-menu"><i class="bi bi-people"></i></span>
-                <span class="desktop">Usuarios</span>
+                <span class="desktop">{{ 'Users'|trans([], 'menu') }}</span>
             </a>
             <a href="{{ path('competiciones') }}" class="opcion-menu">
                 <span class="icono-menu"><i class="bi bi-newspaper"></i></span>
-                <span class="desktop">Competiciones</span>
+                <span class="desktop">{{ 'Competitions'|trans([], 'menu') }}</span>
             </a>
         {% endif %}
         <a href="{{ path('app_logout') }}" class="opcion-menu">
             <span class="icono-menu"><i class="bi bi-door-open"></i></span>
-            <span class="desktop">Salir</span>
+            <span class="desktop">{{ 'Logout'|trans([], 'menu') }}</span>
         </a>
     </div>
 {% endblock %}

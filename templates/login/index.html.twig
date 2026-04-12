@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inicio de sesión{% endblock %}
+{% trans_default_domain 'login' %}
+
+{% block title %}{{ parent() }} | {{ 'Log in'|trans }}{% endblock %}
 
 {% block javascripts %}
     {{ importmap(['app', 'login']) }}
@@ -9,22 +11,22 @@
 {% block body %}
     <div class="contenido">
         <div class="login-form">
-            <h2>Inicia sesión</h2>
+            <h2>{{ 'Log in'|trans }}</h2>
             <form action="{{ path('app_login') }}" method="post">
-                <label for="usuario">Usuario</label>
+                <label for="usuario">{{ 'User'|trans }}</label>
                 <input type="text" id="usuario" name="_username"/>
 
-                <label for="password">Contraseña</label>
+                <label for="password">{{ 'Password'|trans }}</label>
                 <input type="password" id="password" name="_password">
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                <button class="boton boton-primary w-100 mt-2" type="submit">Iniciar sesión</button>
+                <button class="boton boton-primary w-100 mt-2" type="submit">{{ 'log in'|trans }}</button>
 
                 <div class="remember-me">
                     <label class="checkbox-label">
                         <input type="checkbox" name="_remember_me" id="remember_me">
-                        Recuérdame
+                        {{ 'Remember me'|trans }}
                     </label>
                 </div>
             </form>
