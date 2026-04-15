@@ -66,7 +66,7 @@ class ApiJugadorController extends AbstractController
     public function indexAction(?Jugador $jugador, NormalizerInterface $normalizer): JsonResponse
     {
         if (!$jugador) {
-            return $this->buildNotFoundResponse('Jugador no encontrado');
+            return $this->createNotFoundResponse('Jugador no encontrado');
         }
 
         try {
@@ -75,7 +75,7 @@ class ApiJugadorController extends AbstractController
             ]));
 
         } catch (ExceptionInterface $exception) {
-            return $this->buildExceptionResponse($exception);
+            return $this->createExceptionResponse($exception);
         }
     }
 
@@ -118,10 +118,10 @@ class ApiJugadorController extends AbstractController
             ]);
 
         } catch (PartialDenormalizationException $exception) {
-            return $this->buildPartialDenormalizationExceptionResponse($exception);
+            return $this->createPartialDenormalizationExceptionResponse($exception);
 
         } catch (\JsonException $exception) {
-            return $this->buildExceptionResponse($exception);
+            return $this->createExceptionResponse($exception);
         }
     }
 
@@ -149,7 +149,7 @@ class ApiJugadorController extends AbstractController
     public function updateAction(?Jugador $jugador, Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$jugador) {
-            return $this->buildNotFoundResponse('Jugador no encontrado');
+            return $this->createNotFoundResponse('Jugador no encontrado');
         }
 
         try {
@@ -164,7 +164,7 @@ class ApiJugadorController extends AbstractController
             ]);
 
         } catch (NotNormalizableValueException $exception) {
-            return $this->buildResponseWithErrorMessage($exception->getMessage());
+            return $this->createErrorResponseWithMessage($exception->getMessage());
         }
     }
 
@@ -186,7 +186,7 @@ class ApiJugadorController extends AbstractController
     public function deleteAction(?Jugador $jugador): JsonResponse
     {
         if (!$jugador) {
-            return $this->buildNotFoundResponse('Jugador no encontrado');
+            return $this->createNotFoundResponse('Jugador no encontrado');
         }
 
         $this->jugadorRepository->remove($jugador, true);
@@ -245,7 +245,7 @@ class ApiJugadorController extends AbstractController
             return $this->json($response);
 
         } catch (APIException $exception) {
-            return $this->buildExceptionResponse($exception, $exception->getCode());
+            return $this->createExceptionResponse($exception, $exception->getCode());
         }
     }
 }

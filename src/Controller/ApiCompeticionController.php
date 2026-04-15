@@ -10,8 +10,9 @@ use App\Entity\Plantilla;
 use App\Repository\CompeticionRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
+use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/api/competiciones', name: 'api_competicion_')]
 #[OA\Tag(name: 'Competiciones')]
@@ -30,8 +32,10 @@ class ApiCompeticionController extends AbstractController
 {
     use ParamsCheckerTrait;
     use JsonParserRequest;
+    use ResponseBuilder;
 
-    public function __construct(private readonly CompeticionRepository $competicionRepository)
+    public function __construct(private readonly CompeticionRepository $competicionRepository,
+    private readonly TranslatorInterface $translator,)
     {
     }
 
@@ -43,21 +47,19 @@ class ApiCompeticionController extends AbstractController
     #[Route('/{idCompeticion}', name: 'detalles', requirements: ['idCompeticion' => Requirement::DIGITS], methods: ['GET'])]
     #[OA\Response(
         response: 200,
-        description: 'Detalles de la competición',
+        description: 'Petición procesada con éxito',
         content: new Model(type: Competicion::class, groups: ['OA'])
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function detalles(int $idCompeticion): JsonResponse
     {
         $competicion = $this->competicionRepository->find($idCompeticion);
         if (!$competicion) {
-            return $this->json([
-                'msg' => 'No existe ninguna competición con el ID ' . $idCompeticion,
-            ], 264);
+            return $this->createNotFoundResponse($this->translator->trans('competition.404', ['%id%' => $idCompeticion], 'messages'));
         }
 
         return $this->json($competicion);
@@ -81,16 +83,13 @@ class ApiCompeticionController extends AbstractController
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
             return $this->json([
-                'competiciones' => array_map(function (Competicion $competicion) use ($normalizer) {
+                'competiciones' => array_map(static function (Competicion $competicion) use ($normalizer) {
                     return $normalizer->normalize($competicion, null, ['groups' => 'lista']);
                 }, $this->competicionRepository->findAll()),
             ]);
 
         } catch (ExceptionInterface $ex) {
-            return $this->json([
-                'msg' => 'Se ha producido un error al ejecutar la petición',
-                'error' => $ex,
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->createExceptionResponse($ex);
         }
     }
 
@@ -103,27 +102,26 @@ class ApiCompeticionController extends AbstractController
         description: 'Array formado por id, nombre y país de cada equipo y el id de plantilla con la que participa en la competición',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: '#/components/schemas/EquipoPlantilla')
+            items: new OA\Items(ref: new Model(type: Competicion::class, groups: ['lista']))
         )
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'No existe la competición solicitada',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function listaEquiposCompeticion(int $idCompeticion): JsonResponse
     {
         try {
             $competicion = $this->competicionRepository->find($idCompeticion);
             if (!$competicion) {
-                return $this->json([
-                    'msg' => 'No existe una competición con el id ' . $idCompeticion,
-                ], 264);
+                return $this->createNotFoundResponse($this->translator->trans('competition.404', ['%%id%' => $idCompeticion], 'messages'));
             }
 
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
+
             return $this->json([
-                'equipos' => array_map(function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
+                'equipos' => array_map(static function (EquipoPlantillaDTO $equipoPlantilla) use ($normalizer) {
                     $equipoNormalizado = $normalizer->normalize($equipoPlantilla->getEquipo(), null, ['groups' => 'lista']);
                     $equipoNormalizado['plantilla'] = $equipoPlantilla->getPlantilla()->getId();
 
@@ -132,10 +130,7 @@ class ApiCompeticionController extends AbstractController
             ]);
 
         } catch (ExceptionInterface $ex) {
-            return $this->json([
-                'msg' => 'Se ha producido un error al ejecutar la petición',
-                'error' => $ex,
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->createExceptionResponse($ex);
         }
     }
 
@@ -148,93 +143,94 @@ class ApiCompeticionController extends AbstractController
     #[OA\Response(
         response: 400,
         description: 'Petición mal formada',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
     public function agregaEquipos(int                    $idCompeticion,
                                   Request                $request,
                                   EntityManagerInterface $entityManager): JsonResponse
     {
-        if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
-            return $this->json([
-                'msg' => 'No se puede realizar la petición, falta el campo \'equipos\'',
-            ], 400);
-        }
-
-        $this->parseJsonRequest($request);
-
-        if (!is_array($this->jsonContent['equipos'])) {
-            return $this->json([
-                'msg' => 'No se puede realizar la petición, el campo \'equipos\' no es un array',
-            ], 400);
-        }
-
-        $competicion = $this->competicionRepository->find($idCompeticion);
-
-        $errores = [];
-        $posicion = 0;
-        $alMenosUnEquipoAsociado = false;
-        foreach ($this->jsonContent['equipos'] as $equipoPlantilla) {
-            $posicion++;
-
-            if (!array_key_exists('id_equipo', $equipoPlantilla)
-                || !array_key_exists('id_plantilla', $equipoPlantilla)) {
-                $errores[] = [
-                    'posicion' => $posicion,
-                    'msg' => 'Para poder asociar un equipo a la competición también es necesario una plantilla',
-                ];
-                continue;
+        try {
+            if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
+                return $this->createErrorResponseWithMessage($this->translator->trans('generic.400', ['%%params%' => 'equipos'], 'messages'));
             }
 
-            $equipo = $entityManager->getRepository(Equipo::class)->find($equipoPlantilla['id_equipo']);
-            if (!$equipo) {
-                $errores[] = [
-                    'equipo' => $equipoPlantilla['id_equipo'],
-                    'msg' => 'No existe ningún equipo con este id',
-                ];
-                continue;
+            $this->parseJsonRequest($request);
+
+            if (!is_array($this->jsonContent['equipos'])) {
+                return $this->createErrorResponseWithMessage($this->translator->trans('competition.equipos_array', [], 'messages'), Response::HTTP_BAD_REQUEST);
             }
 
-            $plantilla = $entityManager->getRepository(Plantilla::class)->find($equipoPlantilla['id_plantilla']);
-            if (!$plantilla) {
-                $errores[] = [
-                    'plantilla' => $equipoPlantilla['id_plantilla'],
-                    'msg' => 'No exste ninguna plantilla con este id',
-                ];
-                continue;
+            $competicion = $this->competicionRepository->find($idCompeticion);
+
+            $errores = [];
+            $posicion = 0;
+            $alMenosUnEquipoAsociado = false;
+            foreach ($this->jsonContent['equipos'] as $equipoPlantilla) {
+                $posicion++;
+
+                if (!array_key_exists('id_equipo', $equipoPlantilla)
+                    || !array_key_exists('id_plantilla', $equipoPlantilla)) {
+                    $errores[] = [
+                        'posicion' => $posicion,
+                        'msg' => 'Para poder asociar un equipo a la competición también es necesario una plantilla',
+                    ];
+                    continue;
+                }
+
+                $equipo = $entityManager->getRepository(Equipo::class)->find($equipoPlantilla['id_equipo']);
+                if (!$equipo) {
+                    $errores[] = [
+                        'equipo' => $equipoPlantilla['id_equipo'],
+                        'msg' => 'No existe ningún equipo con este id',
+                    ];
+                    continue;
+                }
+
+                $plantilla = $entityManager->getRepository(Plantilla::class)->find($equipoPlantilla['id_plantilla']);
+                if (!$plantilla) {
+                    $errores[] = [
+                        'plantilla' => $equipoPlantilla['id_plantilla'],
+                        'msg' => 'No exste ninguna plantilla con este id',
+                    ];
+                    continue;
+                }
+
+                if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
+                    $errores[] = [
+                        'equipo' => $equipoPlantilla['id_equipo'],
+                        'error' => 'El equipo ya tiene asociada una plantilla a esta cometición',
+                    ];
+                    continue;
+                }
+
+                $equipoCompeticion = new EquipoCompeticion();
+                $equipoCompeticion
+                    ->setCompeticion($competicion)
+                    ->setEquipo($equipo)
+                    ->setPlantilla($plantilla);
+
+                $entityManager->persist($equipoCompeticion);
+                $alMenosUnEquipoAsociado = true;
             }
 
-            if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
-                $errores[] = [
-                    'equipo' => $equipoPlantilla['id_equipo'],
-                    'error' => 'El equipo ya tiene asociada una plantilla a esta cometición',
-                ];
-                continue;
+            $entityManager->flush();
+
+            $response = [
+                'msg' => $alMenosUnEquipoAsociado
+                    ? 'Equipos agregados correctamente a la competición'
+                    : 'No se ha podido asociar ningún equipo a la competición',
+            ];
+
+            if (!empty($errores)) {
+                $response['msg'] .= ' (con errores)';
+                $response['errores'] = $errores;
             }
 
-            $equipoCompeticion = new EquipoCompeticion();
-            $equipoCompeticion
-                ->setCompeticion($competicion)
-                ->setEquipo($equipo)
-                ->setPlantilla($plantilla);
+            return $this->json($response);
 
-            $entityManager->persist($equipoCompeticion);
-            $alMenosUnEquipoAsociado = true;
+        } catch (\JsonException $exception) {
+            return $this->createExceptionResponse($exception);
         }
-
-        $entityManager->flush();
-
-        $response = [
-            'msg' => $alMenosUnEquipoAsociado
-                ? 'Equipos agregados correctamente a la competición'
-                : 'No se ha podido asociar ningún equipo a la competición',
-        ];
-
-        if (!empty($errores)) {
-            $response['msg'] .= ' (con errores)';
-            $response['errores'] = $errores;
-        }
-
-        return $this->json($response);
     }
 
 }

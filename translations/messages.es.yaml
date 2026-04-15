@@ -1,5 +1,10 @@
 generic:
   400: 'No se puede realizar la petición, faltan parámetros obligatorios: [%params%]'
+  500: 'Se ha producido un error inesperado al ejecutar la petición'
 
 admin:
   delete: 'El usuario "%username%" no existe'
+
+competition:
+  equipos_array: 'No se puede realizar la petición, el campo "equipos" debe ser un array'
+  404: 'No existe ninguna competición con el ID %id%'

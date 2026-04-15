@@ -32,34 +32,40 @@ nelmio_api_doc:
               Error:
                 type: object
                 discriminator:
-                  propertyName: code
+                  propertyName: status
                 properties:
-                  code:
+                  status:
                     type: integer
                     format: int32
-                    minimun: 400
-                    maximun: 599
+                    minimum: 400
+                    maximum: 599
                     description: "HTTP Status Code"
+                    example: 500
                   message:
                     type: string
                     description: "Detalles del error"
+                  timestamp:
+                    type: datetime
+                    description: "Fecha y hora de la respuesta en formato ISO 8696"
                 required:
-                  - code
+                  - status
                   - message
-                Mensaje:
-                    type: object
-                    properties:
-                        code:
-                            type: integer
-                            example: "500"
-                        message:
-                            type: string
-                            example: "Contenido del mensaje"
+              Mensaje:
+                  type: object
+                  properties:
+                      status:
+                          type: integer
+                          example: 500
+                      message:
+                          type: string
+                          example: "Contenido del mensaje"
               404: ## '404' se usará como valor del campo code (discriminator)
                 allOf:
                   - $ref: '#/components/schemas/Error'
                   - type: object
                     properties:
+                      status:
+                        example: 404
                       message:
                         example: "Entidad no encontrada"
               400:
@@ -69,17 +75,19 @@ nelmio_api_doc:
                     properties:
                       message:
                         example: "No se puede realizar la petición, faltan parámetros obligatorios"
-                EquipoPlantilla:
-                    type: object
-                    properties:
-                        id:
-                            type: integer
-                        nombre:
-                            type: string
-                        pais:
-                            type: string
-                        plantilla:
-                            type: integer
+                      status:
+                        example: 400
+              EquipoPlantilla:
+                  type: object
+                  properties:
+                      id:
+                          type: integer
+                      nombre:
+                          type: string
+                      pais:
+                          type: string
+                      plantilla:
+                          type: integer
         security:
             - Bearer: [ ]
 
