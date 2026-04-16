@@ -10,7 +10,7 @@ use App\Util\JsonParserRequest;
 use App\Util\PagesCursorTrait;
 use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -89,7 +89,7 @@ class ApiEstadioController extends AbstractController
             return $this->json($response);
 
         } catch (APIException $e) {
-            return $this->buildExceptionResponse($e, $e->getCode());
+            return $this->createExceptionResponse($e, $e->getCode());
         }
     }
 
@@ -131,13 +131,7 @@ class ApiEstadioController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Estadio creado correctamente',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property(property: 'msg', type: 'string'),
-                new OA\Property(property: 'id', description: 'ID del nuevo estadio creado', type: 'integer'),
-            ],
-            type: 'object'
-        )
+        content: new OA\JsonContent(ref: '#/components/schemas/Created')
     )]
     #[OA\Response(
         response: 400,
@@ -147,7 +141,7 @@ class ApiEstadioController extends AbstractController
     #[OA\Response(
         response: 502,
         description: 'Error. Ya existe un estadio con el mismo nombre',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
     public function nuevo(Request $request, SerializerInterface $serializer): Response
     {
@@ -192,9 +186,9 @@ class ApiEstadioController extends AbstractController
         description: 'OK',
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Estadio no encontrado',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[Route('/{idEstadio}', methods: ['PATCH'])]
     public function edita(int $idEstadio, Request $request, SerializerInterface $serializer): Response
@@ -224,12 +218,12 @@ class ApiEstadioController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'OK',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/OK')
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Estadio no encontrado',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[Route('/{idEstadio}', methods: ['DELETE'])]
     public function elimina(int $idEstadio): Response

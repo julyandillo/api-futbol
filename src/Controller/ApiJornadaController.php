@@ -46,9 +46,9 @@ final class ApiJornadaController extends AbstractController
         content: new OA\JsonContent(ref: new Model(type: Jornada::class)),
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function index(int $id, NormalizerInterface $normalizer): Response
     {
@@ -57,7 +57,7 @@ final class ApiJornadaController extends AbstractController
             return $this->json([
                 'code' => 264,
                 'msg' => 'Jornada no encontrada'
-            ], 264);
+            ], 404);
         }
 
         return $this->json($normalizer->normalize($jornada, 'json', [
@@ -82,9 +82,9 @@ final class ApiJornadaController extends AbstractController
         ], type: 'object')
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function view(
         int                   $roundNumber,
@@ -132,9 +132,9 @@ final class ApiJornadaController extends AbstractController
         ], type: 'object')
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[OA\Parameter(
         name: 'competitionID',
@@ -168,17 +168,12 @@ final class ApiJornadaController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Petición procesada correctamente',
-        content: new OA\JsonContent(
-            properties: [
-                new OA\Property('code', type: 'integer', example: 200),
-                new OA\Property('jornada', description: 'ID de la jornada creada', type: 'integer', example: 1),
-            ],
-            type: 'object'),
+        content: new OA\JsonContent(ref: '#/components/schemas/Created'),
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function create(Request $request, SerializerInterface $serializer): Response
     {
@@ -249,14 +244,12 @@ final class ApiJornadaController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Petición procesada correctamente',
-        content: new OA\JsonContent(
-            properties: [new OA\Property('code', type: 'integer', example: 200)],
-            type: 'object'),
+        content: new OA\JsonContent(ref: '#/components/schemas/OK'),
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function update(int $idJornada, Request $request, SerializerInterface $serializer): Response
     {
@@ -329,14 +322,12 @@ final class ApiJornadaController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'Petición procesada correctamente',
-        content: new OA\JsonContent(
-            properties: [new OA\Property('code', type: 'integer', example: 200)],
-            type: 'object'),
+        content: new OA\JsonContent(ref: '#/components/schemas/OK'),
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function matches(int $idJornada, Request $request): Response
     {

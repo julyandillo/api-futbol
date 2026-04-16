@@ -11,28 +11,26 @@ use Symfony\Component\Validator\ConstraintViolationList;
 
 trait ResponseBuilder
 {
-    public function buildResponseWithErrorMessage(string $message, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
+    public function createErrorResponseWithMessage(string $message, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
     {
         return new JsonResponse([
-            'code' => $code,
+            'status' => $code,
             'message' => $message,
+            'timestamp' => date(DATE_ATOM),
         ], $code);
     }
 
-    public function buildNotFoundResponse(string $message = 'Entidad no encontrada'): JsonResponse
+    public function createNotFoundResponse(string $message = 'Entidad no encontrada'): JsonResponse
     {
-        return $this->buildResponseWithErrorMessage($message, Response::HTTP_NOT_FOUND);
+        return $this->createErrorResponseWithMessage($message, Response::HTTP_NOT_FOUND);
     }
 
-    public function buildExceptionResponse(\Exception $exception, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
+    public function createExceptionResponse(\Exception $exception, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse
     {
-        return new JsonResponse([
-            'code' => $code,
-            'message' => $exception->getMessage(),
-        ], $code);
+        return $this->createErrorResponseWithMessage($exception->getMessage(), $code);
     }
 
-    public function buildPartialDenormalizationExceptionResponse(\Exception|PartialDenormalizationException $e): JsonResponse
+    public function createPartialDenormalizationExceptionResponse(\Exception|PartialDenormalizationException $e): JsonResponse
     {
         $violations = new ConstraintViolationList();
 
@@ -48,6 +46,6 @@ trait ResponseBuilder
 
         $messages = array_map(static fn(ConstraintViolation $violation) => implode("", $violation->getParameters()), $violations->getIterator()->getArrayCopy());
 
-        return $this->buildResponseWithErrorMessage(implode("\n", $messages));
+        return $this->createErrorResponseWithMessage(implode("\n", $messages));
     }
 }

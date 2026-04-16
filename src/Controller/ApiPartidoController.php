@@ -56,12 +56,12 @@ final class ApiPartidoController extends AbstractController
     #[OA\Response(
         response: 400,
         description: 'Petición mal formada',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
     #[OA\Response(
-        response: 264,
+        response: 404,
         description: 'Petición procesada con errores',
-        content: new OA\JsonContent(ref: '#/components/schemas/Mensaje')
+        content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     public function create(Request $request): Response
     {

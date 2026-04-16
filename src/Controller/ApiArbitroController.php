@@ -64,14 +64,14 @@ final class ApiArbitroController extends AbstractController
         $arbitro = $this->arbitroRepository->find($id);
 
         if (!$arbitro) {
-            return $this->buildNotFoundResponse('Árbitro no encontrado');
+            return $this->createNotFoundResponse('Árbitro no encontrado');
         }
 
         try {
             return $this->json($normalizer->normalize($arbitro, 'json', ['groups' => ['view']]));
 
         } catch (ExceptionInterface $ex) {
-            return $this->buildExceptionResponse($ex);
+            return $this->createExceptionResponse($ex);
         }
     }
 
@@ -111,7 +111,7 @@ final class ApiArbitroController extends AbstractController
                 $competicion = $entityManager->getRepository(Competicion::class)->find($request->query->get('competicion'));
 
                 if (!$competicion) {
-                    return $this->buildResponseWithErrorMessage('Competición no encontrada');
+                    return $this->createErrorResponseWithMessage('Competición no encontrada');
                 }
 
                 $arbitros = $this->arbitroRepository->findByCompetition($competicion);
@@ -135,7 +135,7 @@ final class ApiArbitroController extends AbstractController
             ]);
 
         } catch (APIException $ex) {
-            return $this->buildExceptionResponse($ex);
+            return $this->createExceptionResponse($ex);
         }
     }
 
@@ -206,7 +206,7 @@ final class ApiArbitroController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
 
         } catch (PartialDenormalizationException $e) {
-            return $this->buildPartialDenormalizationExceptionResponse($e);
+            return $this->createPartialDenormalizationExceptionResponse($e);
         }
     }
 
@@ -235,7 +235,7 @@ final class ApiArbitroController extends AbstractController
     {
         $arbitro = $this->arbitroRepository->find($id);
         if (!$arbitro) {
-            return $this->buildNotFoundResponse('Árbitro no encontrado');
+            return $this->createNotFoundResponse('Árbitro no encontrado');
         }
 
         try {
@@ -249,7 +249,7 @@ final class ApiArbitroController extends AbstractController
             return $this->json(['code' => 200]);
 
         } catch (PartialDenormalizationException $e) {
-            return $this->buildPartialDenormalizationExceptionResponse($e);
+            return $this->createPartialDenormalizationExceptionResponse($e);
         }
     }
 
@@ -272,7 +272,7 @@ final class ApiArbitroController extends AbstractController
     {
         $arbitro = $this->arbitroRepository->find($id);
         if (!$arbitro) {
-            return $this->buildNotFoundResponse('Árbitro no encontrado');
+            return $this->createNotFoundResponse('Árbitro no encontrado');
         }
 
         $this->arbitroRepository->remove($arbitro);
