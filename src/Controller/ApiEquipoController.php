@@ -87,7 +87,7 @@ class ApiEquipoController extends AbstractController
     #[Route(name: 'nuevo', methods: ['POST'])]
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
-        if (!$this->peticionConParametrosObligatorios(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 
@@ -175,7 +175,7 @@ class ApiEquipoController extends AbstractController
     #[Route('/{idEquipo}/competiciones', name: 'agregar_competicion', methods: ['POST'])]
     public function agregaPlantillaCompeticion(int $idEquipo, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if (!$this->peticionConParametrosObligatorios(['competicion', 'plantilla',], $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams(['competicion', 'plantilla',], $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 
@@ -249,7 +249,7 @@ class ApiEquipoController extends AbstractController
     #[Route('/eliminaCompeticion', name: 'eliminar_competicion', methods: ['POST'])]
     public function eliminaCompeticionEquipo(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'competicion', 'plantilla'], $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams(['equipo', 'competicion', 'plantilla'], $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 
@@ -324,7 +324,7 @@ class ApiEquipoController extends AbstractController
     #[Route('/estadio', name: 'set_estadio_actual', methods: ['POST'])]
     public function setEstadioActual(Request $request, EstadioRepository $estadioRepository): Response
     {
-        if (!$this->peticionConParametrosObligatorios(['equipo', 'estadio'], $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams(['equipo', 'estadio'], $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 

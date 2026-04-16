@@ -178,7 +178,7 @@ final class ApiJornadaController extends AbstractController
     public function create(Request $request, SerializerInterface $serializer): Response
     {
         try {
-            if (!$this->peticionConParametrosObligatorios(['number', 'competicion'], $request)) {
+            if (!$this->checkIfRequestHasMandatoryParams(['number', 'competicion'], $request)) {
                 return $this->buildResponseWithMissingMandatoryParams();
             }
 
@@ -332,7 +332,7 @@ final class ApiJornadaController extends AbstractController
     public function matches(int $idJornada, Request $request): Response
     {
         try {
-            if (!$this->peticionConParametrosObligatorios(['partidos'], $request)) {
+            if (!$this->checkIfRequestHasMandatoryParams(['partidos'], $request)) {
                 return $this->buildResponseWithMissingMandatoryParams();
             }
 

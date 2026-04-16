@@ -13,7 +13,7 @@ trait ParamsCheckerTrait
     /**
      * @throws \JsonException
      */
-    public function peticionConParametrosObligatorios(array $mandatoryParams, Request $request): bool
+    public function checkIfRequestHasMandatoryParams(array $mandatoryParams, Request $request): bool
     {
         $requestParams = $request->getContentTypeFormat() === 'json'
             ? array_keys(json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR))

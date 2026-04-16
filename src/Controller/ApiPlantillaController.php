@@ -36,7 +36,7 @@ class ApiPlantillaController extends AbstractController
     #[Route(name: 'crear', methods: ['POST'])]
     public function nuevaPlantilla(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
-        if (!$this->peticionConParametrosObligatorios(['jugadores',], $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams(['jugadores',], $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 

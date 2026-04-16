@@ -66,7 +66,7 @@ final class ApiPartidoController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->peticionConParametrosObligatorios(['equipoLocal', 'equipoVisitante', 'fecha',], $request)) {
+            if (!$this->checkIfRequestHasMandatoryParams(['equipoLocal', 'equipoVisitante', 'fecha',], $request)) {
                 return $this->buildResponseWithMissingMandatoryParams();
             }
 

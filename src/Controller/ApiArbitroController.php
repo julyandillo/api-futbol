@@ -177,7 +177,7 @@ final class ApiArbitroController extends AbstractController
     public function createAction(Request $request): Response
     {
         try {
-            if (!$this->peticionConParametrosObligatorios(['name', 'country'], $request)) {
+            if (!$this->checkIfRequestHasMandatoryParams(['name', 'country'], $request)) {
                 return $this->buildResponseWithMissingMandatoryParams();
             }
 

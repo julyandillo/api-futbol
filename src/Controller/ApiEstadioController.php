@@ -146,7 +146,7 @@ class ApiEstadioController extends AbstractController
     public function nuevo(Request $request, SerializerInterface $serializer): Response
     {
         $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
-        if (!$this->peticionConParametrosObligatorios($camposObligatorios, $request)) {
+        if (!$this->checkIfRequestHasMandatoryParams($camposObligatorios, $request)) {
             return $this->buildResponseWithMissingMandatoryParams();
         }
 

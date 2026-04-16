@@ -150,7 +150,7 @@ class ApiCompeticionController extends AbstractController
                                   EntityManagerInterface $entityManager): JsonResponse
     {
         try {
-            if (!$this->peticionConParametrosObligatorios(['equipos'], $request)) {
+            if (!$this->checkIfRequestHasMandatoryParams(['equipos'], $request)) {
                 return $this->createErrorResponseWithMessage($this->translator->trans('generic.400', ['%%params%' => 'equipos'], 'messages'));
             }
 
