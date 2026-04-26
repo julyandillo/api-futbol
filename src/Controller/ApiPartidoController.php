@@ -6,15 +6,20 @@ use App\Entity\Arbitro;
 use App\Entity\Equipo;
 use App\Entity\Estadio;
 use App\Entity\Partido;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\ApiPolicy;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\PartidoRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
+use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/api/partidos', name: 'api_partido_')]
 #[OA\Tag(name: 'Partidos')]
@@ -25,7 +30,10 @@ final class ApiPartidoController extends AbstractController
 
     public function __construct(
         private readonly PartidoRepository      $partidoRepository,
-        private readonly EntityManagerInterface $entityManager)
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ResponseBuilder        $responseBuilder,
+        private readonly TranslatorInterface    $translator,
+        private readonly MandatoryParamsPolicy  $mandatoryParamsPolicy)
     {
     }
 
@@ -47,7 +55,7 @@ final class ApiPartidoController extends AbstractController
         description: 'Partido creado correctamente',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property('code', type: 'integer', example: 201),
+                new OA\Property('status', type: 'integer', example: 201),
                 new OA\Property('partido', description: 'ID del partido', type: 'integer', example: 1),
                 new OA\Property('errores', type: 'array', items: new OA\Items(schema: 'string')),
             ]
@@ -66,24 +74,26 @@ final class ApiPartidoController extends AbstractController
     public function create(Request $request): Response
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(['equipoLocal', 'equipoVisitante', 'fecha',], $request)) {
-                return $this->buildResponseWithMissingMandatoryParams();
-            }
+            $this->mandatoryParamsPolicy->apply($request, [
+                ApiPolicy::MANDATORY_PARAMS => ['equipoLocal', 'equipoVisitante', 'fecha'],
+            ]);
+
+            $this->parseJsonRequest($request);
 
             $equipoLocal = $this->entityManager->getRepository(Equipo::class)->find($this->jsonContent['equipoLocal']);
-            $equipoVisitante = $this->entityManager->getRepository(Equipo::class)->find($this->jsonContent['equipoVisitante']);
 
             if (!$equipoLocal) {
                 return $this->json([
-                    'code' => 500,
-                    'msg' => 'Equipo local no encontrado',
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => $this->translator->trans('partido.error.local', [], 'messages'),
                 ]);
             }
 
+            $equipoVisitante = $this->entityManager->getRepository(Equipo::class)->find($this->jsonContent['equipoVisitante']);
             if (!$equipoVisitante) {
                 return $this->json([
-                    'code' => 500,
-                    'msg' => 'Equipo visitante no encontrado',
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => $this->translator->trans('partido.error.visitante', [], 'messages'),
                 ]);
             }
 
@@ -96,7 +106,7 @@ final class ApiPartidoController extends AbstractController
             if (isset($this->jsonContent['arbitro'])) {
                 $arbitro = $this->entityManager->getRepository(Arbitro::class)->find($this->jsonContent['arbitro']);
                 if (!$arbitro) {
-                    $errors[] = 'Arbitro no encontrado';
+                    $errors[] = $this->translator->trans('arbitro.generic_not_found', [], 'messages');
                 }
                 $partido->setArbitro($arbitro);
             }
@@ -104,7 +114,7 @@ final class ApiPartidoController extends AbstractController
             if (isset($this->jsonContent['fecha'])) {
                 $datetime = \DateTimeImmutable::createFromFormat(DATE_ATOM, $this->jsonContent['fecha']);
                 if (!$datetime) {
-                    $errors[] = 'No se ha podido guardar la fecha del partido, el formato debe ser ' . DATE_ATOM;
+                    $errors[] = $this->translator->trans('generic.date_format', ['%format%' => DATE_ATOM], 'messages');
                 }
                 $partido->setDatetime($datetime);
             }
@@ -117,28 +127,28 @@ final class ApiPartidoController extends AbstractController
                 } else if ($this->jsonContent['estadio'] === 'local') {
                     $partido->setEstadio($equipoLocal->getEstadio());
                 } else {
-                    $errors[] = 'Estadio no encontrado';
+                    $errors[] = $this->translator->trans('estadio.generic_not_found', [], 'messages');
                 }
             }
 
             $this->partidoRepository->save($partido);
 
             $response = [
-                'code' => Response::HTTP_CREATED,
+                'status' => Response::HTTP_CREATED,
                 'partido' => $partido->getId(),
             ];
 
             if (!empty($errors)) {
-                $response['msg'] = 'Partido creado correctamente, pero con errores';
+                $response['message'] = 'Partido creado correctamente, pero con errores';
                 $response['errors'] = $errors;
             }
             return $this->json($response, Response::HTTP_CREATED);
 
-        } catch (\JsonException $exception) {
-            return $this->json([
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'msg' => $exception->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\JsonException $e) {
+            return $this->responseBuilder->createExceptionResponse($e);
+
+        } catch (APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, $exception->getCode());
         }
     }
 }

@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Jugador;
 use App\Exception\APIException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\JugadorRepository;
 use App\Util\JsonParserRequest;
 use App\Util\PagesCursorTrait;
-use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -31,14 +31,14 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Tag(name: 'Jugadores')]
 class ApiJugadorController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
-    use ResponseBuilder;
     use PagesCursorTrait;
 
     public function __construct(
         private readonly JugadorRepository $jugadorRepository,
-        private readonly ApiCursorBuilder  $apiCursorBuilder
+        private readonly ApiCursorBuilder      $apiCursorBuilder,
+        private readonly ResponseBuilder       $responseBuilder,
+        private readonly MandatoryParamsPolicy $mandatoryParamsPolicy,
     )
     {
     }
@@ -66,7 +66,7 @@ class ApiJugadorController extends AbstractController
     public function indexAction(?Jugador $jugador, NormalizerInterface $normalizer): JsonResponse
     {
         if (!$jugador) {
-            return $this->createNotFoundResponse('Jugador no encontrado');
+            return $this->responseBuilder->createNotFoundResponse();
         }
 
         try {
@@ -75,7 +75,7 @@ class ApiJugadorController extends AbstractController
             ]));
 
         } catch (ExceptionInterface $exception) {
-            return $this->createExceptionResponse($exception);
+            return $this->responseBuilder->createExceptionResponse($exception);
         }
     }
 
@@ -240,7 +240,7 @@ class ApiJugadorController extends AbstractController
                 }, $players),
             ];
 
-            $this->addNextPageFieldTo($response, $cursor);
+            $this->addNextPageFieldInResponse($response, $cursor);
 
             return $this->json($response);
 

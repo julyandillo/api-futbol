@@ -24,6 +24,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/api/arbitros', name: 'api_arbitro_')]
 #[OA\Tag(name: 'Arbitros')]
@@ -31,11 +32,12 @@ final class ApiArbitroController extends AbstractController
 {
     use ParamsCheckerTrait;
     use JsonParserRequest;
-    use ResponseBuilder;
 
     public function __construct(
         private readonly ArbitroRepository   $arbitroRepository,
-        private readonly SerializerInterface $serializer)
+        private readonly SerializerInterface $serializer,
+        private readonly TranslatorInterface $translator,
+        private readonly ResponseBuilder     $responseBuilder)
     {
     }
 
@@ -64,14 +66,16 @@ final class ApiArbitroController extends AbstractController
         $arbitro = $this->arbitroRepository->find($id);
 
         if (!$arbitro) {
-            return $this->createNotFoundResponse('Árbitro no encontrado');
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('arbitro.not_found', ['%id%' => $id], 'messages')
+            );
         }
 
         try {
             return $this->json($normalizer->normalize($arbitro, 'json', ['groups' => ['view']]));
 
         } catch (ExceptionInterface $ex) {
-            return $this->createExceptionResponse($ex);
+            return $this->responseBuilder->createExceptionResponse($ex);
         }
     }
 
@@ -108,10 +112,11 @@ final class ApiArbitroController extends AbstractController
                 $arbitros = $this->arbitroRepository->findBy(['country' => $this->getCountryName($request->query->get('pais'))]);
 
             } else if ($request->query->has('competicion')) {
-                $competicion = $entityManager->getRepository(Competicion::class)->find($request->query->get('competicion'));
+                $competitionId = $request->query->get('competicion');
+                $competicion = $entityManager->getRepository(Competicion::class)->find($competitionId);
 
                 if (!$competicion) {
-                    return $this->createErrorResponseWithMessage('Competición no encontrada');
+                    return $this->responseBuilder->createErrorResponseWithMessage($this->translator->trans('competition.not_found', ['%id%' => $competitionId], 'messages'));
                 }
 
                 $arbitros = $this->arbitroRepository->findByCompetition($competicion);
@@ -128,14 +133,14 @@ final class ApiArbitroController extends AbstractController
             }
 
             return $this->json([
-                'code' => Response::HTTP_OK,
+                'status' => Response::HTTP_OK,
                 'arbitros' => array_map(function (Arbitro $arbitro) {
                     return $this->serializer->normalize($arbitro, 'json', ['groups' => ['list']]);
                 }, $arbitros),
             ]);
 
         } catch (APIException $ex) {
-            return $this->createExceptionResponse($ex);
+            return $this->responseBuilder->createErrorResponseWithMessage($ex->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -147,8 +152,7 @@ final class ApiArbitroController extends AbstractController
         $countryCode = mb_strtoupper($countryCode);
 
         if (!Countries::exists($countryCode)) {
-            throw new APIException('País incorrecto. Debe ser un código establecido según el estándar '
-                . 'ISO3166-alpha2 (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)');
+            throw new APIException($this->translator->trans('generic.country_error', [], 'messages'));
         }
 
         return Countries::getName($countryCode, 'es');
@@ -159,17 +163,17 @@ final class ApiArbitroController extends AbstractController
      */
     #[Route(name: 'create', methods: ['POST'])]
     #[OA\Response(
-        response: 200,
+        response: Response::HTTP_CREATED,
         description: 'Petición procesada con éxito',
         content: new OA\JsonContent(ref: '#/components/schemas/Created')
     )]
     #[OA\Response(
-        response: 400,
+        response: Response::HTTP_BAD_REQUEST,
         description: 'No se puede realizar la petición',
         content: new OA\JsonContent(ref: '#/components/schemas/400')
     )]
     #[OA\Response(
-        response: 264,
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
         description: 'Petición procesada con errores',
         content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
@@ -178,16 +182,16 @@ final class ApiArbitroController extends AbstractController
     {
         try {
             if (!$this->checkIfRequestHasMandatoryParams(['name', 'country'], $request)) {
-                return $this->buildResponseWithMissingMandatoryParams();
+                return $this->responseBuilder->createMissingMandatoryParamsResponse($this->getMissingMandatoryParams());
             }
 
             $this->parseJsonRequest($request);
 
             if ($this->arbitroRepository->findOneBy(['name' => $this->jsonContent['name']])) {
-                return $this->json([
-                    'code' => 264,
-                    'msg' => 'Ya existe un arbitro con el mismo nombre',
-                ]);
+                return $this->responseBuilder->createErrorResponseWithMessage(
+                    $this->translator->trans('arbitro.already_exists', [], 'messages'),
+                    Response::HTTP_UNPROCESSABLE_ENTITY
+                );
             }
 
             $arbitro = $this->serializer->deserialize($request->getContent(), Arbitro::class, 'json', [
@@ -196,17 +200,14 @@ final class ApiArbitroController extends AbstractController
 
             $this->arbitroRepository->save($arbitro);
 
-            return $this->json(['code' => 200, 'arbitro' => $arbitro->getId()]);
+            return $this->json(['status' => Response::HTTP_CREATED, 'arbitro' => $arbitro->getId()]);
 
 
-        } catch (\JsonException $e) {
-            return $this->json([
-                'code' => 500,
-                'msg' => $e->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\JsonException $ex) {
+            return $this->responseBuilder->createExceptionResponse($ex);
 
         } catch (PartialDenormalizationException $e) {
-            return $this->createPartialDenormalizationExceptionResponse($e);
+            return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
         }
     }
 
@@ -226,7 +227,7 @@ final class ApiArbitroController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[OA\Response(
-        response: 500,
+        response: 400,
         description: 'Petición procesada con errores',
         content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
@@ -235,7 +236,9 @@ final class ApiArbitroController extends AbstractController
     {
         $arbitro = $this->arbitroRepository->find($id);
         if (!$arbitro) {
-            return $this->createNotFoundResponse('Árbitro no encontrado');
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('arbitro.not_found', ['%id%' => $id], 'messages')
+            );
         }
 
         try {
@@ -244,12 +247,19 @@ final class ApiArbitroController extends AbstractController
                 AbstractNormalizer::OBJECT_TO_POPULATE => $arbitro,
             ]);
 
+            if ($this->arbitroRepository->findOneBy(['name' => $arbitro->getName()])) {
+                return $this->responseBuilder->createErrorResponseWithMessage(
+                    $this->translator->trans('arbitro.already_exists', [], 'messages'),
+                    Response::HTTP_UNPROCESSABLE_ENTITY
+                );
+            }
+
             $this->arbitroRepository->save($arbitro);
 
-            return $this->json(['code' => 200]);
+            return $this->json(['status' => 200]);
 
         } catch (PartialDenormalizationException $e) {
-            return $this->createPartialDenormalizationExceptionResponse($e);
+            return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
         }
     }
 
@@ -272,11 +282,11 @@ final class ApiArbitroController extends AbstractController
     {
         $arbitro = $this->arbitroRepository->find($id);
         if (!$arbitro) {
-            return $this->createNotFoundResponse('Árbitro no encontrado');
+            return $this->responseBuilder->createNotFoundResponse('Árbitro no encontrado');
         }
 
         $this->arbitroRepository->remove($arbitro);
 
-        return $this->json(['code' => 200]);
+        return $this->json(['status' => 200]);
     }
 }

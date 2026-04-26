@@ -5,10 +5,14 @@ namespace App\Controller;
 use App\Entity\Jugador;
 use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\ApiPolicy;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\EquipoCompeticionRepository;
 use App\Repository\PlantillaRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
+use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,103 +33,113 @@ class ApiPlantillaController extends AbstractController
     use ParamsCheckerTrait;
     use JsonParserRequest;
 
-    public function __construct(private readonly PlantillaRepository $plantillaRepository)
+    public function __construct(private readonly PlantillaRepository   $plantillaRepository,
+                                private readonly ResponseBuilder       $responseBuilder,
+                                private readonly MandatoryParamsPolicy $mandatoryParamsPolicy)
     {
     }
 
     #[Route(name: 'crear', methods: ['POST'])]
     public function nuevaPlantilla(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
-        if (!$this->checkIfRequestHasMandatoryParams(['jugadores',], $request)) {
-            return $this->buildResponseWithMissingMandatoryParams();
-        }
+        try {
+            $this->mandatoryParamsPolicy->apply($request, [
+                ApiPolicy::MANDATORY_PARAMS => ['jugadores']
+            ]);
 
-        $this->parseJsonRequest($request);
+            $this->parseJsonRequest($request);
 
-        if (!is_array($this->jsonContent['jugadores'])) {
-            return $this->json([
-                'msg' => 'No se puede realizar la petición, \'jugadores\' debe ser un array',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        if (empty($this->jsonContent['jugadores'])) {
-            return $this->json([
-                'msg' => 'No se puede crear una plantilla sin jugadores'
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $errores = [];
-        $posicion = 0;
-        $plantilla = new Plantilla();
-
-        foreach ($this->jsonContent['jugadores'] as $rawJugador) {
-            $posicion++;
-
-            if (!array_key_exists('id', $rawJugador)
-                && !empty(array_diff(Jugador::getArrayConCamposObligatorios(), array_keys($rawJugador)))
-            ) {
-                $errores[] = [
-                    'jugador' => $posicion,
-                    'error' => 'No se puede crear un jugador sin: ' .
-                        implode(',', array_diff(Jugador::getArrayConCamposObligatorios(), array_keys($rawJugador)))
-                ];
-                continue;
+            if (!is_array($this->jsonContent['jugadores'])) {
+                return $this->json([
+                    'message' => 'No se puede realizar la petición, \'jugadores\' debe ser un array',
+                ], Response::HTTP_BAD_REQUEST);
             }
 
-            if (!array_key_exists('dorsal', $rawJugador)) {
-                $errores[] = [
-                    'jugador' => $posicion,
-                    'error' => 'No se puede asociar un jugador a una plantilla sin dorsal',
-                ];
-                continue;
+            if (empty($this->jsonContent['jugadores'])) {
+                return $this->json([
+                    'message' => 'No se puede crear una plantilla sin jugadores'
+                ], Response::HTTP_BAD_REQUEST);
             }
 
-            if (array_key_exists('id', $rawJugador)) {
-                $jugador = $entityManager->getRepository(Jugador::class)->find($rawJugador['id']);
-                if (!$jugador) {
+            $errores = [];
+            $posicion = 0;
+            $plantilla = new Plantilla();
+
+            foreach ($this->jsonContent['jugadores'] as $rawJugador) {
+                $posicion++;
+
+                if (!array_key_exists('id', $rawJugador)
+                    && !empty(array_diff(Jugador::getArrayConCamposObligatorios(), array_keys($rawJugador)))
+                ) {
                     $errores[] = [
                         'jugador' => $posicion,
-                        'error' => 'No existe ningún jugador con el id ' . $rawJugador['id'],
+                        'error' => 'No se puede crear un jugador sin: ' .
+                            implode(',', array_diff(Jugador::getArrayConCamposObligatorios(), array_keys($rawJugador)))
                     ];
                     continue;
                 }
-            } else {
-                try {
-                    $jugador = $serializer->deserialize(json_encode($rawJugador), Jugador::class, 'json');
-                    $entityManager->persist($jugador);
-                } catch (NotNormalizableValueException $exception) {
+
+                if (!array_key_exists('dorsal', $rawJugador)) {
                     $errores[] = [
                         'jugador' => $posicion,
-                        'error' => $exception->getMessage(),
+                        'error' => 'No se puede asociar un jugador a una plantilla sin dorsal',
                     ];
                     continue;
                 }
+
+                if (array_key_exists('id', $rawJugador)) {
+                    $jugador = $entityManager->getRepository(Jugador::class)->find($rawJugador['id']);
+                    if (!$jugador) {
+                        $errores[] = [
+                            'jugador' => $posicion,
+                            'error' => 'No existe ningún jugador con el id ' . $rawJugador['id'],
+                        ];
+                        continue;
+                    }
+                } else {
+                    try {
+                        $jugador = $serializer->deserialize(json_encode($rawJugador), Jugador::class, 'json');
+                        $entityManager->persist($jugador);
+                    } catch (NotNormalizableValueException $exception) {
+                        $errores[] = [
+                            'jugador' => $posicion,
+                            'error' => $exception->getMessage(),
+                        ];
+                        continue;
+                    }
+                }
+
+                $plantilla->agregarJugador($jugador, $rawJugador['dorsal']);
             }
 
-            $plantilla->agregarJugador($jugador, $rawJugador['dorsal']);
+            if ($plantilla->getJugadores()->isEmpty()) {
+                return $this->json([
+                    'message' => 'No se ha creado la plantilla. No se ha podido asociar ningún jugador correctamente',
+                    'errores' => $errores,
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $entityManager->persist($plantilla);
+            $entityManager->flush();
+
+            $response = [
+                'message' => 'Plantilla creada correctamente',
+                'plantilla' => $plantilla->getId(),
+            ];
+
+            if (!empty($errores)) {
+                $response['message'] .= ' (con errores)';
+                $response['errores'] = $errores;
+            }
+
+            return $this->json($response);
+
+        } catch (\JsonException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception);
+
+        } catch (APIMissingMandatoryParamsException $ex) {
+            return $this->responseBuilder->createExceptionResponse($ex, $ex->getCode());
         }
-
-        if ($plantilla->getJugadores()->isEmpty()) {
-            return $this->json([
-                'msg' => 'No se ha creado la plantilla. No se ha podido asociar ningún jugador correctamente',
-                'errores' => $errores,
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $entityManager->persist($plantilla);
-        $entityManager->flush();
-
-        $response = [
-            'msg' => 'Plantilla creada correctamente',
-            'plantilla' => $plantilla->getId(),
-        ];
-
-        if (!empty($errores)) {
-            $response['msg'] .= ' (con errores)';
-            $response['errores'] = $errores;
-        }
-
-        return $this->json($response);
     }
 
     #[Route(name: 'listar', methods: ['GET'])]
@@ -133,14 +147,9 @@ class ApiPlantillaController extends AbstractController
     {
         $plantillas = $this->plantillaRepository->findAll();
 
-        if (count($plantillas) == 0) {
-            return $this->json([
-                'msg' => 'No hay ningna plantilla creada',
-            ]);
-        }
-
         return $this->json([
-            'plantillas' => array_map(function (Plantilla $plantilla) {
+            'status' => Response::HTTP_OK,
+            'plantillas' => array_map(static function (Plantilla $plantilla) {
                 return [
                     'id_plantilla' => $plantilla->getId(),
                     'jugadores' => $plantilla->getJugadores()->count(),
@@ -155,7 +164,7 @@ class ApiPlantillaController extends AbstractController
         $plantilla = $this->plantillaRepository->find($idPlantilla);
         if (!$plantilla) {
             return $this->json([
-                'msg' => 'No existe ninguna plantilla con el id ' . $idPlantilla,
+                'message' => 'No existe ninguna plantilla con el id ' . $idPlantilla,
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -192,7 +201,7 @@ class ApiPlantillaController extends AbstractController
         $this->plantillaRepository->remove($plantilla);
 
         return $this->json([
-            'msg' => 'La plantilla ha sido eliminada correctamente',
+            'status' => Response::HTTP_OK,
         ]);
     }
 

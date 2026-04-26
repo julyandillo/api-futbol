@@ -32,10 +32,10 @@ class ApiCompeticionController extends AbstractController
 {
     use ParamsCheckerTrait;
     use JsonParserRequest;
-    use ResponseBuilder;
 
     public function __construct(private readonly CompeticionRepository $competicionRepository,
-    private readonly TranslatorInterface $translator,)
+                                private readonly TranslatorInterface $translator,
+                                private readonly ResponseBuilder     $responseBuilder)
     {
     }
 
@@ -59,7 +59,8 @@ class ApiCompeticionController extends AbstractController
     {
         $competicion = $this->competicionRepository->find($idCompeticion);
         if (!$competicion) {
-            return $this->createNotFoundResponse($this->translator->trans('competition.404', ['%id%' => $idCompeticion], 'messages'));
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('competition.not_found', ['%id%' => $idCompeticion], 'messages'));
         }
 
         return $this->json($competicion);
@@ -89,7 +90,7 @@ class ApiCompeticionController extends AbstractController
             ]);
 
         } catch (ExceptionInterface $ex) {
-            return $this->createExceptionResponse($ex);
+            return $this->responseBuilder->createExceptionResponse($ex);
         }
     }
 
@@ -115,7 +116,8 @@ class ApiCompeticionController extends AbstractController
         try {
             $competicion = $this->competicionRepository->find($idCompeticion);
             if (!$competicion) {
-                return $this->createNotFoundResponse($this->translator->trans('competition.404', ['%%id%' => $idCompeticion], 'messages'));
+                return $this->responseBuilder->createNotFoundResponse(
+                    $this->translator->trans('competition.not_found', ['%%id%' => $idCompeticion], 'messages'));
             }
 
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
@@ -130,7 +132,7 @@ class ApiCompeticionController extends AbstractController
             ]);
 
         } catch (ExceptionInterface $ex) {
-            return $this->createExceptionResponse($ex);
+            return $this->responseBuilder->createExceptionResponse($ex);
         }
     }
 
@@ -151,16 +153,23 @@ class ApiCompeticionController extends AbstractController
     {
         try {
             if (!$this->checkIfRequestHasMandatoryParams(['equipos'], $request)) {
-                return $this->createErrorResponseWithMessage($this->translator->trans('generic.400', ['%%params%' => 'equipos'], 'messages'));
+                return $this->responseBuilder->createErrorResponseWithMessage(
+                    $this->translator->trans('generic.400', ['%%params%' => 'equipos'], 'messages'));
             }
 
             $this->parseJsonRequest($request);
 
             if (!is_array($this->jsonContent['equipos'])) {
-                return $this->createErrorResponseWithMessage($this->translator->trans('competition.equipos_array', [], 'messages'), Response::HTTP_BAD_REQUEST);
+                return $this->responseBuilder->createErrorResponseWithMessage(
+                    $this->translator->trans('competition.equipos_array', [], 'messages'), Response::HTTP_BAD_REQUEST);
             }
 
             $competicion = $this->competicionRepository->find($idCompeticion);
+            if (!$competicion) {
+                return $this->responseBuilder->createNotFoundResponse(
+                    $this->translator->trans('competition.not_found', ['%id%' => $idCompeticion], 'messages')
+                );
+            }
 
             $errores = [];
             $posicion = 0;
@@ -172,7 +181,7 @@ class ApiCompeticionController extends AbstractController
                     || !array_key_exists('id_plantilla', $equipoPlantilla)) {
                     $errores[] = [
                         'posicion' => $posicion,
-                        'msg' => 'Para poder asociar un equipo a la competición también es necesario una plantilla',
+                        'message' => 'Para poder asociar un equipo a la competición también es necesaria una plantilla',
                     ];
                     continue;
                 }
@@ -181,7 +190,7 @@ class ApiCompeticionController extends AbstractController
                 if (!$equipo) {
                     $errores[] = [
                         'equipo' => $equipoPlantilla['id_equipo'],
-                        'msg' => 'No existe ningún equipo con este id',
+                        'message' => 'No existe ningún equipo con este id',
                     ];
                     continue;
                 }
@@ -190,7 +199,7 @@ class ApiCompeticionController extends AbstractController
                 if (!$plantilla) {
                     $errores[] = [
                         'plantilla' => $equipoPlantilla['id_plantilla'],
-                        'msg' => 'No exste ninguna plantilla con este id',
+                        'message' => 'No exste ninguna plantilla con este id',
                     ];
                     continue;
                 }
@@ -198,7 +207,7 @@ class ApiCompeticionController extends AbstractController
                 if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
                     $errores[] = [
                         'equipo' => $equipoPlantilla['id_equipo'],
-                        'error' => 'El equipo ya tiene asociada una plantilla a esta cometición',
+                        'error' => 'El equipo ya tiene asociada una plantilla a la competición',
                     ];
                     continue;
                 }
@@ -216,20 +225,21 @@ class ApiCompeticionController extends AbstractController
             $entityManager->flush();
 
             $response = [
-                'msg' => $alMenosUnEquipoAsociado
+                'status' => Response::HTTP_OK,
+                'message' => $alMenosUnEquipoAsociado
                     ? 'Equipos agregados correctamente a la competición'
                     : 'No se ha podido asociar ningún equipo a la competición',
             ];
 
             if (!empty($errores)) {
-                $response['msg'] .= ' (con errores)';
+                $response['message'] .= ' (con errores)';
                 $response['errores'] = $errores;
             }
 
             return $this->json($response);
 
         } catch (\JsonException $exception) {
-            return $this->createExceptionResponse($exception);
+            return $this->responseBuilder->createExceptionResponse($exception);
         }
     }
 

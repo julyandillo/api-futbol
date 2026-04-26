@@ -1,10 +1,29 @@
 generic:
-  400: 'No se puede realizar la petición, faltan parámetros obligatorios: [%params%]'
+  missing_params: 'No se puede realizar la petición, faltan parámetros obligatorios: [%params%]'
   500: 'Se ha producido un error inesperado al ejecutar la petición'
+  error_types: 'El tipo de dato debe ser uno de estos: %expected% ("%current%" dado)'
+  country_error: 'País incorrecto. Debe ser un código establecido según el estándar ISO3166-alpha2 (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)'
+  date_format: 'Fecha con formato incorrecto, debe ser %format%'
+  not_found: 'Entidad no encontrada'
 
 admin:
   delete: 'El usuario "%username%" no existe'
 
 competition:
   equipos_array: 'No se puede realizar la petición, el campo "equipos" debe ser un array'
-  404: 'No existe ninguna competición con el ID %id%'
+  not_found: 'No existe ninguna competición con el ID %id%'
+
+arbitro:
+  not_found: 'No existe ningún árbitro con el ID %id%'
+  generic_not_found: "Árbitro no encontrado"
+  already_exists: 'No se puede procesar la petición, ya existe un árbitro con el mismo nombre'
+
+estadio:
+  already_exists: 'No se puede procesar la petición, ya existe un estadio con el mismo nombre'
+  not_found: 'No exuste ningún estadios con el Id %id%'
+  generic_not_found: "Estadio no encontrado"
+
+partido:
+  error:
+    local: 'Equipo local no encontrado'
+    visitante: 'Equipo visitante no encontrado'

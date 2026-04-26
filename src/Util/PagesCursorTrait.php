@@ -7,7 +7,7 @@ use App\ApiCursor\ApiCursorBuilder;
 
 trait PagesCursorTrait
 {
-    public function addNextPageFieldTo(array &$response, ApiCursor $cursor): void
+    public function addNextPageFieldInResponse(array &$response, ApiCursor $cursor): void
     {
         if (($nextPage = $cursor->getNextPage()) !== ApiCursor::LAST_PAGE) {
             $response[ApiCursorBuilder::CURSOR_PARAMETER_NAME] = $nextPage;

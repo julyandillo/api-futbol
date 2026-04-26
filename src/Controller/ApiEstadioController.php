@@ -18,12 +18,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\Exception\PartialDenormalizationException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AttributeLoader;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/api/estadios', name: 'api_estadio_')]
 #[OA\Tag(name: 'Estadios')]
@@ -31,11 +33,12 @@ class ApiEstadioController extends AbstractController
 {
     use ParamsCheckerTrait;
     use JsonParserRequest;
-    use ResponseBuilder;
     use PagesCursorTrait;
 
-    public function __construct(private readonly EstadioRepository $estadioRepository,
-                                private readonly ApiCursorBuilder  $cursorBuilder)
+    public function __construct(private readonly EstadioRepository   $estadioRepository,
+                                private readonly ApiCursorBuilder    $cursorBuilder,
+                                private readonly ResponseBuilder     $responseBuilder,
+                                private readonly TranslatorInterface $translator)
     {
     }
 
@@ -79,17 +82,18 @@ class ApiEstadioController extends AbstractController
 
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
             $response = [
+                'status' => Response::HTTP_OK,
                 'estadios' => array_map(static function (Estadio $estadio) use ($normalizer) {
                     return $normalizer->normalize($estadio, null, ['groups' => 'lista']);
                 }, $stadiums),
             ];
 
-            $this->addNextPageFieldTo($response, $cursor);
+            $this->addNextPageFieldInResponse($response, $cursor);
 
             return $this->json($response);
 
         } catch (APIException $e) {
-            return $this->createExceptionResponse($e, $e->getCode());
+            return $this->responseBuilder->createExceptionResponse($e, $e->getCode());
         }
     }
 
@@ -108,18 +112,15 @@ class ApiEstadioController extends AbstractController
             $estadio = $this->estadioRepository->find($idEstadio);
 
             if (!$estadio) {
-                return $this->json([
-                    'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-                ], 264);
+                return $this->responseBuilder->createNotFoundResponse(
+                    $this->translator->trans('estadio.not_found', ['%id%' => $idEstadio], 'messages')
+                );
             }
 
             return $this->json($normalizer->normalize($estadio));
 
         } catch (ExceptionInterface $ex) {
-            return $this->json([
-                'msg' => 'Se ha producido un error al ejecutar la petición',
-                'error' => $ex,
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->responseBuilder->createExceptionResponse($ex);
         }
     }
 
@@ -139,37 +140,46 @@ class ApiEstadioController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/400'),
     )]
     #[OA\Response(
-        response: 502,
-        description: 'Error. Ya existe un estadio con el mismo nombre',
-        content: new OA\JsonContent(ref: '#/components/schemas/Error')
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'No se puede procesar la petición, ha ocurrido un error de validación',
+        content: new OA\JsonContent(ref: '#/components/schemas/422')
     )]
-    public function nuevo(Request $request, SerializerInterface $serializer): Response
+    public function createAction(Request $request, SerializerInterface $serializer): Response
     {
-        $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
-        if (!$this->checkIfRequestHasMandatoryParams($camposObligatorios, $request)) {
-            return $this->buildResponseWithMissingMandatoryParams();
-        }
+        try {
+            $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
+            if (!$this->checkIfRequestHasMandatoryParams($camposObligatorios, $request)) {
+                return $this->responseBuilder->createMissingMandatoryParamsResponse($this->getMissingMandatoryParams());
+            }
 
-        $this->parseJsonRequest($request);
+            $this->parseJsonRequest($request);
 
-        $estadio = $this->estadioRepository->findOneBy([
-            'nombre' => $this->jsonContent['nombre'],
-        ]);
+            $estadio = $this->estadioRepository->findOneBy([
+                'nombre' => $this->jsonContent['nombre'],
+            ]);
 
-        if ($estadio) {
+            if ($estadio) {
+                return $this->responseBuilder->createErrorResponseWithMessage(
+                    $this->translator->trans('estadio.already_exists', [], 'messages'),
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                );
+            }
+
+            /** @var Estadio $estadio */
+            $estadio = $serializer->deserialize($request->getContent(), Estadio::class, 'json');
+            $this->estadioRepository->save($estadio, true);
+
             return $this->json([
-                'msg' => sprintf('Ya existe un estadio con el nombre \'%s\'', $this->jsonContent['nombre']),
-            ], 502);
+                'status' => Response::HTTP_OK,
+                'estadio' => $estadio->getId(),
+            ]);
+
+        } catch (\JsonException $ex) {
+            return $this->responseBuilder->createExceptionResponse($ex);
+
+        } catch (PartialDenormalizationException $e) {
+            return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
         }
-
-        /** @var Estadio $estadio */
-        $estadio = $serializer->deserialize($request->getContent(), Estadio::class, 'json');
-        $this->estadioRepository->save($estadio, true);
-
-        return $this->json([
-            'msg' => 'Estadio creado correctamente',
-            'id' => $estadio->getId(),
-        ]);
     }
 
     /**
@@ -191,22 +201,29 @@ class ApiEstadioController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[Route('/{idEstadio}', methods: ['PATCH'])]
-    public function edita(int $idEstadio, Request $request, SerializerInterface $serializer): Response
+    public function update(int $idEstadio, Request $request, SerializerInterface $serializer): Response
     {
         $estadio = $this->estadioRepository->find($idEstadio);
 
         if (!$estadio) {
-            return $this->json([
-                'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 264);
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('estadio.not_found', ['%id%' => $idEstadio], 'messages')
+            );
         }
 
-        $serializer->deserialize($request->getContent(), Estadio::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $estadio]);
-        $this->estadioRepository->save($estadio, true);
+        try {
+            $serializer->deserialize($request->getContent(), Estadio::class, 'json', [
+                    AbstractNormalizer::OBJECT_TO_POPULATE => $estadio]
+            );
+            $this->estadioRepository->save($estadio, true);
 
-        return $this->json([
-            'msg' => 'Estadio actualizado correctamente',
-        ]);
+            return $this->json([
+                'status' => Response::HTTP_OK,
+            ]);
+
+        } catch (PartialDenormalizationException $e) {
+            return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
+        }
     }
 
     /**
@@ -226,20 +243,20 @@ class ApiEstadioController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
     #[Route('/{idEstadio}', methods: ['DELETE'])]
-    public function elimina(int $idEstadio): Response
+    public function delete(int $idEstadio): Response
     {
         $estadio = $this->estadioRepository->find($idEstadio);
 
         if (!$estadio) {
-            return $this->json([
-                'msg' => 'No existe ningún estadio con el id ' . $idEstadio,
-            ], 264);
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('estadio.not_found', ['%id%' => $idEstadio], 'messages')
+            );
         }
 
         $this->estadioRepository->remove($estadio, true);
 
         return $this->json([
-            'msg' => 'Estadio eliminado correctamente',
+            'status' => Response::HTTP_OK,
         ]);
     }
 }

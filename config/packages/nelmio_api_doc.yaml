@@ -24,6 +24,9 @@ nelmio_api_doc:
                   - $ref: '#/components/schemas/OK'
                   - type: object
                   - properties:
+                      status:
+                        type: integer
+                        example: 201
                       id:
                         type: integer
                         description: "ID de la nueva entidad recién creada"
@@ -74,9 +77,18 @@ nelmio_api_doc:
                   - type: object
                     properties:
                       message:
-                        example: "No se puede realizar la petición, faltan parámetros obligatorios"
+                        example: "No se puede realizar la petición, faltan parámetros obligatorios o está mal formada"
                       status:
                         example: 400
+              422:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    properties:
+                      message:
+                        example: 'No se puede procesar la petición, ha ocurrido un error de validación'
+                      status:
+                        example: 422
               EquipoPlantilla:
                   type: object
                   properties:
