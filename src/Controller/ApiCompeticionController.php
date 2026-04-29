@@ -7,9 +7,10 @@ use App\Entity\Competicion;
 use App\Entity\Equipo;
 use App\Entity\EquipoCompeticion;
 use App\Entity\Plantilla;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\CompeticionRepository;
 use App\Util\JsonParserRequest;
-use App\Util\ParamsCheckerTrait;
 use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -30,12 +31,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[OA\Tag(name: 'Competiciones')]
 class ApiCompeticionController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
 
     public function __construct(private readonly CompeticionRepository $competicionRepository,
-                                private readonly TranslatorInterface $translator,
-                                private readonly ResponseBuilder     $responseBuilder)
+                                private readonly TranslatorInterface   $translator,
+                                private readonly ResponseBuilder       $responseBuilder,
+                                private readonly MandatoryParamsPolicy $mandatoryParamsPolicy)
     {
     }
 
@@ -152,10 +153,7 @@ class ApiCompeticionController extends AbstractController
                                   EntityManagerInterface $entityManager): JsonResponse
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(['equipos'], $request)) {
-                return $this->responseBuilder->createErrorResponseWithMessage(
-                    $this->translator->trans('generic.400', ['%%params%' => 'equipos'], 'messages'));
-            }
+            $this->mandatoryParamsPolicy->apply($request, ['equipos',]);
 
             $this->parseJsonRequest($request);
 
@@ -173,7 +171,8 @@ class ApiCompeticionController extends AbstractController
 
             $errores = [];
             $posicion = 0;
-            $alMenosUnEquipoAsociado = false;
+            $associatedTeams = 0;
+
             foreach ($this->jsonContent['equipos'] as $equipoPlantilla) {
                 $posicion++;
 
@@ -181,7 +180,7 @@ class ApiCompeticionController extends AbstractController
                     || !array_key_exists('id_plantilla', $equipoPlantilla)) {
                     $errores[] = [
                         'posicion' => $posicion,
-                        'message' => 'Para poder asociar un equipo a la competición también es necesaria una plantilla',
+                        'message' => $this->translator->trans('competition.error.without_plantilla', [], 'messages'),
                     ];
                     continue;
                 }
@@ -190,7 +189,7 @@ class ApiCompeticionController extends AbstractController
                 if (!$equipo) {
                     $errores[] = [
                         'equipo' => $equipoPlantilla['id_equipo'],
-                        'message' => 'No existe ningún equipo con este id',
+                        'message' => $this->translator->trans('competition.error.equipo', [], 'messages'),
                     ];
                     continue;
                 }
@@ -199,7 +198,7 @@ class ApiCompeticionController extends AbstractController
                 if (!$plantilla) {
                     $errores[] = [
                         'plantilla' => $equipoPlantilla['id_plantilla'],
-                        'message' => 'No exste ninguna plantilla con este id',
+                        'message' => $this->translator->trans('competition.error.plantilla', [], 'messages'),
                     ];
                     continue;
                 }
@@ -207,7 +206,7 @@ class ApiCompeticionController extends AbstractController
                 if ($entityManager->getRepository(EquipoCompeticion::class)->load($equipo, $competicion, $plantilla)) {
                     $errores[] = [
                         'equipo' => $equipoPlantilla['id_equipo'],
-                        'error' => 'El equipo ya tiene asociada una plantilla a la competición',
+                        'error' => $this->translator->trans('competition.error.duplicate_plantilla', [], 'messages'),
                     ];
                     continue;
                 }
@@ -219,27 +218,28 @@ class ApiCompeticionController extends AbstractController
                     ->setPlantilla($plantilla);
 
                 $entityManager->persist($equipoCompeticion);
-                $alMenosUnEquipoAsociado = true;
+                $associatedTeams++;
             }
 
             $entityManager->flush();
 
             $response = [
                 'status' => Response::HTTP_OK,
-                'message' => $alMenosUnEquipoAsociado
-                    ? 'Equipos agregados correctamente a la competición'
-                    : 'No se ha podido asociar ningún equipo a la competición',
+                'message' => $this->translator->trans('competition.ok', ['%count%' => $associatedTeams], 'messages'),
             ];
 
             if (!empty($errores)) {
-                $response['message'] .= ' (con errores)';
-                $response['errores'] = $errores;
+                $response['message'] .= ' ' . $this->translator->trans('competition.error.with_errors', [], 'messages');
+                $response['errors'] = $errores;
             }
 
             return $this->json($response);
 
         } catch (\JsonException $exception) {
             return $this->responseBuilder->createExceptionResponse($exception);
+
+        } catch (APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, $exception->getCode());
         }
     }
 

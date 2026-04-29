@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Estadio;
 use App\Exception\APIException;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\EstadioRepository;
 use App\Util\JsonParserRequest;
 use App\Util\PagesCursorTrait;
@@ -31,7 +33,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[OA\Tag(name: 'Estadios')]
 class ApiEstadioController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
     use PagesCursorTrait;
 
@@ -144,13 +145,12 @@ class ApiEstadioController extends AbstractController
         description: 'No se puede procesar la petición, ha ocurrido un error de validación',
         content: new OA\JsonContent(ref: '#/components/schemas/422')
     )]
-    public function createAction(Request $request, SerializerInterface $serializer): Response
+    public function createAction(Request               $request,
+                                 SerializerInterface   $serializer,
+                                 MandatoryParamsPolicy $mandatoryParamsPolicy): Response
     {
         try {
-            $camposObligatorios = ['nombre', 'ciudad', 'capacidad'];
-            if (!$this->checkIfRequestHasMandatoryParams($camposObligatorios, $request)) {
-                return $this->responseBuilder->createMissingMandatoryParamsResponse($this->getMissingMandatoryParams());
-            }
+            $mandatoryParamsPolicy->apply($request, ['nombre', 'ciudad', 'capacidad']);
 
             $this->parseJsonRequest($request);
 
@@ -174,11 +174,11 @@ class ApiEstadioController extends AbstractController
                 'estadio' => $estadio->getId(),
             ]);
 
-        } catch (\JsonException $ex) {
-            return $this->responseBuilder->createExceptionResponse($ex);
-
         } catch (PartialDenormalizationException $e) {
             return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
+
+        } catch (APIMissingMandatoryParamsException|\JsonException $ex) {
+            return $this->responseBuilder->createExceptionResponse($ex, Response::HTTP_BAD_REQUEST);
         }
     }
 

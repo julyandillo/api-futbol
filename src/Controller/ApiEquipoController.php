@@ -8,10 +8,13 @@ use App\Entity\EquipoCompeticion;
 use App\Entity\Estadio;
 use App\Entity\Plantilla;
 use App\Entity\PlantillaJugador;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\EquipoRepository;
 use App\Repository\EstadioRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
+use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,10 +38,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Tag(name: 'Equipos')]
 class ApiEquipoController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
 
-    public function __construct(private readonly EquipoRepository $equipoRepository)
+    public function __construct(
+        private readonly EquipoRepository      $equipoRepository,
+        private readonly ResponseBuilder       $responseBuilder,
+        private readonly MandatoryParamsPolicy $mandatoryParamsPolicy,
+    )
     {
     }
 
@@ -71,7 +77,7 @@ class ApiEquipoController extends AbstractController
             $normalizer = new ObjectNormalizer(new ClassMetadataFactory(new AttributeLoader()));
 
             return $this->json([
-                'equipos' => array_map(function (Equipo $equipo) use ($normalizer) {
+                'equipos' => array_map(static function (Equipo $equipo) use ($normalizer) {
                     return $normalizer->normalize($equipo, null, ['groups' => 'lista']);
                 }, $this->equipoRepository->findAll())
             ]);
@@ -87,19 +93,16 @@ class ApiEquipoController extends AbstractController
     #[Route(name: 'nuevo', methods: ['POST'])]
     public function nuevoEquipo(Request $request, SerializerInterface $serializer): JsonResponse
     {
-        if (!$this->checkIfRequestHasMandatoryParams(['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais'], $request)) {
-            return $this->buildResponseWithMissingMandatoryParams();
-        }
-
-        $this->parseJsonRequest($request);
-
-        if ($this->equipoRepository->existeEquipoConNombre($this->jsonContent['nombre'])) {
-            return $this->json([
-                'msg' => sprintf('Ya existe un equipo con el nombre \'%s\'', $this->jsonContent['nombre']),
-            ], 502);
-        }
-
         try {
+            $this->mandatoryParamsPolicy->apply($request, ['nombre', 'nombreCompleto', 'nombreAbreviado', 'pais']);
+            $this->parseJsonRequest($request);
+
+            if ($this->equipoRepository->existeEquipoConNombre($this->jsonContent['nombre'])) {
+                return $this->json([
+                    'msg' => sprintf('Ya existe un equipo con el nombre \'%s\'', $this->jsonContent['nombre']),
+                ], 502);
+            }
+
             $equipo = $serializer->deserialize($request->getContent(), Equipo::class, 'json', [
                 DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS => true,
             ]);
@@ -121,6 +124,9 @@ class ApiEquipoController extends AbstractController
                 'msg' => 'Error de validación',
                 'detalles' => $errores,
             ], Response::HTTP_BAD_REQUEST);
+
+        } catch (\JsonException|APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 

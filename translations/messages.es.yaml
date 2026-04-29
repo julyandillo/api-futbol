@@ -10,8 +10,15 @@ admin:
   delete: 'El usuario "%username%" no existe'
 
 competition:
+  ok: '%count% equipos asociados correctamente'
   equipos_array: 'No se puede realizar la petición, el campo "equipos" debe ser un array'
   not_found: 'No existe ninguna competición con el ID %id%'
+  error:
+    equipo: 'No se puede encontrar el equipo'
+    plantilla: 'No se puede encontrar la plantilla'
+    without_plantilla: 'No se puede asociar un equipo a una competición sin una plantilla'
+    duplicate_plantilla: 'El equipo y la plantilla ya están asociados a la competición'
+    with_errors: '(con errores)'
 
 arbitro:
   not_found: 'No existe ningún árbitro con el ID %id%'
@@ -20,10 +27,14 @@ arbitro:
 
 estadio:
   already_exists: 'No se puede procesar la petición, ya existe un estadio con el mismo nombre'
-  not_found: 'No exuste ningún estadios con el Id %id%'
+  not_found: 'No existe ningún estadios con el Id %id%'
   generic_not_found: "Estadio no encontrado"
 
 partido:
   error:
     local: 'Equipo local no encontrado'
     visitante: 'Equipo visitante no encontrado'
+
+jornada:
+  error:
+    not_found: 'La jornada no existe'

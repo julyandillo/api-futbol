@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Arbitro;
 use App\Entity\Competicion;
 use App\Exception\APIException;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\ArbitroRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
@@ -30,7 +32,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[OA\Tag(name: 'Arbitros')]
 final class ApiArbitroController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
 
     public function __construct(
@@ -178,12 +179,10 @@ final class ApiArbitroController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
     #[OA\RequestBody(content: new Model(type: Arbitro::class, groups: ['create']))]
-    public function createAction(Request $request): Response
+    public function createAction(Request $request, MandatoryParamsPolicy $mandatoryParamsPolicy): Response
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(['name', 'country'], $request)) {
-                return $this->responseBuilder->createMissingMandatoryParamsResponse($this->getMissingMandatoryParams());
-            }
+            $mandatoryParamsPolicy->apply($request, ['name', 'country',]);
 
             $this->parseJsonRequest($request);
 
@@ -203,11 +202,11 @@ final class ApiArbitroController extends AbstractController
             return $this->json(['status' => Response::HTTP_CREATED, 'arbitro' => $arbitro->getId()]);
 
 
-        } catch (\JsonException $ex) {
-            return $this->responseBuilder->createExceptionResponse($ex);
-
         } catch (PartialDenormalizationException $e) {
             return $this->responseBuilder->createPartialDenormalizationExceptionResponse($e);
+
+        } catch (APIMissingMandatoryParamsException|\JsonException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\ApiCursor\ApiCursorBuilder;
 use App\Entity\Jugador;
 use App\Exception\APIException;
+use App\Exception\APIMissingMandatoryParamsException;
 use App\Policy\MandatoryParamsPolicy;
 use App\Repository\JugadorRepository;
 use App\Util\JsonParserRequest;
@@ -16,6 +17,7 @@ use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -38,7 +40,6 @@ class ApiJugadorController extends AbstractController
         private readonly JugadorRepository $jugadorRepository,
         private readonly ApiCursorBuilder      $apiCursorBuilder,
         private readonly ResponseBuilder       $responseBuilder,
-        private readonly MandatoryParamsPolicy $mandatoryParamsPolicy,
     )
     {
     }
@@ -99,12 +100,12 @@ class ApiJugadorController extends AbstractController
         content: new OA\JsonContent(ref: '#/components/schemas/Error')
     )]
     #[OA\RequestBody(content: new Model(type: Jugador::class, groups: ['create']))]
-    public function createAction(Request $request, SerializerInterface $serializer): JsonResponse
+    public function createAction(Request $request,
+                                 SerializerInterface $serializer,
+                                 MandatoryParamsPolicy $mandatoryParamsPolicy): JsonResponse
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(Jugador::getArrayConCamposObligatorios(), $request)) {
-                return $this->buildResponseWithMissingMandatoryParams();
-            }
+            $mandatoryParamsPolicy->apply($request, Jugador::getArrayConCamposObligatorios());
 
             $jugador = $serializer->deserialize($request->getContent(), Jugador::class, 'json', [
                 DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS => true,
@@ -118,10 +119,10 @@ class ApiJugadorController extends AbstractController
             ]);
 
         } catch (PartialDenormalizationException $exception) {
-            return $this->createPartialDenormalizationExceptionResponse($exception);
+            return $this->responseBuilder->createPartialDenormalizationExceptionResponse($exception);
 
-        } catch (\JsonException $exception) {
-            return $this->createExceptionResponse($exception);
+        } catch (APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -149,7 +150,7 @@ class ApiJugadorController extends AbstractController
     public function updateAction(?Jugador $jugador, Request $request, SerializerInterface $serializer): JsonResponse
     {
         if (!$jugador) {
-            return $this->createNotFoundResponse('Jugador no encontrado');
+            return $this->responseBuilder->createNotFoundResponse('Jugador no encontrado');
         }
 
         try {
@@ -164,7 +165,7 @@ class ApiJugadorController extends AbstractController
             ]);
 
         } catch (NotNormalizableValueException $exception) {
-            return $this->createErrorResponseWithMessage($exception->getMessage());
+            return $this->responseBuilder->createErrorResponseWithMessage($exception->getMessage());
         }
     }
 
@@ -186,7 +187,7 @@ class ApiJugadorController extends AbstractController
     public function deleteAction(?Jugador $jugador): JsonResponse
     {
         if (!$jugador) {
-            return $this->createNotFoundResponse('Jugador no encontrado');
+            return $this->responseBuilder->createNotFoundResponse('Jugador no encontrado');
         }
 
         $this->jugadorRepository->remove($jugador, true);
@@ -245,7 +246,7 @@ class ApiJugadorController extends AbstractController
             return $this->json($response);
 
         } catch (APIException $exception) {
-            return $this->createExceptionResponse($exception, $exception->getCode());
+            return $this->responseBuilder->createExceptionResponse($exception, $exception->getCode());
         }
     }
 }

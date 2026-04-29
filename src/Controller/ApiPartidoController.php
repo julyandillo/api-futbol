@@ -25,7 +25,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[OA\Tag(name: 'Partidos')]
 final class ApiPartidoController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
 
     public function __construct(
@@ -144,11 +143,8 @@ final class ApiPartidoController extends AbstractController
             }
             return $this->json($response, Response::HTTP_CREATED);
 
-        } catch (\JsonException $e) {
-            return $this->responseBuilder->createExceptionResponse($e);
-
-        } catch (APIMissingMandatoryParamsException $exception) {
-            return $this->responseBuilder->createExceptionResponse($exception, $exception->getCode());
+        } catch (APIMissingMandatoryParamsException|\JsonException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 }

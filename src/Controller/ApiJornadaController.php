@@ -6,10 +6,13 @@ use App\Entity\Competicion;
 use App\Entity\Jornada;
 use App\Entity\JornadaPartido;
 use App\Entity\Partido;
+use App\Exception\APIMissingMandatoryParamsException;
+use App\Policy\MandatoryParamsPolicy;
 use App\Repository\CompeticionRepository;
 use App\Repository\JornadaRepository;
 use App\Util\JsonParserRequest;
 use App\Util\ParamsCheckerTrait;
+use App\Util\ResponseBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -21,17 +24,19 @@ use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/api/jornadas', name: 'api_jornada_')]
 #[OA\Tag(name: 'Jornadas')]
 final class ApiJornadaController extends AbstractController
 {
-    use ParamsCheckerTrait;
     use JsonParserRequest;
 
     public function __construct(
         private readonly JornadaRepository      $jornadaRepository,
-        private readonly EntityManagerInterface $entityManager)
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ResponseBuilder        $responseBuilder,
+        private readonly TranslatorInterface    $translator)
     {
     }
 
@@ -54,10 +59,8 @@ final class ApiJornadaController extends AbstractController
     {
         $jornada = $this->jornadaRepository->find($id);
         if (!$jornada) {
-            return $this->json([
-                'code' => 264,
-                'msg' => 'Jornada no encontrada'
-            ], 404);
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('jornada.error.not_found', [], 'messages'));
         }
 
         return $this->json($normalizer->normalize($jornada, 'json', [
@@ -68,7 +71,7 @@ final class ApiJornadaController extends AbstractController
     }
 
     /**
-     * Muestra el detalle de una jornada (usando el número de jornada) de una determinada competición
+     * Muestra el detalle de una jornada (usando el número de la jornada) de una determinada competición
      */
     #[Route('/{roundNumber}/competicion/{competitionId}', name: '_view', methods: ['GET'])]
     #[OA\Parameter(name: 'roundNumber', description: 'número de jornada', in: 'path', schema: new OA\Schema('integer'))]
@@ -77,7 +80,7 @@ final class ApiJornadaController extends AbstractController
         response: 200,
         description: 'Detalles de la jornada',
         content: new OA\JsonContent(properties: [
-            new OA\Property('code', type: 'integer', example: 200),
+            new OA\Property('status', type: 'integer', example: 200),
             new OA\Property('jornada', ref: new Model(type: Jornada::class, groups: ['list', 'detail']))
         ], type: 'object')
     )]
@@ -95,10 +98,7 @@ final class ApiJornadaController extends AbstractController
     {
         $competicion = $competicionRepository->find($competitionId);
         if (!$competicion) {
-            return $this->json([
-                'code' => 264,
-                'msg' => 'No existe la competición'
-            ], 264);
+            return $this->responseBuilder->createNotFoundResponse($this->translator->trans('competition.not_found', ['%id%' => $competitionId], 'messages'));
         }
 
         /** @var Jornada $jornada */
@@ -109,8 +109,8 @@ final class ApiJornadaController extends AbstractController
         }
 
         return $this->json([
-            'code' => 264,
-            'msg' => 'La competición no tiene ninguna jornada con el ID deseado',
+            'status' => 264,
+            'message' => 'La competición no tiene ninguna jornada con el ID deseado',
         ], 264);
     }
 
@@ -123,7 +123,7 @@ final class ApiJornadaController extends AbstractController
         response: 200,
         description: 'OK',
         content: new OA\JsonContent(properties: [
-            new OA\Property('code', type: 'integer', example: 200),
+            new OA\Property('status', type: 'integer', example: 200),
             new OA\Property(
                 'jornadas',
                 type: 'array',
@@ -146,14 +146,13 @@ final class ApiJornadaController extends AbstractController
     {
         $competicion = $competicionRepository->find($competitionID);
         if (!$competicion) {
-            return $this->json([
-                'code' => 264,
-                'msg' => 'No existe ninguna competición con el id ' . $competitionID
-            ], 264);
+            return $this->responseBuilder->createNotFoundResponse(
+                $this->translator->trans('competition.not_found', ['%id%' => $competitionID], 'messages')
+            );
         }
 
         return $this->json([
-            'code' => 200,
+            'status' => 200,
             'jornadas' => array_map(static function (Jornada $jornada) use ($normalizer) {
                 return $normalizer->normalize($jornada, 'json', ['groups' => 'list']);
             }, $competicion->getJornadas()->toArray()),
@@ -175,27 +174,26 @@ final class ApiJornadaController extends AbstractController
         description: 'Petición procesada con errores',
         content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
-    public function create(Request $request, SerializerInterface $serializer): Response
+    public function create(Request               $request,
+                           SerializerInterface   $serializer,
+                           MandatoryParamsPolicy $mandatoryParamsPolicy): Response
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(['number', 'competicion'], $request)) {
-                return $this->buildResponseWithMissingMandatoryParams();
-            }
+            $mandatoryParamsPolicy->apply($request, ['number', 'competicion']);
 
             $this->parseJsonRequest($request);
 
             $competicion = $this->entityManager->getRepository(Competicion::class)->find($this->jsonContent['competicion']);
             if (!$competicion) {
-                return $this->json([
-                    'code' => 264,
-                    'msg' => 'No existe ninguna competición con el ID ' . $this->jsonContent['competicion'],
-                ], 264);
+                return $this->responseBuilder->createNotFoundResponse(
+                    $this->translator->trans('competition.not_found', ['%id%' => $competicion], 'messages')
+                );
             }
 
             if ($this->jornadaRepository->findOneBy(['number' => $this->jsonContent['number'], 'competicion' => $competicion])) {
                 return $this->json([
-                    'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'msg' => 'Jornada ya existente para la competición',
+                    'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'message' => 'Jornada ya existente para la competición',
                 ]);
             }
 
@@ -207,9 +205,9 @@ final class ApiJornadaController extends AbstractController
             if (isset($this->jsonContent['partidos'])) {
                 if (!is_array($this->jsonContent['partidos'])) {
                     return $this->json([
-                        'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                        'msg' => 'Formato de partidos incorrecto, debe ser un array',
-                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                        'status' => Response::HTTP_BAD_REQUEST,
+                        'message' => 'Formato de partidos incorrecto, debe ser un array',
+                    ], Response::HTTP_BAD_REQUEST);
                 }
 
                 $errors = $this->addMatchesToJornada($jornada, $this->jsonContent['partidos']);
@@ -218,7 +216,7 @@ final class ApiJornadaController extends AbstractController
             $this->entityManager->flush();
 
             $response = [
-                'code' => Response::HTTP_CREATED,
+                'status' => Response::HTTP_CREATED,
                 'jornada' => $jornada->getId(),
             ];
 
@@ -228,11 +226,8 @@ final class ApiJornadaController extends AbstractController
 
             return $this->json($response, Response::HTTP_CREATED);
 
-        } catch (\JsonException $exception) {
-            return $this->json([
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'msg' => $exception->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\JsonException|APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -256,10 +251,7 @@ final class ApiJornadaController extends AbstractController
         $jornada = $this->jornadaRepository->find($idJornada);
 
         if (!$jornada) {
-            return $this->json([
-                'code' => 264,
-                'msg' => 'No existe ninguna jornada con el id ' . $idJornada,
-            ]);
+            return $this->responseBuilder->createNotFoundResponse();
         }
 
         $serializer->deserialize($request->getContent(), Jornada::class, 'json', [
@@ -268,7 +260,7 @@ final class ApiJornadaController extends AbstractController
 
         $this->jornadaRepository->save($jornada);
 
-        return $this->json(['code' => 200]);
+        return $this->json(['status' => 200]);
     }
 
     private function addMatchesToJornada(Jornada $jornada, array $idPartidos): array
@@ -329,40 +321,34 @@ final class ApiJornadaController extends AbstractController
         description: 'Petición procesada con errores',
         content: new OA\JsonContent(ref: '#/components/schemas/404')
     )]
-    public function matches(int $idJornada, Request $request): Response
+    public function matches(int $idJornada, Request $request, MandatoryParamsPolicy $mandatoryParamsPolicy): Response
     {
         try {
-            if (!$this->checkIfRequestHasMandatoryParams(['partidos'], $request)) {
-                return $this->buildResponseWithMissingMandatoryParams();
-            }
+            $mandatoryParamsPolicy->apply($request, ['partidos']);
 
             $this->parseJsonRequest($request);
 
             $jornada = $this->jornadaRepository->find($idJornada);
             if (!$jornada) {
-                return $this->json([
-                    'code' => 264,
-                    'msg' => 'No existe ninguna jornada con el id ' . $idJornada,
-                ], 264);
+                return $this->responseBuilder->createNotFoundResponse(
+                    $this->translator->trans('jornada.error.not_found', [], 'messages')
+                );
             }
 
             $errors = $this->addMatchesToJornada($jornada, $this->jsonContent['partidos']);
 
             if (empty($errors)) {
-                return $this->json(['code' => 200]);
+                return $this->json(['status' => 200]);
             }
 
             return $this->json([
-                'code' => Response::HTTP_CREATED,
-                'msg' => 'Petición procesada correctamente, pero con errores',
+                'status' => Response::HTTP_CREATED,
+                'message' => 'Petición procesada correctamente, pero con errores',
                 'errors' => $errors,
             ], Response::HTTP_CREATED);
 
-        } catch (\JsonException $exception) {
-            return $this->json([
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'msg' => $exception->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\JsonException|APIMissingMandatoryParamsException $exception) {
+            return $this->responseBuilder->createExceptionResponse($exception, Response::HTTP_BAD_REQUEST);
         }
     }
 }
